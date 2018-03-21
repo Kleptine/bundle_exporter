@@ -188,6 +188,7 @@ def get_key(obj):
 
 			group = [obj_A]
 			processed.append(obj_A)
+			bounds = SceneBounds(obj_A)
 
 			if(i < len(objects)-1):
 				for j in range(i+1, len(objects)):
@@ -196,12 +197,13 @@ def get_key(obj):
 					if obj_B in processed:
 						continue
 
-					bounds_A = SceneBounds(obj_A)
+					
 					bounds_B = SceneBounds(obj_B)
-					if(is_colliding(bounds_A, bounds_B)):
+					if(is_colliding(bounds, bounds_B)):
 						print("Collide {} x {}".format(obj_A.name, obj_B.name))
 						group.append(obj_B)
 						processed.append(obj_B)
+						bounds.combine(bounds_B)
 
 			groups.append(group)
 
@@ -245,6 +247,12 @@ class SceneBounds:
 		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
 
 
+	def combine(self, other):
+		self.bounds_min = min(self.bounds_min, other.bounds_min)
+		self.bounds_max = max(self.bounds_max, other.bounds_max)
+		self.size = self.bounds_max - self.bounds_min
+		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+
 
 def is_colliding(bounds_A, bounds_B):
 	def is_collide_1D(A_min, A_max, B_min, B_max):
@@ -260,7 +268,6 @@ def is_colliding(bounds_A, bounds_B):
 	collide_z = is_collide_1D(bounds_A.bounds_min.z, bounds_A.bounds_max.z, bounds_B.bounds_min.z, bounds_B.bounds_max.z)
 
 	return collide_x and collide_y and collide_z
-
 
 
 
