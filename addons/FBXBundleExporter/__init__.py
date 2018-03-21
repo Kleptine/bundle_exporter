@@ -1,6 +1,7 @@
 import bpy
 import os
 import mathutils
+from mathutils import Vector
 
 from bpy.props import (
 	StringProperty,
@@ -35,78 +36,14 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	mode_package = bpy.props.EnumProperty(items= 
 		[('name', 'Name', "Group by matching names"), 
 		('space', 'Space', "Group by shared space"), 
-		('group', 'Group', "Group by 'Groups'")], name = "Package Mode", default = 'name'
+		('group', 'Group', "Group by 'Groups'"),
+		('parent', 'Parent', "Group by parents")], name = "Package Mode", default = 'name'
 	)
 	mode_origin = bpy.props.EnumProperty(items= 
 		[('name_first', 'First', "Origin of first object sorted by name"), 
 		('bottom_bounds', 'Bottom', "Bounds bottom center of group"), 
 		('world_center', 'Scene', "The Scene center 0,0,0'")], name = "Origin From", default = 'name_first'
 	)
-
-
-class op_export(bpy.types.Operator):
-	bl_idname = "fbxbundle.export"
-	bl_label = "Export"
-
-	def execute(self, context):
-		print ("Export Operator")
-		# export_selection(context, False)
-		return {'FINISHED'}
-
-
-
-def get_key(obj):
-	mode = bpy.context.scene.FBXBundleSettings.mode_package
-	if mode == 'name':
-		name = obj.name
-		# Remove blender naming digits, e.g. cube.001, cube.002,...
-		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
-			name = name[:-4]
-
-		split_chars = [' ','_','.','-']
-		return name
-
-	return obj.name
-
-
-
-def get_bundles():
-	objects = []
-	for obj in bpy.context.selected_objects:
-		if obj.type == 'MESH':
-			objects.append(obj)
-
-	# Collect groups by key
-	groups = []
-	for obj in objects:
-		key = get_key(obj)
-
-		if(len(groups) == 0):
-			groups.append([obj])
-		else:
-			isFound = False
-			for group in groups:
-				if key == get_key(group[0]):
-					group.append(obj)
-					isFound = True
-					break
-			if not isFound:
-				groups.append([obj])
-
-	# Sort alphabetically
-	keys = [get_key(group[0]) for group in groups]
-	keys.sort()
-	key_groups = {}
-	for key in keys:
-		if key not in key_groups:
-			key_groups[key] = []
-
-		for group in groups:
-			if key == get_key(group[0]):
-				key_groups[key] = group
-				break
-
-	return key_groups
 
 
 
@@ -126,42 +63,251 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		col = box.column(align=True)
 		col.prop(context.scene.FBXBundleSettings, "mode_package", text="Bundle")
-		
-		col = box.column(align=True)
 		col.prop(context.scene.FBXBundleSettings, "mode_origin", text="Origin", expand=False)
 		# layout.separator()
 		
-		layout.label(text="Add Modifier")
-		box = layout.box()
-		box.label(text="[] Copy Modifiers")
-		box.label(text="[] Merge to single Mesh")
+		# layout.label(text="Add Modifier")
+		# box = layout.box()
+		# box.label(text="[] Copy Modifiers")
+		# box.label(text="[] Merge to single Mesh")
 
 		# Get bundles
 		bundles = get_bundles()
 
-		layout.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
-	
-
 		row = layout.row()
 		row.label('Files: '+str(len(bundles))+"x")
+		
+		row = layout.row(align=True)
+		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
+		layout.separator()
+
 		
 		if(len(bundles) > 0):
 
 			for fileName,objects in bundles.items():
 				row = layout.row(align=True)
 				box = row.box()
+
+				row = box.row(align=True)
+				row.operator(op_remove.bl_idname,text="", icon='X')
+				row.operator(op_select.bl_idname,text=fileName+".fbx")#, icon='MATCUBE'
+
+				col = row.column(align=True)
+				col.alignment = 'LEFT'
+				col.label(text="{}x".format(len(objects)))
+
 				for i in range(0,len(objects)):
 					row = box.row(align=True)
-					if i ==0:
-						label = text=fileName+".fbx";
-						if len(objects) > 1:
-							label+="   "+str(len(objects))+"x";
-						row.label(label)
-					else:
-						row.label(text="")
-						
 					row.label(text=objects[i].name)
 
+
+
+class op_select(bpy.types.Operator):
+	bl_idname = "fbxbundle.select"
+	bl_label = "Select"
+
+	def execute(self, context):
+		print ("Select Operator")
+		return {'FINISHED'}
+
+
+
+class op_remove(bpy.types.Operator):
+	bl_idname = "fbxbundle.remove"
+	bl_label = "Remove"
+
+	def execute(self, context):
+		print ("Remove Operator")
+		return {'FINISHED'}
+
+
+
+class op_export(bpy.types.Operator):
+	bl_idname = "fbxbundle.export"
+	bl_label = "Export"
+
+	def execute(self, context):
+		print ("Export Operator")
+		return {'FINISHED'}
+
+
+
+class op_fence(bpy.types.Operator):
+	bl_idname = "fbxbundle.fence"
+	bl_label = "Fence"
+
+	def execute(self, context):
+		print ("Fence Operator")
+		return {'FINISHED'}
+
+
+
+def get_key(obj):
+	mode = bpy.context.scene.FBXBundleSettings.mode_package
+	if mode == 'name':
+		name = obj.name
+		# Remove blender naming digits, e.g. cube.001, cube.002,...
+		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
+			name = name[:-4]
+
+		# Split
+		split_chars = [' ','_','.','-']
+		split = name.lower()
+		for char in split_chars:
+			split = split.replace(char,' ')
+		
+		# Combine
+		strings = split.split(' ')
+		if len(strings) > 1:
+			name = '_'.join(strings[0:-1])
+		else:
+			name = strings[0]
+		return name
+
+	elif mode == 'group':
+		if len(obj.users_group) >= 1:
+			return obj.users_group[0].name
+
+	elif mode == 'parent':
+		if obj.parent:
+			return obj.parent.name
+
+	elif mode == 'space':
+		# Do objects share same space with bounds?
+		objects = get_objects()
+
+		print("_________")
+		processed = []
+		groups = []
+		for i in range(0, len(objects)):
+			obj_A = objects[i]
+			
+			if obj_A in processed:
+				continue
+
+			group = [obj_A]
+			processed.append(obj_A)
+
+			if(i < len(objects)-1):
+				for j in range(i+1, len(objects)):
+					obj_B = objects[j]
+
+					if obj_B in processed:
+						continue
+
+					bounds_A = SceneBounds(obj_A)
+					bounds_B = SceneBounds(obj_B)
+					if(is_colliding(bounds_A, bounds_B)):
+						print("Collide {} x {}".format(obj_A.name, obj_B.name))
+						group.append(obj_B)
+						processed.append(obj_B)
+
+			groups.append(group)
+
+		print("groups {}x".format(len(groups)))
+		if(len(groups) > 0):
+			for group in groups:
+				for obj_A in group:
+					if obj == obj_A:
+						return group[0].name
+		
+			# print("Bounds {} | {} | {}".format(bounds.size, bounds.center, bounds.obj.name))
+		#take first object sorted by name
+		return obj.name
+
+	return "unknown"
+
+
+
+class SceneBounds:
+	obj = None
+	bounds_min = Vector((0,0,0))
+	bounds_max = Vector((0,0,0))
+	size = Vector((0,0,0))
+	center = Vector((0,0,0))
+
+	def __init__(self, obj):
+		self.obj = obj
+		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
+
+		self.bounds_min = Vector((corners[0].x, corners[0].y, corners[0].z))
+		self.bounds_max = Vector((corners[0].x, corners[0].y, corners[0].z))
+		for corner in corners:
+			self.bounds_min.x = min(self.bounds_min.x, corner.x)
+			self.bounds_min.y = min(self.bounds_min.y, corner.y)
+			self.bounds_min.z = min(self.bounds_min.z, corner.z)
+			self.bounds_max.x = max(self.bounds_max.x, corner.x)
+			self.bounds_max.y = max(self.bounds_max.y, corner.y)
+			self.bounds_max.z = max(self.bounds_max.z, corner.z)
+
+		self.size = self.bounds_max - self.bounds_min
+		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+
+
+
+def is_colliding(bounds_A, bounds_B):
+	def is_collide_1D(A_min, A_max, B_min, B_max):
+		# One line is inside the other
+		length_A = A_max-A_min
+		length_B = B_max-B_min
+		center_A = A_min + length_A/2
+		center_B = B_min + length_B/2
+		return abs(center_A - center_B) <= (length_A+length_B)/2
+
+	collide_x = is_collide_1D(bounds_A.bounds_min.x, bounds_A.bounds_max.x, bounds_B.bounds_min.x, bounds_B.bounds_max.x)
+	collide_y = is_collide_1D(bounds_A.bounds_min.y, bounds_A.bounds_max.y, bounds_B.bounds_min.y, bounds_B.bounds_max.y)
+	collide_z = is_collide_1D(bounds_A.bounds_min.z, bounds_A.bounds_max.z, bounds_B.bounds_min.z, bounds_B.bounds_max.z)
+
+	return collide_x and collide_y and collide_z
+
+
+
+
+def get_objects():
+	objects = []
+	for obj in bpy.context.selected_objects:
+		if obj.type == 'MESH':
+			objects.append(obj)
+
+	return objects
+
+
+
+def get_bundles():
+	objects = get_objects()
+
+	# Collect groups by key
+	groups = []
+	for obj in objects:
+		key = get_key(obj)
+
+		if(len(groups) == 0):
+			groups.append([obj])
+		else:
+			isFound = False
+			for group in groups:
+				if key == get_key(group[0]):
+					group.append(obj)
+					isFound = True
+					break
+			if not isFound:
+				groups.append([obj])
+
+	# Sort keys alphabetically
+	keys = [get_key(group[0]) for group in groups]
+	keys.sort()
+	key_groups = {}
+	for key in keys:
+		if key not in key_groups:
+			key_groups[key] = []
+
+		for group in groups:
+			if key == get_key(group[0]):
+				key_groups[key] = group
+				break
+
+	return key_groups
 
 
 
@@ -172,7 +318,6 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
-	# bpy.utils.register_class(FBXBundleExporterPanel)
 
 
 def unregister():
