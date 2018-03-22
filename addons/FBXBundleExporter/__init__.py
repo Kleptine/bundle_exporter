@@ -90,6 +90,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 				box = row.box()
 
 				row = box.row(align=True)
+				if(fileName == "unknown"):
+					row.alert = True
 				row.operator(op_remove.bl_idname,text="", icon='X')
 				row.operator(op_select.bl_idname,text=fileName+".fbx")#, icon='MATCUBE'
 
@@ -174,10 +176,61 @@ def get_key(obj):
 			return obj.parent.name
 
 	elif mode == 'space':
+		print("_________")
+
 		# Do objects share same space with bounds?
 		objects = get_objects()
+		clusters = {}
 
-		print("_________")
+		for obj_A in objects: 
+			clusters[ObjectBounds(obj)] = [obj_A]
+		
+		removed = []
+
+		for bounds_A in clusters:
+			if bounds_A not in removed:
+				for bounds_B in clusters:
+					if bounds_B not in removed and bounds_A != bounds_B:
+
+						if bounds_A.is_colliding(bounds_B):
+							# Merge Objects
+							for o in clusters[bounds_B]:
+								if o not in clusters[bounds_A]:
+									clusters[bounds_A].append(o)
+							# Merge bounds
+							bounds_A.combine(bounds_B)
+							# Remove
+							removed.append(bounds_B)
+							# del clusters[bounds_B]
+							continue
+		for key in removed:
+			del clusters[key]
+
+		print("Clusters {}x".format(len(clusters))
+
+			# for obj_B in objects:
+			# 	if obj_A != obj_B:
+
+			# 		bounds = ObjectBounds(obj_B)
+
+			# 		if bounds.is_colliding(bounds_B):
+
+
+		# remaining = objects.copy()
+		# for obj_A in objects:
+		# 	if obj_A in remaining:
+		# 		bounds = SceneBounds(obj_A)
+		# 		remaining.remove(obj_A)
+		# 		for obj_B in remaining:
+		# 			print("Compare {} | {}".format(obj_A.name, obj_B.name))
+		# 			bounds_B = SceneBounds(obj_B)
+		# 			if bounds.is_colliding(bounds_B):
+		# 				bounds.combine(bounds_B)
+		# 				print("Combined ".format(obj_B.name))
+		# 				remaining.remove(obj_B)
+		# 				break
+		'''
+		
 		processed = []
 		groups = []
 		for i in range(0, len(objects)):
@@ -217,12 +270,12 @@ def get_key(obj):
 			# print("Bounds {} | {} | {}".format(bounds.size, bounds.center, bounds.obj.name))
 		#take first object sorted by name
 		return obj.name
-
+		'''
 	return "unknown"
 
 
 
-class SceneBounds:
+class ObjectBounds:
 	obj = None
 	bounds_min = Vector((0,0,0))
 	bounds_max = Vector((0,0,0))
@@ -253,21 +306,20 @@ class SceneBounds:
 		self.size = self.bounds_max - self.bounds_min
 		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
 
+	def is_colliding(self, other):
+		def is_collide_1D(A_min, A_max, B_min, B_max):
+			# One line is inside the other
+			length_A = A_max-A_min
+			length_B = B_max-B_min
+			center_A = A_min + length_A/2
+			center_B = B_min + length_B/2
+			return abs(center_A - center_B) <= (length_A+length_B)/2
 
-def is_colliding(bounds_A, bounds_B):
-	def is_collide_1D(A_min, A_max, B_min, B_max):
-		# One line is inside the other
-		length_A = A_max-A_min
-		length_B = B_max-B_min
-		center_A = A_min + length_A/2
-		center_B = B_min + length_B/2
-		return abs(center_A - center_B) <= (length_A+length_B)/2
+		collide_x = is_collide_1D(self.bounds_min.x, self.bounds_max.x, other.bounds_min.x, other.bounds_max.x)
+		collide_y = is_collide_1D(self.bounds_min.y, self.bounds_max.y, other.bounds_min.y, other.bounds_max.y)
+		collide_z = is_collide_1D(self.bounds_min.z, self.bounds_max.z, other.bounds_min.z, other.bounds_max.z)
 
-	collide_x = is_collide_1D(bounds_A.bounds_min.x, bounds_A.bounds_max.x, bounds_B.bounds_min.x, bounds_B.bounds_max.x)
-	collide_y = is_collide_1D(bounds_A.bounds_min.y, bounds_A.bounds_max.y, bounds_B.bounds_min.y, bounds_B.bounds_max.y)
-	collide_z = is_collide_1D(bounds_A.bounds_min.z, bounds_A.bounds_max.z, bounds_B.bounds_min.z, bounds_B.bounds_max.z)
-
-	return collide_x and collide_y and collide_z
+		return collide_x and collide_y and collide_z
 
 
 
