@@ -177,17 +177,22 @@ def get_key(obj):
 		objects = get_objects()
 		clusters = {}
 
-		for obj_A in objects: 
-			clusters[ObjectBounds(obj)] = [obj_A]
+		for o in objects: 
+			clusters[ObjectBounds(o)] = [o]
 		
 		removed = []
 
-		for bounds_A in clusters:
+		for bounds_A in clusters.keys():
 			if bounds_A not in removed:
-				for bounds_B in clusters:
+				print("GO {}".format(bounds_A.obj.name))
+				
+				for bounds_B in clusters.keys():
 					if bounds_B not in removed and bounds_A != bounds_B:
 
 						if bounds_A.is_colliding(bounds_B):
+
+							# print("Merge {} --> {}x = {}".format(bounds_A.obj.name, len(clusters[bounds_B]), ",".join( [o.name for o in clusters[bounds_B]] )   ))
+
 							# Merge Objects
 							for o in clusters[bounds_B]:
 								if o not in clusters[bounds_A]:
@@ -196,12 +201,19 @@ def get_key(obj):
 							bounds_A.combine(bounds_B)
 							# Remove
 							removed.append(bounds_B)
-							# del clusters[bounds_B]
-							continue
+					
+							print("   Merged {} --> {}x = {}".format(bounds_A.obj.name, len(clusters[bounds_A]), ",".join( [o.name for o in clusters[bounds_A]] )   ))
+						else:
+							print("   Don't collide: {} | {}".format(bounds_A.obj.name, bounds_B.obj.name))
+
+
 		for key in removed:
 			del clusters[key]
 
-		print("Clusters {}x".format(len(clusters)))
+		for bounds in clusters:
+			print("{} {} = {}x".format(bounds.obj.name, bounds.size, len(clusters[bounds])))
+
+		print("Clusters {}x, removed {}x".format(len(clusters), len(removed)))
 
 
 
@@ -319,7 +331,6 @@ class ObjectBounds:
 		collide_x = is_collide_1D(self.bounds_min.x, self.bounds_max.x, other.bounds_min.x, other.bounds_max.x)
 		collide_y = is_collide_1D(self.bounds_min.y, self.bounds_max.y, other.bounds_min.y, other.bounds_max.y)
 		collide_z = is_collide_1D(self.bounds_min.z, self.bounds_max.z, other.bounds_min.z, other.bounds_max.z)
-
 		return collide_x and collide_y and collide_z
 
 

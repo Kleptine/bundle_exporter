@@ -7,6 +7,8 @@ FBX Bundle Exporter is a Blender 2.79 addon to export your object selection as b
 * Fence objects with gizmos
 * Apply additional modifiers e.g. LOD, Merge, Add Colliders,...
 
+
+![](https://farm1.staticflickr.com/787/40907228092_b74d8b8f90_o.png)
 ---
 
 # Bundle Mode #
