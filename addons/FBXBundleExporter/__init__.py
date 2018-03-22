@@ -26,6 +26,7 @@ bl_info = {
 	"tracker_url": "",
 }
 
+
 class FBXBundleSettings(bpy.types.PropertyGroup):
 	path = bpy.props.StringProperty (
 		name="Output Path",
@@ -107,12 +108,13 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 class op_select(bpy.types.Operator):
 	bl_idname = "fbxbundle.select"
 	bl_label = "Select"
-
 	key = bpy.props.StringProperty (name="Key")
-
 	def execute(self, context):
-		print ("Select Operator {}".format(self.key))
-
+		bundles = get_bundles()
+		if self.key in bundles:
+			bpy.ops.object.select_all(action='DESELECT')
+			for obj in bundles[self.key]:
+				obj.select = True
 		return {'FINISHED'}
 
 
@@ -120,11 +122,12 @@ class op_select(bpy.types.Operator):
 class op_remove(bpy.types.Operator):
 	bl_idname = "fbxbundle.remove"
 	bl_label = "Remove"
-
 	key = bpy.props.StringProperty (name="Key")
-
 	def execute(self, context):
-		print ("Remove Operator")
+		bundles = get_bundles()
+		if self.key in bundles:
+			for obj in bundles[self.key]:
+				obj.select = False
 		return {'FINISHED'}
 
 
@@ -189,10 +192,10 @@ def get_key(obj):
 
 		for bounds_A in clusters.keys():
 			if bounds_A not in removed:
-				print("GO {}".format(bounds_A.obj.name))
+				print("GO      {}".format(bounds_A.obj.name))
 				
 				for bounds_B in clusters.keys():
-					if bounds_B not in removed and bounds_A != bounds_B:
+					if bounds_B not in removed and bounds_A != bounds_B:	# 
 
 						if bounds_A.is_colliding(bounds_B):
 
@@ -207,9 +210,9 @@ def get_key(obj):
 							# Remove
 							removed.append(bounds_B)
 					
-							print("   Merged {} --> {}x = {}".format(bounds_A.obj.name, len(clusters[bounds_A]), ",".join( [o.name for o in clusters[bounds_A]] )   ))
+							print("   Mrg: {} -> {}x  {}".format(bounds_A.obj.name, len(clusters[bounds_A]), " ".join( [o.name for o in clusters[bounds_A]] )   ))
 						else:
-							print("   Don't collide: {} | {}".format(bounds_A.obj.name, bounds_B.obj.name))
+							print("   No : {} | {}".format(bounds_A.obj.name, bounds_B.obj.name))
 
 
 		for key in removed:
