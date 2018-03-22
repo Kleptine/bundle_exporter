@@ -33,16 +33,15 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		description="Define the path where to export",
 		subtype='DIR_PATH'
 	)
-	mode_package = bpy.props.EnumProperty(items= 
+	mode_bundle = bpy.props.EnumProperty(items= 
 		[('name', 'Name', "Group by matching names"), 
 		('space', 'Space', "Group by shared space"), 
-		('group', 'Group', "Group by 'Groups'"),
-		('parent', 'Parent', "Group by parents")], name = "Package Mode", default = 'name'
+		('group', 'Group', "Group by 'Groups'")], name = "Bundle Mode", default = 'name'
 	)
-	mode_origin = bpy.props.EnumProperty(items= 
-		[('name_first', 'First', "Origin of first object sorted by name"), 
-		('bottom_bounds', 'Bottom', "Bounds bottom center of group"), 
-		('world_center', 'Scene', "The Scene center 0,0,0'")], name = "Origin From", default = 'name_first'
+	mode_pivot = bpy.props.EnumProperty(items= 
+		[('name_first', 'First Child', "First object sorted by name of the group"), 
+		('bottom_bounds', 'Bottom Center', "Bottom center of the bounds of the group"), 
+		('world_center', 'Scene Origin', "The Scene center 0,0,0'")], name = "Pivot From", default = 'name_first'
 	)
 
 
@@ -62,8 +61,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		box.prop(context.scene.FBXBundleSettings, "path", text="")
 		
 		col = box.column(align=True)
-		col.prop(context.scene.FBXBundleSettings, "mode_package", text="Bundle")
-		col.prop(context.scene.FBXBundleSettings, "mode_origin", text="Origin", expand=False)
+		col.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle")
+		col.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot", expand=False)
 		# layout.separator()
 		
 		# layout.label(text="Add Modifier")
@@ -146,7 +145,7 @@ class op_fence(bpy.types.Operator):
 
 
 def get_key(obj):
-	mode = bpy.context.scene.FBXBundleSettings.mode_package
+	mode = bpy.context.scene.FBXBundleSettings.mode_bundle
 	if mode == 'name':
 		name = obj.name
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
@@ -170,10 +169,6 @@ def get_key(obj):
 	elif mode == 'group':
 		if len(obj.users_group) >= 1:
 			return obj.users_group[0].name
-
-	elif mode == 'parent':
-		if obj.parent:
-			return obj.parent.name
 
 	elif mode == 'space':
 		print("_________")
@@ -206,7 +201,14 @@ def get_key(obj):
 		for key in removed:
 			del clusters[key]
 
-		print("Clusters {}x".format(len(clusters))
+		print("Clusters {}x".format(len(clusters)))
+
+
+
+
+
+
+	return "unknown"
 
 			# for obj_B in objects:
 			# 	if obj_A != obj_B:
@@ -229,49 +231,48 @@ def get_key(obj):
 		# 				print("Combined ".format(obj_B.name))
 		# 				remaining.remove(obj_B)
 		# 				break
-		'''
 		
-		processed = []
-		groups = []
-		for i in range(0, len(objects)):
-			obj_A = objects[i]
+		
+		# processed = []
+		# groups = []
+		# for i in range(0, len(objects)):
+		# 	obj_A = objects[i]
 			
-			if obj_A in processed:
-				continue
+		# 	if obj_A in processed:
+		# 		continue
 
-			group = [obj_A]
-			processed.append(obj_A)
-			bounds = SceneBounds(obj_A)
+		# 	group = [obj_A]
+		# 	processed.append(obj_A)
+		# 	bounds = SceneBounds(obj_A)
 
-			if(i < len(objects)-1):
-				for j in range(i+1, len(objects)):
-					obj_B = objects[j]
+		# 	if(i < len(objects)-1):
+		# 		for j in range(i+1, len(objects)):
+		# 			obj_B = objects[j]
 
-					if obj_B in processed:
-						continue
+		# 			if obj_B in processed:
+		# 				continue
 
 					
-					bounds_B = SceneBounds(obj_B)
-					if(is_colliding(bounds, bounds_B)):
-						print("Collide {} x {}".format(obj_A.name, obj_B.name))
-						group.append(obj_B)
-						processed.append(obj_B)
-						bounds.combine(bounds_B)
+		# 			bounds_B = SceneBounds(obj_B)
+		# 			if(is_colliding(bounds, bounds_B)):
+		# 				print("Collide {} x {}".format(obj_A.name, obj_B.name))
+		# 				group.append(obj_B)
+		# 				processed.append(obj_B)
+		# 				bounds.combine(bounds_B)
 
-			groups.append(group)
+		# 	groups.append(group)
 
-		print("groups {}x".format(len(groups)))
-		if(len(groups) > 0):
-			for group in groups:
-				for obj_A in group:
-					if obj == obj_A:
-						return group[0].name
+		# print("groups {}x".format(len(groups)))
+		# if(len(groups) > 0):
+		# 	for group in groups:
+		# 		for obj_A in group:
+		# 			if obj == obj_A:
+		# 				return group[0].name
 		
-			# print("Bounds {} | {} | {}".format(bounds.size, bounds.center, bounds.obj.name))
-		#take first object sorted by name
-		return obj.name
-		'''
-	return "unknown"
+		# 	# print("Bounds {} | {} | {}".format(bounds.size, bounds.center, bounds.obj.name))
+		# #take first object sorted by name
+		# return obj.name
+	
 
 
 
