@@ -91,8 +91,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 				row = box.row(align=True)
 				if(fileName == "unknown"):
 					row.alert = True
-				row.operator(op_remove.bl_idname,text="", icon='X')
-				row.operator(op_select.bl_idname,text=fileName+".fbx")#, icon='MATCUBE'
+				row.operator(op_remove.bl_idname,text="", icon='X').key = fileName
+				row.operator(op_select.bl_idname,text=fileName+".fbx").key = fileName
 
 				col = row.column(align=True)
 				col.alignment = 'LEFT'
@@ -108,8 +108,11 @@ class op_select(bpy.types.Operator):
 	bl_idname = "fbxbundle.select"
 	bl_label = "Select"
 
+	key = bpy.props.StringProperty (name="Key")
+
 	def execute(self, context):
-		print ("Select Operator")
+		print ("Select Operator {}".format(self.key))
+
 		return {'FINISHED'}
 
 
@@ -117,6 +120,8 @@ class op_select(bpy.types.Operator):
 class op_remove(bpy.types.Operator):
 	bl_idname = "fbxbundle.remove"
 	bl_label = "Remove"
+
+	key = bpy.props.StringProperty (name="Key")
 
 	def execute(self, context):
 		print ("Remove Operator")
