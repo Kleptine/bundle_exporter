@@ -77,9 +77,14 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row = layout.row()
 		row.label('Files: '+str(len(bundles))+"x")
 		
-		row = layout.row(align=True)
+		col = layout.column(align=True)
+		row = col.row(align=True)
 		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+
+		row = col.row(align=True)
 		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_clear.bl_idname, text="Clear", icon='PANEL_CLOSE')
+		
 		layout.separator()
 
 		
@@ -132,16 +137,6 @@ class op_remove(bpy.types.Operator):
 
 
 
-class op_export(bpy.types.Operator):
-	bl_idname = "fbxbundle.export"
-	bl_label = "Export"
-
-	def execute(self, context):
-		print ("Export Operator")
-		return {'FINISHED'}
-
-
-
 class op_fence(bpy.types.Operator):
 	bl_idname = "fbxbundle.fence"
 	bl_label = "Fence"
@@ -149,6 +144,55 @@ class op_fence(bpy.types.Operator):
 	def execute(self, context):
 		print ("Fence Operator")
 		return {'FINISHED'}
+
+
+class op_fence_clear(bpy.types.Operator):
+	bl_idname = "fbxbundle.fence_clear"
+	bl_label = "Fence"
+
+	def execute(self, context):
+		print ("Fence clear Operator")
+		return {'FINISHED'}
+
+
+class op_export(bpy.types.Operator):
+	bl_idname = "fbxbundle.export"
+	bl_label = "Export"
+
+	def execute(self, context):
+		export_fbx( get_bundles() )
+		return {'FINISHED'}
+
+
+def export_fbx(bundles):
+	print("_____________")
+
+	if not os.path.dirname(bpy.data.filepath):
+		raise Exception("Blend file is not saved")
+
+	if bpy.context.scene.FBXBundleSettings.path == "":
+		raise Exception("Export path not set")
+
+	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+
+	for name,objects in bundles.items():
+		path = os.path.join(path_folder, name)
+		print("Export {}".format(path))
+		# # offset
+		# offset = objects[0].location.copy();
+		
+		# # Select Group
+		# for object in objects:
+		# 	object.select = True
+		# 	object.location =  object.location.copy() - offset;#
+
+		# #Export
+		# path = os.path.join(dir, fileName)
+		# export_FBX(path)
+
+		# #Restore offset
+		# for object in objects:
+		# 	object.location=object.location + offset;
 
 
 
@@ -174,9 +218,11 @@ def get_key(obj):
 			name = strings[0]
 		return name
 
+
 	elif mode == 'group':
 		if len(obj.users_group) >= 1:
 			return obj.users_group[0].name
+
 
 	elif mode == 'space':
 		print("_________")
@@ -218,10 +264,15 @@ def get_key(obj):
 		for key in removed:
 			del clusters[key]
 
-		for bounds in clusters:
-			print("{} {} = {}x".format(bounds.obj.name, bounds.size, len(clusters[bounds])))
-
 		print("Clusters {}x, removed {}x".format(len(clusters), len(removed)))
+
+		for bounds in clusters:
+			if obj in clusters[bounds]:
+				return clusters[bounds][0].name 
+			# print("... {} {} = {}x".format(bounds.obj.name, bounds.size, len(clusters[bounds])))
+
+
+		
 
 
 
@@ -296,50 +347,6 @@ def get_key(obj):
 
 
 
-class ObjectBounds:
-	obj = None
-	bounds_min = Vector((0,0,0))
-	bounds_max = Vector((0,0,0))
-	size = Vector((0,0,0))
-	center = Vector((0,0,0))
-
-	def __init__(self, obj):
-		self.obj = obj
-		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
-
-		self.bounds_min = Vector((corners[0].x, corners[0].y, corners[0].z))
-		self.bounds_max = Vector((corners[0].x, corners[0].y, corners[0].z))
-		for corner in corners:
-			self.bounds_min.x = min(self.bounds_min.x, corner.x)
-			self.bounds_min.y = min(self.bounds_min.y, corner.y)
-			self.bounds_min.z = min(self.bounds_min.z, corner.z)
-			self.bounds_max.x = max(self.bounds_max.x, corner.x)
-			self.bounds_max.y = max(self.bounds_max.y, corner.y)
-			self.bounds_max.z = max(self.bounds_max.z, corner.z)
-
-		self.size = self.bounds_max - self.bounds_min
-		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
-
-
-	def combine(self, other):
-		self.bounds_min = min(self.bounds_min, other.bounds_min)
-		self.bounds_max = max(self.bounds_max, other.bounds_max)
-		self.size = self.bounds_max - self.bounds_min
-		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
-
-	def is_colliding(self, other):
-		def is_collide_1D(A_min, A_max, B_min, B_max):
-			# One line is inside the other
-			length_A = A_max-A_min
-			length_B = B_max-B_min
-			center_A = A_min + length_A/2
-			center_B = B_min + length_B/2
-			return abs(center_A - center_B) <= (length_A+length_B)/2
-
-		collide_x = is_collide_1D(self.bounds_min.x, self.bounds_max.x, other.bounds_min.x, other.bounds_max.x)
-		collide_y = is_collide_1D(self.bounds_min.y, self.bounds_max.y, other.bounds_min.y, other.bounds_max.y)
-		collide_z = is_collide_1D(self.bounds_min.z, self.bounds_max.z, other.bounds_min.z, other.bounds_max.z)
-		return collide_x and collide_y and collide_z
 
 
 
@@ -390,6 +397,51 @@ def get_bundles():
 
 
 
+
+class ObjectBounds:
+	obj = None
+	bounds_min = Vector((0,0,0))
+	bounds_max = Vector((0,0,0))
+	size = Vector((0,0,0))
+	center = Vector((0,0,0))
+
+	def __init__(self, obj):
+		self.obj = obj
+		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
+
+		self.bounds_min = Vector((corners[0].x, corners[0].y, corners[0].z))
+		self.bounds_max = Vector((corners[0].x, corners[0].y, corners[0].z))
+		for corner in corners:
+			self.bounds_min.x = min(self.bounds_min.x, corner.x)
+			self.bounds_min.y = min(self.bounds_min.y, corner.y)
+			self.bounds_min.z = min(self.bounds_min.z, corner.z)
+			self.bounds_max.x = max(self.bounds_max.x, corner.x)
+			self.bounds_max.y = max(self.bounds_max.y, corner.y)
+			self.bounds_max.z = max(self.bounds_max.z, corner.z)
+
+		self.size = self.bounds_max - self.bounds_min
+		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+
+
+	def combine(self, other):
+		self.bounds_min = min(self.bounds_min, other.bounds_min)
+		self.bounds_max = max(self.bounds_max, other.bounds_max)
+		self.size = self.bounds_max - self.bounds_min
+		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+
+	def is_colliding(self, other):
+		def is_collide_1D(A_min, A_max, B_min, B_max):
+			# One line is inside the other
+			length_A = A_max-A_min
+			length_B = B_max-B_min
+			center_A = A_min + length_A/2
+			center_B = B_min + length_B/2
+			return abs(center_A - center_B) <= (length_A+length_B)/2
+
+		collide_x = is_collide_1D(self.bounds_min.x, self.bounds_max.x, other.bounds_min.x, other.bounds_max.x)
+		collide_y = is_collide_1D(self.bounds_min.y, self.bounds_max.y, other.bounds_min.y, other.bounds_max.y)
+		collide_z = is_collide_1D(self.bounds_min.z, self.bounds_max.z, other.bounds_min.z, other.bounds_max.z)
+		return collide_x and collide_y and collide_z
 
 
 
