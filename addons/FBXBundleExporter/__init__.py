@@ -256,9 +256,9 @@ def get_key(obj):
 							# Remove
 							removed.append(bounds_B)
 					
-							print("   Mrg: {} -> {}x  {}".format(bounds_A.obj.name, len(clusters[bounds_A]), " ".join( [o.name for o in clusters[bounds_A]] )   ))
+							print("   Ja : {}  ->  {}x  {}".format(bounds_A.obj.name, len(clusters[bounds_A]), ", ".join( [o.name for o in clusters[bounds_A]] )   ))
 						else:
-							print("   No : {} | {}".format(bounds_A.obj.name, bounds_B.obj.name))
+							print("   No : {}  |  {}".format(bounds_A.obj.name, bounds_B.obj.name))
 
 
 		for key in removed:
@@ -344,6 +344,21 @@ def get_key(obj):
 		# #take first object sorted by name
 		# return obj.name
 	
+
+
+
+
+
+def sort_objects_name(objects):
+	names = {}
+	for obj in objects:
+		names[obj.name] = obj
+
+	# now sort
+
+	return objects
+
+
 
 
 
