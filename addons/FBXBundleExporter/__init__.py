@@ -79,6 +79,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		col = layout.column(align=True)
 		row = col.row(align=True)
+		row.scale_y = 1.7
 		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 
 		row = col.row(align=True)
@@ -91,21 +92,28 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		if(len(bundles) > 0):
 
 			for fileName,objects in bundles.items():
-				row = layout.row(align=True)
-				box = row.box()
 
-				row = box.row(align=True)
+				# row = layout.row(align=True)
+				box = layout.box()
+				# box.scale_y = 0.8
+				column = box.column(align=True)
+
+				row = column.row(align=True)
 				if(fileName == "unknown"):
 					row.alert = True
-				row.operator(op_remove.bl_idname,text="", icon='X').key = fileName
-				row.operator(op_select.bl_idname,text=fileName+".fbx").key = fileName
+				
+				row.operator(op_select.bl_idname,text="{}x   {}.fbx".format(len(objects), fileName)).key = fileName
+				r = row.row(align=True)
+				r.alert = True
+				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
 
-				col = row.column(align=True)
-				col.alignment = 'LEFT'
-				col.label(text="{}x".format(len(objects)))
+				# col = row.column(align=True)
+				# col.alignment = 'LEFT'
+				# col.label(text="{}x".format(len(objects)))
 
+				# col = box.column(align=True)
 				for i in range(0,len(objects)):
-					row = box.row(align=True)
+					row = column.row(align=True)
 					row.label(text=objects[i].name)
 
 
@@ -146,6 +154,7 @@ class op_fence(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
 class op_fence_clear(bpy.types.Operator):
 	bl_idname = "fbxbundle.fence_clear"
 	bl_label = "Fence"
@@ -155,6 +164,7 @@ class op_fence_clear(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
 class op_export(bpy.types.Operator):
 	bl_idname = "fbxbundle.export"
 	bl_label = "Export"
@@ -162,6 +172,7 @@ class op_export(bpy.types.Operator):
 	def execute(self, context):
 		export_fbx( get_bundles() )
 		return {'FINISHED'}
+
 
 
 def export_fbx(bundles):
@@ -198,6 +209,7 @@ def export_fbx(bundles):
 
 def get_key(obj):
 	mode = bpy.context.scene.FBXBundleSettings.mode_bundle
+
 	if mode == 'name':
 		name = obj.name
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
@@ -225,125 +237,39 @@ def get_key(obj):
 
 
 	elif mode == 'space':
-		print("_________")
+		# print("_________")
 
 		# Do objects share same space with bounds?
 		objects = get_objects()
-		clusters = {}
+		clusters = []
 
 		for o in objects: 
-			clusters[ObjectBounds(o)] = [o]
-		
-		removed = []
-
-		for bounds_A in clusters.keys():
-			if bounds_A not in removed:
-				print("GO      {}".format(bounds_A.obj.name))
-				
-				for bounds_B in clusters.keys():
-					if bounds_B not in removed and bounds_A != bounds_B:	# 
-
-						if bounds_A.is_colliding(bounds_B):
-
-							# print("Merge {} --> {}x = {}".format(bounds_A.obj.name, len(clusters[bounds_B]), ",".join( [o.name for o in clusters[bounds_B]] )   ))
-
-							# Merge Objects
-							for o in clusters[bounds_B]:
-								if o not in clusters[bounds_A]:
-									clusters[bounds_A].append(o)
-							# Merge bounds
-							bounds_A.combine(bounds_B)
-							# Remove
-							removed.append(bounds_B)
-					
-							print("   Ja : {}  ->  {}x  {}".format(bounds_A.obj.name, len(clusters[bounds_A]), ", ".join( [o.name for o in clusters[bounds_A]] )   ))
-						else:
-							print("   No : {}  |  {}".format(bounds_A.obj.name, bounds_B.obj.name))
+			clusters.append({'bounds':ObjectBounds(o), 'objects':[o], 'merged':False})
 
 
-		for key in removed:
-			del clusters[key]
+		for clusterA in clusters:
+			if len(clusterA['objects']) > 0:
 
-		print("Clusters {}x, removed {}x".format(len(clusters), len(removed)))
+				for clusterB in clusters:
+					if clusterA != clusterB and len(clusterB['objects']) > 0:
 
-		for bounds in clusters:
-			if obj in clusters[bounds]:
-				return clusters[bounds][0].name 
-			# print("... {} {} = {}x".format(bounds.obj.name, bounds.size, len(clusters[bounds])))
+						boundsA = clusterA['bounds']
+						boundsB = clusterB['bounds']
+						if boundsA.is_colliding(boundsB):
+							
+							# print("Merge {} --> {}x = {}".format(nA, len(clusterB['objects']), ",".join( [o.name for o in clusterB['objects'] ] )   ))
+							for o in clusterB['objects']:
+								clusterA['objects'].append( o )
+							clusterB['objects'].clear()
+							
+							boundsA.combine(boundsB)
 
-
-		
-
-
-
-
+		for cluster in clusters:
+			if obj in cluster['objects']:
+				return cluster['objects'][0].name
 
 
 	return "unknown"
-
-			# for obj_B in objects:
-			# 	if obj_A != obj_B:
-
-			# 		bounds = ObjectBounds(obj_B)
-
-			# 		if bounds.is_colliding(bounds_B):
-
-
-		# remaining = objects.copy()
-		# for obj_A in objects:
-		# 	if obj_A in remaining:
-		# 		bounds = SceneBounds(obj_A)
-		# 		remaining.remove(obj_A)
-		# 		for obj_B in remaining:
-		# 			print("Compare {} | {}".format(obj_A.name, obj_B.name))
-		# 			bounds_B = SceneBounds(obj_B)
-		# 			if bounds.is_colliding(bounds_B):
-		# 				bounds.combine(bounds_B)
-		# 				print("Combined ".format(obj_B.name))
-		# 				remaining.remove(obj_B)
-		# 				break
-		
-		
-		# processed = []
-		# groups = []
-		# for i in range(0, len(objects)):
-		# 	obj_A = objects[i]
-			
-		# 	if obj_A in processed:
-		# 		continue
-
-		# 	group = [obj_A]
-		# 	processed.append(obj_A)
-		# 	bounds = SceneBounds(obj_A)
-
-		# 	if(i < len(objects)-1):
-		# 		for j in range(i+1, len(objects)):
-		# 			obj_B = objects[j]
-
-		# 			if obj_B in processed:
-		# 				continue
-
-					
-		# 			bounds_B = SceneBounds(obj_B)
-		# 			if(is_colliding(bounds, bounds_B)):
-		# 				print("Collide {} x {}".format(obj_A.name, obj_B.name))
-		# 				group.append(obj_B)
-		# 				processed.append(obj_B)
-		# 				bounds.combine(bounds_B)
-
-		# 	groups.append(group)
-
-		# print("groups {}x".format(len(groups)))
-		# if(len(groups) > 0):
-		# 	for group in groups:
-		# 		for obj_A in group:
-		# 			if obj == obj_A:
-		# 				return group[0].name
-		
-		# 	# print("Bounds {} | {} | {}".format(bounds.size, bounds.center, bounds.obj.name))
-		# #take first object sorted by name
-		# return obj.name
-	
 
 
 
@@ -355,8 +281,11 @@ def sort_objects_name(objects):
 		names[obj.name] = obj
 
 	# now sort
+	sorted_objects = []
+	for key in sorted(names.keys()):
+		sorted_objects.append(names[key])
 
-	return objects
+	return sorted_objects
 
 
 
@@ -371,7 +300,7 @@ def get_objects():
 		if obj.type == 'MESH':
 			objects.append(obj)
 
-	return objects
+	return sort_objects_name(objects)
 
 
 
