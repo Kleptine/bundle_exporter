@@ -1,4 +1,4 @@
-import bpy
+import bpy, bmesh
 import os
 import mathutils
 from mathutils import Vector
@@ -34,6 +34,13 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		description="Define the path where to export",
 		subtype='DIR_PATH'
 	)
+	padding = bpy.props.FloatProperty (
+		name="Padding",
+		default=0.5,
+		min = 0,
+		description="Padding for fences or Space bundling",
+		subtype='DISTANCE'
+	)
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('name', 'Name', "Group by matching names"), 
 		('space', 'Space', "Group by shared space"), 
@@ -64,6 +71,10 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		col = box.column(align=True)
 		col.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle")
 		col.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot", expand=False)
+		
+		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=False)
+		
+
 		# layout.separator()
 		
 		# layout.label(text="Add Modifier")
@@ -84,7 +95,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		row = col.row(align=True)
 		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
-		row.operator(op_fence_clear.bl_idname, text="Clear", icon='PANEL_CLOSE')
+		row.operator(op_fence_clear.bl_idname, text="Clear All", icon='PANEL_CLOSE')
 		
 		layout.separator()
 
@@ -151,7 +162,55 @@ class op_fence(bpy.types.Operator):
 
 	def execute(self, context):
 		print ("Fence Operator")
+
+
+		bundles = get_bundles()
+		for name,objects in bundles.items():
+			if len(objects) > 0:
+				bounds = ObjectBounds(objects[0])
+				if len(objects) > 1:
+					for i in range(1,len(objects)):
+						bounds.combine( ObjectBounds(objects[i]) )
+
+				fence_bounds(name, bounds)
+
+
 		return {'FINISHED'}
+
+
+
+def fence_bounds(name, bounds):
+	print("Fence {}".format(name))
+
+	mesh = bpy.data.meshes.new("meshFence")
+	bm = bmesh.new()
+	
+
+	add_mesh_edges(bm,
+		[(0,0,0),
+		(1,0,0),
+		(1,1,0),
+		(0,1,0),
+		(0,0,0)]
+	)
+
+	bm.to_mesh(mesh)
+
+	obj = bpy.data.objects.new("fence_{}".format(name), mesh)
+	bpy.context.scene.objects.link(obj)
+
+
+
+def add_mesh_edges(bm, points):
+	offset  = len(bm.verts)
+	for point in points:
+		bm.verts.new( point )
+
+	bm.verts.ensure_lookup_table()
+
+	for e in range(len(points)-1):
+		bm.edges.new((bm.verts[offset+e], bm.verts[offset+e+1]))
+
 
 
 
