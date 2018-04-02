@@ -182,21 +182,24 @@ class op_fence(bpy.types.Operator):
 def fence_bounds(name, bounds):
 	print("Fence {}".format(name))
 
-	mesh = bpy.data.meshes.new("meshFence")
+	mesh = bpy.data.meshes.new("fence {}".format(name))
 	bm = bmesh.new()
 	
-
+	pos = bounds.center
+	min = bounds.min - pos
+	max = bounds.max - pos
 	add_mesh_edges(bm,
-		[(0,0,0),
-		(1,0,0),
-		(1,1,0),
-		(0,1,0),
-		(0,0,0)]
+		[min +Vector((0,0,0)),
+		min +Vector((1,0,0)),
+		min +Vector((1,1,0)),
+		min +Vector((0,1,0)),
+		min +Vector((0,0,0))]
 	)
 
 	bm.to_mesh(mesh)
 
 	obj = bpy.data.objects.new("fence_{}".format(name), mesh)
+	obj.location = pos
 	bpy.context.scene.objects.link(obj)
 
 
@@ -403,8 +406,8 @@ def get_bundles():
 
 class ObjectBounds:
 	obj = None
-	bounds_min = Vector((0,0,0))
-	bounds_max = Vector((0,0,0))
+	min = Vector((0,0,0))
+	max = Vector((0,0,0))
 	size = Vector((0,0,0))
 	center = Vector((0,0,0))
 
@@ -412,25 +415,25 @@ class ObjectBounds:
 		self.obj = obj
 		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
 
-		self.bounds_min = Vector((corners[0].x, corners[0].y, corners[0].z))
-		self.bounds_max = Vector((corners[0].x, corners[0].y, corners[0].z))
+		self.min = Vector((corners[0].x, corners[0].y, corners[0].z))
+		self.max = Vector((corners[0].x, corners[0].y, corners[0].z))
 		for corner in corners:
-			self.bounds_min.x = min(self.bounds_min.x, corner.x)
-			self.bounds_min.y = min(self.bounds_min.y, corner.y)
-			self.bounds_min.z = min(self.bounds_min.z, corner.z)
-			self.bounds_max.x = max(self.bounds_max.x, corner.x)
-			self.bounds_max.y = max(self.bounds_max.y, corner.y)
-			self.bounds_max.z = max(self.bounds_max.z, corner.z)
+			self.min.x = min(self.min.x, corner.x)
+			self.min.y = min(self.min.y, corner.y)
+			self.min.z = min(self.min.z, corner.z)
+			self.max.x = max(self.max.x, corner.x)
+			self.max.y = max(self.max.y, corner.y)
+			self.max.z = max(self.max.z, corner.z)
 
-		self.size = self.bounds_max - self.bounds_min
-		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+		self.size = self.max - self.min
+		self.center = self.min+(self.max-self.min)/2
 
 
 	def combine(self, other):
-		self.bounds_min = min(self.bounds_min, other.bounds_min)
-		self.bounds_max = max(self.bounds_max, other.bounds_max)
-		self.size = self.bounds_max - self.bounds_min
-		self.center = self.bounds_min+(self.bounds_max-self.bounds_min)/2
+		self.min = min(self.min, other.min)
+		self.max = max(self.max, other.max)
+		self.size = self.max - self.min
+		self.center = self.min+(self.max-self.min)/2
 
 	def is_colliding(self, other):
 		def is_collide_1D(A_min, A_max, B_min, B_max):
@@ -441,9 +444,9 @@ class ObjectBounds:
 			center_B = B_min + length_B/2
 			return abs(center_A - center_B) <= (length_A+length_B)/2
 
-		collide_x = is_collide_1D(self.bounds_min.x, self.bounds_max.x, other.bounds_min.x, other.bounds_max.x)
-		collide_y = is_collide_1D(self.bounds_min.y, self.bounds_max.y, other.bounds_min.y, other.bounds_max.y)
-		collide_z = is_collide_1D(self.bounds_min.z, self.bounds_max.z, other.bounds_min.z, other.bounds_max.z)
+		collide_x = is_collide_1D(self.min.x, self.max.x, other.min.x, other.max.x)
+		collide_y = is_collide_1D(self.min.y, self.max.y, other.min.y, other.max.y)
+		collide_z = is_collide_1D(self.min.z, self.max.z, other.min.z, other.max.z)
 		return collide_x and collide_y and collide_z
 
 
