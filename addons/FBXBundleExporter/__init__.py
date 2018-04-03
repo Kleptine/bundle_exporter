@@ -204,7 +204,7 @@ def fence_bounds(name, bounds):
 		min +Vector((0,size.y,0)),
 		min +Vector((0,0,0))]
 	)
-	add_mesh_text(bm, name)
+	add_mesh_text(bm, min, name)
 
 	bm.to_mesh(mesh)
 
@@ -239,7 +239,7 @@ def add_mesh_edges(bm, points):
 
 
 
-def add_mesh_text(bm, text):
+def add_mesh_text(bm, pos, text, use_border = True):
 	text = text.upper()
 	size = Vector((0.5,1))
 	offset = 0
@@ -253,7 +253,7 @@ def add_mesh_text(bm, text):
 			for id in stroke:
 				x = (id % 3)/3 * size[0] + (offset * (size[0]*1.5))
 				y = math.floor(id/3)/3 * size[1]
-				path.append(Vector((x,y,0)))
+				path.append(pos + Vector((x,y,0)))
 			
 			add_mesh_edges(bm, path)
 
@@ -314,8 +314,6 @@ def add_mesh_text(bm, text):
 		# Unknown
 		'?':[[3,6,8,5,4,1]]
 	}
-
-
 	for char in text:
 		if char in chars:
 			add_character(char, chars[char])
