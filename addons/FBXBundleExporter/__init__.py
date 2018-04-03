@@ -257,9 +257,21 @@ def add_mesh_text(bm, text):
 			
 			add_mesh_edges(bm, path)
 
-
+	# Grid Font: https://image.shutterstock.com/z/stock-vector-set-of-font-design-base-on-line-and-dot-which-represent-connection-link-and-network-vector-621619463.jpg			
+	# 6 -- 7 -- 8
+	# |    |    |
+	# 3 -- 4 -- 5
+	# |    |    |
+	# 0 -- 1 -- 2
 	chars = {
+		# Special
 		' ':[],
+		'_':[[0,2]],
+		'-':[[3,5]],
+		'.':[[1,2]],
+		'|':[[1,7]],
+
+		# Alhabet
 		'A':[[0,3,7,5,2],[3,5]],
 		'B':[[0,6,8,4,2,0]],
 		'C':[[2,1,3,7,8]],
@@ -287,21 +299,24 @@ def add_mesh_text(bm, text):
 		'Y':[[6,4,8],[4,1]],
 		'Z':[[6,8,0,2]],
 
+		# Numbers
 		'0':[[6,8,2,0],[0,8]],		
-		# '1':[[]],		
-
+		'1':[[0,2],[1,7,6]],
+		'2':[[6,7,5,3,0,2]],
+		'3':[[6,8,4,2,0]],
+		'4':[[6,3,5],[8,2]],
+		'5':[[8,6,3,5,1,0]],
+		'6':[[8,7,3,0,2,5,3]],
+		'7':[[3,6,8,5,1]],
+		'8':[[6,2,0,8,6]],
+		'9':[[5,3,6,8,5,1,0]],
+		
+		# Unknown
 		'?':[[3,6,8,5,4,1]]
 	}
 
 
 	for char in text:
-		# Grid Font: https://image.shutterstock.com/z/stock-vector-set-of-font-design-base-on-line-and-dot-which-represent-connection-link-and-network-vector-621619463.jpg
-		# 6 -- 7 -- 8
-		# |    |    |
-		# 3 -- 4 -- 5
-		# |    |    |
-		# 0 -- 1 -- 2
-
 		if char in chars:
 			add_character(char, chars[char])
 		else:
