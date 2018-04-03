@@ -204,7 +204,7 @@ def fence_bounds(name, bounds):
 		min +Vector((0,size.y,0)),
 		min +Vector((0,0,0))]
 	)
-	add_mesh_text(bm, min, name)
+	add_mesh_text(bm, min, padding, name)
 
 	bm.to_mesh(mesh)
 
@@ -239,9 +239,11 @@ def add_mesh_edges(bm, points):
 
 
 
-def add_mesh_text(bm, pos, text, use_border = True):
+def add_mesh_text(bm, pos, scale, text, use_border = True):
 	text = text.upper()
-	size = Vector((0.5,1))
+	size = Vector((0.5,1)) * scale
+	padding = size.x/2
+
 	offset = 0
 
 	def add_character(char, strokes):
@@ -251,9 +253,9 @@ def add_mesh_text(bm, pos, text, use_border = True):
 		for stroke in strokes:
 			path = []
 			for id in stroke:
-				x = (id % 3)/3 * size[0] + (offset * (size[0]*1.5))
-				y = math.floor(id/3)/3 * size[1]
-				path.append(pos + Vector((x,y,0)))
+				x = (id % 3) * (size.x/2) + (offset * (size.x*1.5)) + padding
+				y = math.floor(id/3) * size.y/2 + padding
+				path.append(pos + Vector((x,-size.y-2* padding + y,0)))
 			
 			add_mesh_edges(bm, path)
 
@@ -300,7 +302,7 @@ def add_mesh_text(bm, pos, text, use_border = True):
 		'Z':[[6,8,0,2]],
 
 		# Numbers
-		'0':[[6,8,2,0],[0,8]],		
+		'0':[[6,8,2,0,6],[0,8]],		
 		'1':[[0,2],[1,7,6]],
 		'2':[[6,7,5,3,0,2]],
 		'3':[[6,8,4,2,0]],
@@ -320,6 +322,23 @@ def add_mesh_text(bm, pos, text, use_border = True):
 		else:
 			add_character('?', chars['?'])
 		offset+=1
+
+	# Add border
+	if use_border:
+		
+		width = ((offset-1) * (size.x*1.5))+size.x  + 2*padding
+		height = size.y + 2*padding
+
+		# x = (id % 3)/3 * size[0] + (offset * (size[0]*1.5))
+		# 		y = math.floor(id/3)/3 * size[1]
+
+		add_mesh_edges(bm,
+			[pos +Vector((0,0,0)),
+			pos +Vector((width,0,0)),
+			pos +Vector((width,-height,0)),
+			pos +Vector((0,-height,0)),
+			pos +Vector((0,0,0))]
+		)
 
 
 class op_fence_clear(bpy.types.Operator):
@@ -535,8 +554,13 @@ class ObjectBounds:
 
 
 	def combine(self, other):
-		self.min = min(self.min, other.min)
-		self.max = max(self.max, other.max)
+		self.min.x = min(self.min.x, other.min.x)
+		self.min.y = min(self.min.y, other.min.y)
+		self.min.z = min(self.min.z, other.min.z)
+		self.max.x = max(self.max.x, other.max.x)
+		self.max.y = max(self.max.y, other.max.y)
+		self.max.z = max(self.max.z, other.max.z)
+
 		self.size = self.max - self.min
 		self.center = self.min+(self.max-self.min)/2
 
