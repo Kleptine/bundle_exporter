@@ -164,19 +164,87 @@ class op_fence(bpy.types.Operator):
 	def execute(self, context):
 		print ("Fence Operator")
 
+		test_grease_pencil()
 
-		bundles = get_bundles()
-		for name,objects in bundles.items():
-			if len(objects) > 0:
-				bounds = ObjectBounds(objects[0])
-				if len(objects) > 1:
-					for i in range(1,len(objects)):
-						bounds.combine( ObjectBounds(objects[i]) )
+		# bundles = get_bundles()
+		# for name,objects in bundles.items():
+		# 	if len(objects) > 0:
+		# 		bounds = ObjectBounds(objects[0])
+		# 		if len(objects) > 1:
+		# 			for i in range(1,len(objects)):
+		# 				bounds.combine( ObjectBounds(objects[i]) )
 
-				fence_bounds(name, bounds)
+		# 		fence_bounds(name, bounds)
 
 
 		return {'FINISHED'}
+
+
+def test_grease_pencil():
+	id_grease = "fence"
+	id_layer = "lines"
+	id_palette = "fence_colors"
+
+	# Info: https://wiki.blender.org/index.php/User:Antoniov/Grease_Pencil_Api_Changes
+
+	# Grease Pencil
+	if id_grease in bpy.data.grease_pencil:
+		gp = bpy.data.grease_pencil.get(id_grease, None)
+	else:
+		gp = bpy.data.grease_pencil.new(id_grease)
+	bpy.context.scene.grease_pencil = gp
+
+	# Layer
+	if id_layer in gp.layers:
+		layer = gp.layers[id_layer]
+	else:
+		layer = gp.layers.new(id_layer, set_active=True)
+
+	# Palette
+	if id_palette in gp.palettes:
+		palette = gp.palettes.get(id_palette)
+	else:
+		palette = gp.palettes.new(id_palette, set_active=True)
+
+	# Color
+	if len(palette.colors) > 0:
+		color = palette.colors[0]
+	else:
+		color = palette.colors.new()
+		color.color=(1,1,1)
+	
+	# Frame
+	if len(layer.frames) == 0:
+		frame = layer.frames.new(bpy.context.scene.frame_current)
+	else:
+		frame = layer.frames[0]
+	
+	# Stroke
+	stroke  = frame.strokes.new(colorname=color.name)
+	stroke.draw_mode = '3DSPACE'
+
+	stroke.points.add(2)
+	A = Vector((0,0,0))
+	B = Vector((2,2,2))
+	stroke.points[0].co       = A.to_tuple()
+	stroke.points[0].select   = True
+	stroke.points[0].pressure = 1
+	stroke.points[0].strength = 1
+
+	stroke.points[1].co       = B.to_tuple()
+	stroke.points[1].select   = True
+	stroke.points[1].pressure = 1
+	stroke.points[1].strength = 1
+
+	
+	print("GP {}".format(gp))
+	print("Layer {}".format(layer))
+
+
+	bpy.context.space_data.show_grease_pencil = True
+
+
+	print("GP test")
 
 
 
