@@ -1,3 +1,12 @@
+
+
+
+if "bpy" in locals():
+	import imp
+	imp.reload(line_draw)
+else:
+	from . import line_draw
+
 import bpy, bmesh
 import os
 import mathutils
@@ -14,6 +23,7 @@ from bpy.props import (
 	PointerProperty,
 )
 
+
 bl_info = {
 	"name": "FBX Bundle Exporter",
 	"description": "Export object selection in FBX bundles",
@@ -26,6 +36,7 @@ bl_info = {
 	"wiki_url": "",
 	"tracker_url": "",
 }
+
 
 
 class FBXBundleSettings(bpy.types.PropertyGroup):
@@ -164,87 +175,21 @@ class op_fence(bpy.types.Operator):
 	def execute(self, context):
 		print ("Fence Operator")
 
-		test_grease_pencil()
+		# test_grease_pencil()
 
-		# bundles = get_bundles()
-		# for name,objects in bundles.items():
-		# 	if len(objects) > 0:
-		# 		bounds = ObjectBounds(objects[0])
-		# 		if len(objects) > 1:
-		# 			for i in range(1,len(objects)):
-		# 				bounds.combine( ObjectBounds(objects[i]) )
+		bundles = get_bundles()
+		for name,objects in bundles.items():
+			if len(objects) > 0:
+				bounds = ObjectBounds(objects[0])
+				if len(objects) > 1:
+					for i in range(1,len(objects)):
+						bounds.combine( ObjectBounds(objects[i]) )
 
-		# 		fence_bounds(name, bounds)
+				fence_bounds(name, bounds)
 
 
 		return {'FINISHED'}
 
-
-def test_grease_pencil():
-	id_grease = "fence"
-	id_layer = "lines"
-	id_palette = "fence_colors"
-
-	# Info: https://wiki.blender.org/index.php/User:Antoniov/Grease_Pencil_Api_Changes
-
-	# Grease Pencil
-	if id_grease in bpy.data.grease_pencil:
-		gp = bpy.data.grease_pencil.get(id_grease, None)
-	else:
-		gp = bpy.data.grease_pencil.new(id_grease)
-	bpy.context.scene.grease_pencil = gp
-
-	# Layer
-	if id_layer in gp.layers:
-		layer = gp.layers[id_layer]
-	else:
-		layer = gp.layers.new(id_layer, set_active=True)
-
-	# Palette
-	if id_palette in gp.palettes:
-		palette = gp.palettes.get(id_palette)
-	else:
-		palette = gp.palettes.new(id_palette, set_active=True)
-
-	# Color
-	if len(palette.colors) > 0:
-		color = palette.colors[0]
-	else:
-		color = palette.colors.new()
-		color.color=(1,1,1)
-	
-	# Frame
-	if len(layer.frames) == 0:
-		frame = layer.frames.new(bpy.context.scene.frame_current)
-	else:
-		frame = layer.frames[0]
-	
-	# Stroke
-	stroke  = frame.strokes.new(colorname=color.name)
-	stroke.draw_mode = '3DSPACE'
-
-	stroke.points.add(2)
-	A = Vector((0,0,0))
-	B = Vector((2,2,2))
-	stroke.points[0].co       = A.to_tuple()
-	stroke.points[0].select   = True
-	stroke.points[0].pressure = 1
-	stroke.points[0].strength = 1
-
-	stroke.points[1].co       = B.to_tuple()
-	stroke.points[1].select   = True
-	stroke.points[1].pressure = 1
-	stroke.points[1].strength = 1
-
-	
-	print("GP {}".format(gp))
-	print("Layer {}".format(layer))
-
-
-	bpy.context.space_data.show_grease_pencil = True
-
-
-	print("GP test")
 
 
 
@@ -253,32 +198,35 @@ def fence_bounds(name, bounds):
 
 	padding = bpy.context.scene.FBXBundleSettings.padding
 
-	mesh = bpy.data.meshes.new("fence {}".format(name))
-	bm = bmesh.new()
-	
+
 	pos = bounds.center
 	min = bounds.min - pos
 	max = bounds.max - pos
-	# Expand padding
 	min-= Vector((padding,padding,0))
 	max+= Vector((padding,padding,0))
 	size = max - min
 
+	draw = line_draw.LineDraw(name, (0,0.8,1.0))
+
 	# Bottom bounds
-	add_mesh_edges(bm,
+	# add_mesh_edges(bm,
+	# 	[min +Vector((0,0,0)),
+	# 	min +Vector((size.x,0,0)),
+	# 	min +Vector((size.x,size.y,0)),
+	# 	min +Vector((0,size.y,0)),
+	# 	min +Vector((0,0,0))]
+	# )
+	draw.add_line(
 		[min +Vector((0,0,0)),
 		min +Vector((size.x,0,0)),
 		min +Vector((size.x,size.y,0)),
 		min +Vector((0,size.y,0)),
 		min +Vector((0,0,0))]
 	)
-	add_mesh_text(bm, min, padding, name)
+	draw.add_text(name, min, padding)
+	
 
-	bm.to_mesh(mesh)
 
-
-	obj = bpy.data.objects.new("fence_{}".format(name), mesh)
-	obj.location = pos
 	# obj.hide_select = True
 
 	# Add skin modifier
@@ -288,139 +236,6 @@ def fence_bounds(name, bounds):
 	# bpy.ops.transform.skin_resize(value=(0.0568648, 0.0568648, 0.0568648), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
 
-
-
-
-	bpy.context.scene.objects.link(obj)
-
-
-
-def add_mesh_edges(bm, points):
-	offset  = len(bm.verts)
-	for point in points:
-		bm.verts.new( point )
-
-	bm.verts.ensure_lookup_table()
-
-	for e in range(len(points)-1):
-		bm.edges.new((bm.verts[offset+e], bm.verts[offset+e+1]))
-
-
-
-def add_mesh_text(bm, pos, scale, text, use_border = True):
-	text = text.upper()
-	size = Vector((0.5,1)) * scale
-	padding = size.x/2
-
-	offset = 0
-
-	def add_character(char, strokes):
-		nonlocal offset
-
-		print("Str {} = {}x".format(char, len(strokes)))
-		for stroke in strokes:
-			path = []
-			for id in stroke:
-				x = (id % 3) * (size.x/2) + (offset * (size.x*1.5)) + padding
-				y = math.floor(id/3) * size.y/2 + padding
-				path.append(pos + Vector((x,-size.y-2* padding + y,0)))
-			
-			add_mesh_edges(bm, path)
-
-	# Grid Font: https://image.shutterstock.com/z/stock-vector-set-of-font-design-base-on-line-and-dot-which-represent-connection-link-and-network-vector-621619463.jpg			
-	# 6 -- 7 -- 8
-	# |    |    |
-	# 3 -- 4 -- 5
-	# |    |    |
-	# 0 -- 1 -- 2
-	chars = {
-		# Special
-		' ':[],
-		'_':[[0,2]],
-		'+':[[3,5],[7,1]],
-		'-':[[3,5]],
-		'.':[[1,2]],
-		'|':[[1,7]],
-		'/':[[0,8]],
-		'*':[[0,8],[3,5],[6,2],[1,7]],
-		'%':[[6,3],[8,0],[5,2]],
-		'\'':[[7,4]],
-		'"':[[6,4],[7,5]],
-
-		# Pairs
-		'(':[[1,3,7]],
-		')':[[7,5,1]],
-		'[':[[7,6,0,1]],
-		']':[[7,8,2,1]],
-		'<':[[8,3,2]],
-		'>':[[6,5,0]],
-		
-		# Alhabet Uppercase
-		'A':[[0,3,7,5,2],[3,5]],
-		'B':[[0,6,8,4,2,0]],
-		'C':[[2,1,3,7,8]],
-		'D':[[0,6,7,5,1,0]],
-		'E':[[2,0,6,8],[3,4]],
-		'F':[[0,6,8],[3,4]],
-		'G':[[4,5,2,0,3,7,8]],
-		'H':[[0,6],[3,5],[2,8]],
-		'I':[[0,2],[1,7],[6,8]],
-		'J':[[6,8,5,1,0,3]],
-		'K':[[6,0],[2,1,3,7,8]],
-		'L':[[6,0,2]],
-		'M':[[0,6,4,8,2]],
-		'N':[[0,6,2,8]],
-		'O':[[1,3,7,5,1]],
-		'P':[[0,6,7,5,3]],
-		'Q':[[1,3,7,5,1],[4,2]],
-		'R':[[0,6,8,4,2],[3,4]],
-		'S':[[0,1,5,3,7,8]],
-		'T':[[6,8],[7,1]],
-		'U':[[6,0,2,8]],
-		'V':[[6,3,1,5,8]],
-		'W':[[6,0,4,2,8]],
-		'X':[[6,2],[0,8]],
-		'Y':[[6,4,8],[4,1]],
-		'Z':[[6,8,0,2]],
-
-		# Numbers
-		'0':[[6,8,2,0,6],[0,8]],		
-		'1':[[0,2],[1,7,6]],
-		'2':[[6,7,5,3,0,2]],
-		'3':[[6,8,4,2,0]],
-		'4':[[6,3,5],[8,2]],
-		'5':[[8,6,3,5,1,0]],
-		'6':[[8,7,3,0,2,5,3]],
-		'7':[[3,6,8,5,1]],
-		'8':[[6,2,0,8,6]],
-		'9':[[5,3,6,8,5,1,0]],
-		
-		# Unknown
-		'?':[[3,6,8,5,4,1]]
-	}
-	for char in text:
-		if char in chars:
-			add_character(char, chars[char])
-		else:
-			add_character('?', chars['?'])
-		offset+=1
-
-	# Add border
-	if use_border:
-		
-		width = ((offset-1) * (size.x*1.5))+size.x  + 2*padding
-		height = size.y + 2*padding
-
-		# x = (id % 3)/3 * size[0] + (offset * (size[0]*1.5))
-		# 		y = math.floor(id/3)/3 * size[1]
-
-		add_mesh_edges(bm,
-			[pos +Vector((0,0,0)),
-			pos +Vector((width,0,0)),
-			pos +Vector((width,-height,0)),
-			pos +Vector((0,-height,0)),
-			pos +Vector((0,0,0))]
-		)
 
 
 class op_fence_clear(bpy.types.Operator):
