@@ -1,6 +1,3 @@
-
-
-
 if "bpy" in locals():
 	import imp
 	imp.reload(line_draw)
@@ -22,6 +19,7 @@ from bpy.props import (
 	EnumProperty,
 	PointerProperty,
 )
+
 
 
 bl_info = {
@@ -65,7 +63,6 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 
 
-
 class FBXBundleExporterPanel(bpy.types.Panel):
 	bl_idname = "FBX_bundle_exporter_panel"
 	bl_label = "FBX Bundle"
@@ -78,7 +75,10 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		layout = self.layout
 		
 		box = layout.box()
-		box.prop(context.scene.FBXBundleSettings, "path", text="")
+		row = box.row()
+		if context.scene.FBXBundleSettings.path == "":
+			row.alert = True
+		row.prop(context.scene.FBXBundleSettings, "path", text="")
 		
 		col = box.column(align=True)
 		col.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle")
@@ -93,21 +93,24 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# box = layout.box()
 		# box.label(text="[] Copy Modifiers")
 		# box.label(text="[] Merge to single Mesh")
-
+		layout.separator()
 		# Get bundles
 		bundles = get_bundles()
 
-		row = layout.row()
-		row.label('Files: '+str(len(bundles))+"x")
+		# row = layout.row()
+		# row.label('Files: '+str(len(bundles))+"x")
 		
 		col = layout.column(align=True)
 		row = col.row(align=True)
 		row.scale_y = 1.7
 		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 
+		col.separator()
 		row = col.row(align=True)
 		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
-		row.operator(op_fence_clear.bl_idname, text="Clear All", icon='PANEL_CLOSE')
+		row.operator(op_fence_clear.bl_idname, text="Clear", icon='PANEL_CLOSE')
+		
+		col.operator(op_debug_lines.bl_idname, text="Debug")
 		
 		layout.separator()
 
@@ -176,6 +179,8 @@ class op_fence(bpy.types.Operator):
 		print ("Fence Operator")
 
 		# test_grease_pencil()
+		draw = get_draw()
+		draw.clear()
 
 		bundles = get_bundles()
 		for name,objects in bundles.items():
@@ -187,10 +192,38 @@ class op_fence(bpy.types.Operator):
 
 				fence_bounds(name, bounds)
 
+		return {'FINISHED'}
+
+
+class op_debug_lines(bpy.types.Operator):
+	bl_idname = "fbxbundle.debug_lines"
+	bl_label = "Debug"
+
+	def execute(self, context):
+		print ("Debug Operator")
+
+		# test_grease_pencil()
+		padding = bpy.context.scene.FBXBundleSettings.padding
+
+		draw = get_draw()
+		draw.clear()
+
+		draw.add_text("ABCDEFGHIJKLM", Vector((0,0,0)), padding)
+		draw.add_text("NOPQRSTUVWXYZ", Vector((0,-1,0)), padding)
+		draw.add_text("0123456789", Vector((0,-2,0)), padding)
+		draw.add_text("~!@#$%^&*()", Vector((0,-3,0)), padding)
+		draw.add_text("_-+\"';:,.<>[](){}\\/?", Vector((0,-4,0)), padding)
+		draw.add_text("www.renderhjs.net", Vector((0,-5,0)), padding)
 
 		return {'FINISHED'}
 
 
+_draw = None
+def get_draw():
+	global _draw
+	if _draw == None:
+		_draw = line_draw.LineDraw("fence",(0,0.8,1.0))
+	return _draw
 
 
 def fence_bounds(name, bounds):
@@ -200,22 +233,17 @@ def fence_bounds(name, bounds):
 
 
 	pos = bounds.center
-	min = bounds.min - pos
-	max = bounds.max - pos
+
+	min = bounds.min
+	max = bounds.max
 	min-= Vector((padding,padding,0))
 	max+= Vector((padding,padding,0))
 	size = max - min
 
-	draw = line_draw.LineDraw(name, (0,0.8,1.0))
 
-	# Bottom bounds
-	# add_mesh_edges(bm,
-	# 	[min +Vector((0,0,0)),
-	# 	min +Vector((size.x,0,0)),
-	# 	min +Vector((size.x,size.y,0)),
-	# 	min +Vector((0,size.y,0)),
-	# 	min +Vector((0,0,0))]
-	# )
+
+	draw = get_draw()
+
 	draw.add_line(
 		[min +Vector((0,0,0)),
 		min +Vector((size.x,0,0)),
@@ -244,6 +272,10 @@ class op_fence_clear(bpy.types.Operator):
 
 	def execute(self, context):
 		print ("Fence clear Operator")
+
+		draw = get_draw()
+		draw.clear()
+
 		return {'FINISHED'}
 
 
@@ -482,7 +514,6 @@ def register():
 	bpy.utils.register_module(__name__)
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
 
-
 def unregister():
 	bpy.utils.unregister_class(FBXBundleExporterPanel)
 	del bpy.types.Scene.FBXBundleSettings
@@ -490,3 +521,7 @@ def unregister():
 
 if __name__ == "__main__":
 	register()
+
+	
+
+
