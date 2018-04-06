@@ -110,7 +110,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		# Debug Tools
 		if bpy.app.debug_value != 0:
-			row = layout.row()
+			row = col.row(align=True)
 			row.alert =True
 			row.operator(op_debug_lines.bl_idname, text="Draw Debug")
 		
@@ -130,7 +130,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 				if(fileName == "unknown"):
 					row.alert = True
 				
-				row.operator(op_select.bl_idname,text="{}x   {}.fbx".format(len(objects), fileName)).key = fileName
+				row.operator(op_select.bl_idname,icon='MOD_SOLIDIFY', text="{}.fbx".format(fileName)).key = fileName
 				r = row.row(align=True)
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
@@ -227,7 +227,34 @@ def fence_bounds(name, objects, bounds):
 
 	# Draw pivot
 	pivot = get_pivot(objects, bounds)
-	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,max.z))], dash=padding*0.2)
+	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,max.z+size.z*0.5))], dash=padding*0.2)
+
+	# Grid lines
+	def is_collide_1D(A_min, A_max, B_min, B_max):
+		# One line is inside the other
+		length_A = A_max-A_min
+		length_B = B_max-B_min
+		center_A = A_min + length_A/2
+		center_B = B_min + length_B/2
+		return abs(center_A - center_B) <= (length_A+length_B)/2
+
+	object_bounds = {}
+	for o in objects:
+		b = ObjectBounds(o)
+		object_bounds[o] = b
+
+	for i in range(len(objects)):
+		for j in range(i, len(objects)):
+			if i != j:
+				print("Compare {} | {}".format(i,j))
+
+				b0 = object_bounds[ objects[i] ]
+				b1 = object_bounds[ objects[j] ]
+
+				print("Collide {}".format( is_collide_1D(b0.min.x, b0.max.x, b1.min.x, b1.max.x) ))
+
+	# draw.add_box( Vector((b.min.x, bounds.min.y, bounds.min.z)), padding*0.25)
+		# draw.add_box( Vector((b.max.x, bounds.min.y, bounds.min.z)), padding*0.25)
 	
 
 
