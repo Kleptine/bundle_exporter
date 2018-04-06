@@ -20,8 +20,6 @@ from bpy.props import (
 	PointerProperty,
 )
 
-
-
 bl_info = {
 	"name": "FBX Bundle Exporter",
 	"description": "Export object selection in FBX bundles",
@@ -34,7 +32,6 @@ bl_info = {
 	"wiki_url": "",
 	"tracker_url": "",
 }
-
 
 
 class FBXBundleSettings(bpy.types.PropertyGroup):
@@ -52,14 +49,14 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		subtype='DISTANCE'
 	)
 	mode_bundle = bpy.props.EnumProperty(items= 
-		[('name', 'Name', "Group by matching names"), 
-		('space', 'Space', "Group by shared space"), 
-		('group', 'Group', "Group by 'Groups'")], name = "Bundle Mode", default = 'name'
+		[('NAME', 'Name', "Group by matching names"), 
+		('SPACE', 'Space', "Group by shared space"), 
+		('GROUP', 'Group', "Group by 'Groups'")], name = "Bundle Mode", default = 'NAME'
 	)
 	mode_pivot = bpy.props.EnumProperty(items= 
-		[('name_first', 'First Child', "First object sorted by name of the group"), 
-		('bottom_bounds', 'Bottom Center', "Bottom center of the bounds of the group"), 
-		('world_center', 'Scene Origin', "The Scene center 0,0,0'")], name = "Pivot From", default = 'name_first'
+		[('NAME_FIRST', 'First Child', "First object sorted by name of the group"), 
+		('BOUNDS_BOTTOM', 'Bottom Center', "Bottom center of the bounds of the group"), 
+		('SCENE', 'Scene Origin', "The Scene center 0,0,0'")], name = "Pivot From", default = 'NAME_FIRST'
 	)
 
 
@@ -81,8 +78,9 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.prop(context.scene.FBXBundleSettings, "path", text="")
 		
 		col = box.column(align=True)
-		col.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle")
-		col.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot", expand=False)
+		row = col.row(align=True)
+		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='SURFACE_NCYLINDER')
+		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_OB_EMPTY', expand=False)
 		
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=False)
 		
@@ -110,7 +108,11 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
 		row.operator(op_fence_clear.bl_idname, text="Clear", icon='PANEL_CLOSE')
 		
-		col.operator(op_debug_lines.bl_idname, text="Debug")
+		# Debug Tools
+		if bpy.app.debug_value != 0:
+			row = layout.row()
+			row.alert =True
+			row.operator(op_debug_lines.bl_idname, text="Draw Debug")
 		
 		layout.separator()
 
@@ -190,9 +192,63 @@ class op_fence(bpy.types.Operator):
 					for i in range(1,len(objects)):
 						bounds.combine( ObjectBounds(objects[i]) )
 
-				fence_bounds(name, bounds)
+				fence_bounds(name, objects, bounds)
 
 		return {'FINISHED'}
+
+
+
+def fence_bounds(name, objects, bounds):
+	print("Fence {}".format(name))
+
+	padding = bpy.context.scene.FBXBundleSettings.padding
+	
+	
+	pos = bounds.center
+
+	min = bounds.min
+	max = bounds.max
+	min-= Vector((padding,padding,0))
+	max+= Vector((padding,padding,0))
+	size = max - min
+
+	# Bounds
+	draw = get_draw()
+	draw.add_line(
+		[min +Vector((0,0,0)),
+		min +Vector((size.x,0,0)),
+		min +Vector((size.x,size.y,0)),
+		min +Vector((0,size.y,0)),
+		min +Vector((0,0,0))]
+	)
+
+	# Text
+	draw.add_text(name, min, padding)
+
+	# Draw pivot
+	pivot = get_pivot(objects, bounds)
+	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,max.z))], dash=padding*0.2)
+	
+
+
+
+def get_pivot(objects, bounds):
+	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
+
+	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
+	if mode_pivot == 'NAME_FIRST':
+		if len(objects) > 0:
+			return objects[0].location
+
+	elif mode_pivot == 'BOUNDS_BOTTOM':
+		return bounds.min
+
+	elif mode_pivot == 'SCENE':
+		return Vector((0,0,0))
+
+	# Default
+	return Vector((0,0,0))
+
 
 
 class op_debug_lines(bpy.types.Operator):
@@ -224,44 +280,6 @@ def get_draw():
 	if _draw == None:
 		_draw = line_draw.LineDraw("fence",(0,0.8,1.0))
 	return _draw
-
-
-def fence_bounds(name, bounds):
-	print("Fence {}".format(name))
-
-	padding = bpy.context.scene.FBXBundleSettings.padding
-
-
-	pos = bounds.center
-
-	min = bounds.min
-	max = bounds.max
-	min-= Vector((padding,padding,0))
-	max+= Vector((padding,padding,0))
-	size = max - min
-
-
-
-	draw = get_draw()
-
-	draw.add_line(
-		[min +Vector((0,0,0)),
-		min +Vector((size.x,0,0)),
-		min +Vector((size.x,size.y,0)),
-		min +Vector((0,size.y,0)),
-		min +Vector((0,0,0))]
-	)
-	draw.add_text(name, min, padding)
-	
-
-
-	# obj.hide_select = True
-
-	# Add skin modifier
-	# bpy.ops.object.modifier_add(type='SKIN')
-	# bpy.context.object.modifiers["Skin"].branch_smoothing = 0
-	# bpy.ops.mesh.select_all(action='SELECT')
-	# bpy.ops.transform.skin_resize(value=(0.0568648, 0.0568648, 0.0568648), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
 
 
@@ -323,9 +341,9 @@ def export_fbx(bundles):
 
 
 def get_key(obj):
-	mode = bpy.context.scene.FBXBundleSettings.mode_bundle
+	mode_bundle = bpy.context.scene.FBXBundleSettings.mode_bundle
 
-	if mode == 'name':
+	if mode_bundle == 'NAME':
 		name = obj.name
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
 		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
@@ -346,12 +364,12 @@ def get_key(obj):
 		return name
 
 
-	elif mode == 'group':
+	elif mode_bundle == 'GROUP':
 		if len(obj.users_group) >= 1:
 			return obj.users_group[0].name
 
 
-	elif mode == 'space':
+	elif mode_bundle == 'SPACE':
 		# print("_________")
 
 		# Do objects share same space with bounds?
@@ -401,7 +419,6 @@ def sort_objects_name(objects):
 		sorted_objects.append(names[key])
 
 	return sorted_objects
-
 
 
 

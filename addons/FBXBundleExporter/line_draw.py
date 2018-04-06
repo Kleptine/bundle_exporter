@@ -24,20 +24,55 @@ class LineDraw:
 
 
 	def clear(self):
-		print("Clear")
 		self.gp_frame.clear()
 
 
-	def add_box(self, center, size):
+	def add_box(self, position, size=1.0):
 		print("Box")
 
+		self.add_line([
+			position + Vector((-0.5,-0.5,-0.5)) * size,
+			position + Vector((+0.5,-0.5,-0.5)) * size,
+			position + Vector((+0.5,+0.5,-0.5)) * size,
+			position + Vector((-0.5,+0.5,-0.5)) * size,
+			position + Vector((-0.5,-0.5,-0.5)) * size,
+		])
+		self.add_line([
+			position + Vector((-0.5,-0.5,-0.5)) * size,
+			position + Vector((-0.5,-0.5,+0.5)) * size,
+		])
+		self.add_line([
+			position + Vector((+0.5,-0.5,-0.5)) * size,
+			position + Vector((+0.5,-0.5,+0.5)) * size,
+		])
+		self.add_line([
+			position + Vector((+0.5,+0.5,-0.5)) * size,
+			position + Vector((+0.5,+0.5,+0.5)) * size,
+		])
+		self.add_line([
+			position + Vector((-0.5,+0.5,-0.5)) * size,
+			position + Vector((-0.5,+0.5,+0.5)) * size,
+		])
+		self.add_line([
+			position + Vector((-0.5,-0.5,+0.5)) * size,
+			position + Vector((+0.5,-0.5,+0.5)) * size,
+			position + Vector((+0.5,+0.5,+0.5)) * size,
+			position + Vector((-0.5,+0.5,+0.5)) * size,
+			position + Vector((-0.5,-0.5,+0.5)) * size,
+		])
 
-	def add_lines(self, lines, mode='SOLID'):
+
+	def add_cross(self, position, size=1.0):
+		print("...")
+
+
+
+	def add_lines(self, lines, dash=0.0):
 		for line in lines:
 			self.add_line(line, mode)
 
 
-	def add_line(self, points, mode='SOLID', dash=0.25):
+	def add_line(self, points, dash=0.0):
 		print("Line")
 		stroke = self.get_gp_stroke()
 		offset = len(stroke.points)
