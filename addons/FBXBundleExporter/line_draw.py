@@ -73,7 +73,6 @@ class LineDraw:
 
 
 	def add_line(self, points, dash=0.0):
-		print("Line")
 		stroke = self.get_gp_stroke()
 		offset = len(stroke.points)
 
@@ -87,7 +86,6 @@ class LineDraw:
 
 
 	def add_text(self, text, pos=Vector((0,0,0)), size=1.0):
-		print("text")
 		text = text.upper()
 		size_xy = Vector((0.66,1)) * size
 		padding = size_xy.x/2
@@ -97,7 +95,6 @@ class LineDraw:
 		def add_character(strokes):
 			nonlocal offset
 
-			print("Str {} = {}x".format(char, len(strokes)))
 			for stroke in strokes:
 				path = []
 				for id in stroke:

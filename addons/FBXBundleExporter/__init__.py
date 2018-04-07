@@ -230,7 +230,19 @@ def fence_bounds(name, objects, bounds):
 	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,max.z+size.z*0.5))], dash=padding*0.2)
 
 	# Grid lines
-	def is_collide_1D(A_min, A_max, B_min, B_max):
+	draw_fence_grid(objects, bounds)
+
+				# print("Collide {}".format(  ))
+
+	# draw.add_box( Vector((b.min.x, bounds.min.y, bounds.min.z)), padding*0.25)
+		# draw.add_box( Vector((b.max.x, bounds.min.y, bounds.min.z)), padding*0.25)
+	
+
+
+def draw_fence_grid(objects, bounds):
+	draw = get_draw()
+
+	def is_collide(A_min, A_max, B_min, B_max):
 		# One line is inside the other
 		length_A = A_max-A_min
 		length_B = B_max-B_min
@@ -243,19 +255,37 @@ def fence_bounds(name, objects, bounds):
 		b = ObjectBounds(o)
 		object_bounds[o] = b
 
-	for i in range(len(objects)):
-		for j in range(i, len(objects)):
-			if i != j:
-				print("Compare {} | {}".format(i,j))
 
-				b0 = object_bounds[ objects[i] ]
-				b1 = object_bounds[ objects[j] ]
+	groups_x = [[o] for o in objects]
+	bounds_x = [[object_bounds[o].min.x, object_bounds[o].max.x] for o in objects]
 
-				print("Collide {}".format( is_collide_1D(b0.min.x, b0.max.x, b1.min.x, b1.max.x) ))
+	# groups_y = [[o] for o in objects]
 
-	# draw.add_box( Vector((b.min.x, bounds.min.y, bounds.min.z)), padding*0.25)
-		# draw.add_box( Vector((b.max.x, bounds.min.y, bounds.min.z)), padding*0.25)
-	
+	for i in range(len(groups_x)):	
+		for j in range(len(groups_x)):
+			if i != j and i < len(groups_x) and j < len(groups_x):
+				group0 = groups_x[i]
+				group1 = groups_x[j]
+
+				b0 = bounds_x[i]
+				b1 = bounds_x[j]
+				if is_collide(b0[0], b0[1], b1[0], b1[1]):			
+					print("Collision {} : {}".format(group0[0].name, group1[0].name))
+					# Merge j into i
+					for o in group1:
+						group0.append(o)
+					print("Group {} : {}x".format(group0[0].name, len(group0) ))
+					groups_x.remove(group1)
+
+	# for i in range(len(objects)):
+	# 	for j in range(i, len(objects)):
+	# 		if i != j:
+	# 			print("Compare {} | {}".format(i,j))
+
+	# 			b0 = object_bounds[ objects[i] ]
+	# 			b1 = object_bounds[ objects[j] ]
+	# 			if is_collide_1D(b0.min.x, b0.max.x, b1.min.x, b1.max.x):
+
 
 
 
