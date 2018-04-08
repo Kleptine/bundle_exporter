@@ -255,53 +255,51 @@ def draw_fence_grid(objects, bounds_group):
 		bounds_objects[o] = ObjectBounds(o)
 
 	grid_x = SortedGridAxis(objects, bounds_objects, 'x') 
-	# grid_y = SortedGridAxis(objects, bounds_objects, 'y') 
+	grid_y = SortedGridAxis(objects, bounds_objects, 'y') 
+
+	# Draw grids
+	for i in range(len(grid_x.groups)-1):
+		A = grid_x.bounds[i][1] #End first item
+		B = grid_x.bounds[i+1][0] #Start next item
+		center = A + (B-A)/2
+
+		draw.add_line([
+			Vector((center, bounds_group.min.y, bounds_group.min.z)),
+			Vector((center, bounds_group.max.y, bounds_group.min.z))
+		], padding)
+
+	for i in range(len(grid_y.groups)-1):
+		A = grid_y.bounds[i][1] #End first item
+		B = grid_y.bounds[i+1][0] #Start next item
+		center = A + (B-A)/2
+
+		draw.add_line([
+			Vector((bounds_group.min.x, center, bounds_group.min.z)),
+			Vector((bounds_group.max.x, center, bounds_group.min.z))
+		], padding)
 
 	# Draw grids
 	# for i in range(len(grid_x.groups)):
-	# 	A = grid_x.bounds[i][1] #End first item
-	# 	# B = grid_x.bounds[i+1][0] #Start next item
+	# 	A = grid_x.bounds[i][0]
+	# 	B = grid_x.bounds[i][1]
 	# 	# center = A + (B-A)/2
-	# 	center = grid_x.bounds[i][0]
+	# 	# center = grid_x.bounds[i][0]
 
 	# 	draw.add_line([
-	# 		Vector((center, bounds_group.min.y, bounds_group.min.z)),
-	# 		Vector((center, bounds_group.max.y, bounds_group.min.z))
+	# 		Vector((A, bounds_group.min.y, bounds_group.min.z)),
+	# 		Vector((A, bounds_group.max.y, bounds_group.min.z))
 	# 	], padding)
-
-	# 	draw.add_text("A"+str(i), Vector((center, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
-	# 	draw.add_text("B"+str(i), Vector((center, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
-
-	# Draw grids
-	for i in range(len(grid_x.groups)):
-		A = grid_x.bounds[i][0]
-		B = grid_x.bounds[i][1]
-		# center = A + (B-A)/2
-		# center = grid_x.bounds[i][0]
-
-		draw.add_line([
-			Vector((A, bounds_group.min.y, bounds_group.min.z)),
-			Vector((A, bounds_group.max.y, bounds_group.min.z))
-		], padding)
-
-		draw.add_line([
-			Vector((B, bounds_group.min.y, bounds_group.min.z)),
-			Vector((B, bounds_group.max.y, bounds_group.min.z))
-		], padding)
-
-
-		draw.add_text("A"+str(i), Vector((A, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
-		draw.add_text("B"+str(i), Vector((B, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
-
-	# for i in range(len(grid_y.groups)-1):
-	# 	A = grid_y.bounds[i][1] #End first item
-	# 	B = grid_y.bounds[i+1][0] #Start next item
-	# 	center = A + (B-A)/2
 
 	# 	draw.add_line([
-	# 		Vector((bounds_group.min.x, center, bounds_group.min.z)),
-	# 		Vector((bounds_group.max.x, center, bounds_group.min.z))
+	# 		Vector((B, bounds_group.min.y, bounds_group.min.z)),
+	# 		Vector((B, bounds_group.max.y, bounds_group.min.z))
 	# 	], padding)
+
+
+	# 	draw.add_text(str(i)+"A", Vector((A, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
+	# 	draw.add_text(str(i)+"B", Vector((B, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
+
+	
 
 
 
@@ -315,25 +313,39 @@ class SortedGridAxis:
 		# self.setup_gp()
 
 		# Calculate clusters
-		for i in range(len(self.groups)):	
-			for j in range(len(self.groups)):
-				if i != j and i < len(self.groups) and j < len(self.groups):
-					group0 = self.groups[i]
-					group1 = self.groups[j]
 
+		for i in range(len(self.groups)):
+			print("i {}. / {}".format(i, len(self.groups)))
+
+			j = 0
+			for x in range(len(self.groups)):
+				print("  j {}. / {}".format(j, len(self.groups)))
+
+				if i != j and i < len(self.groups) and j < len(self.groups):
+					g0 = self.groups[i]
+					g1 = self.groups[j]
 					b0 = self.bounds[i]
 					b1 = self.bounds[j]
+					# if g0 not in processed:
 					if self.is_collide(b0[0], b0[1], b1[0], b1[1]):
-						for o in group1:
-							group0.append(o)
+						for o in g1:
+							g0.append(o)
 						b0[0] = min(b0[0], b1[0])
 						b0[1] = max(b0[1], b1[1])
-
-						# print("... Group {} : {}x".format(group0[0].name, len(group0) ))
-						self.groups.remove(group1)
+						self.groups.remove(g1)
 						self.bounds.remove(b1)
+						j-=1
+						print("    Grp @ {} {} = {}x".format(i,j,len(self.groups)))
+						# break
+						# j-=1
+						# i-=1
+						# processed.append(g0)
+				j+=1
+			# 	j+=1
+			# i+=1
 
-		print("Final groups {}x {}".format(len(self.groups), len(self.bounds)))
+
+		print("Final {} x {}".format(len(self.groups), len(self.bounds)))
 		
 		# Sort
 		values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
