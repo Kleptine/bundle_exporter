@@ -101,14 +101,21 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# row.label('Files: '+str(len(bundles))+"x")
 		
 		col = layout.column(align=True)
+
+		if bpy.app.debug_value != 0:
+			row = col.row(align=True)
+			row.alert = True
+			row.operator(op_import.bl_idname, text="Import Objects", icon='IMPORT')
+
+
 		row = col.row(align=True)
 		row.scale_y = 1.7
 		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 
 		col.separator()
 		row = col.row(align=True)
-		row.operator(op_fence.bl_idname, text="Fence", icon='STICKY_UVS_LOC')
-		row.operator(op_fence_clear.bl_idname, text="Clear", icon='PANEL_CLOSE')
+		row.operator(op_fence.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
 		
 		# Debug Tools
 		if bpy.app.debug_value != 0:
@@ -117,6 +124,15 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			row.operator(op_debug_lines.bl_idname, text="Draw Debug")
 		
 		layout.separator()
+
+		if bpy.app.debug_value != 0:
+			box = layout.box()
+			box.alert =True
+			box.label(text="Align")
+			row = box.row(align=True)
+			row.operator(op_fence_clear.bl_idname, text="Pack Bundles")
+			row.operator(op_fence_clear.bl_idname, text="Align Z")
+
 
 		
 		if(len(bundles) > 0):
@@ -449,6 +465,19 @@ class op_fence_clear(bpy.types.Operator):
 		draw = get_draw()
 		draw.clear()
 
+		return {'FINISHED'}
+
+
+
+
+
+class op_import(bpy.types.Operator):
+	bl_idname = "fbxbundle.import"
+	bl_label = "Import"
+
+	def execute(self, context):
+		# https://blender.stackexchange.com/questions/5064/how-to-batch-import-wavefront-obj-files
+		# http://ricardolovelace.com/batch-import-and-export-obj-files-in-blender.html
 		return {'FINISHED'}
 
 
