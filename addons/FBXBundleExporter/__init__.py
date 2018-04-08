@@ -10,6 +10,7 @@ import mathutils
 from mathutils import Vector
 import operator
 import math
+import re
 
 from bpy.props import (
 	StringProperty,
@@ -222,9 +223,17 @@ def fence_bounds(name, objects, bounds):
 		min +Vector((0,size.y,0)),
 		min +Vector((0,0,0))]
 	)
+	draw.add_line([min +Vector((0,0,0)), min +Vector((0,0,padding))] )
+	draw.add_line([min +Vector((size.x,0,0)), min +Vector((size.x,0,padding))] )
+	draw.add_line([min +Vector((size.x,size.y,0)), min +Vector((size.x,size.y,padding))] )
+	draw.add_line([min +Vector((0,size.y,0)), min +Vector((0,size.y,padding))] )
+
 
 	# Text
-	draw.add_text(name, min, padding)
+	label = name
+	if len(objects) > 1:
+		label = "{} {}x".format(name, len(objects))
+	draw.add_text(label, min, padding)
 
 	# Draw pole + Flag
 	pivot = get_pivot(objects, bounds)
@@ -235,6 +244,7 @@ def fence_bounds(name, objects, bounds):
 		Vector((pivot.x - padding, pivot.y - padding, min.z + height - padding/2)),
 		Vector((pivot.x, pivot.y, min.z + height))
 	] )
+	draw.add_circle( Vector((pivot.x, pivot.y, min.z)), padding, sides=8)
 	
 	# Grid lines
 	draw_fence_grid(objects, bounds)
@@ -264,9 +274,11 @@ def draw_fence_grid(objects, bounds_group):
 		center = A + (B-A)/2
 
 		draw.add_line([
+			Vector((center, bounds_group.min.y, bounds_group.min.z+padding)),
 			Vector((center, bounds_group.min.y, bounds_group.min.z)),
-			Vector((center, bounds_group.max.y, bounds_group.min.z))
-		], padding)
+			Vector((center, bounds_group.max.y, bounds_group.min.z)),
+			Vector((center, bounds_group.max.y, bounds_group.min.z+padding))
+		], alpha=0.33)
 
 	for i in range(len(grid_y.groups)-1):
 		A = grid_y.bounds[i][1] #End first item
@@ -274,9 +286,11 @@ def draw_fence_grid(objects, bounds_group):
 		center = A + (B-A)/2
 
 		draw.add_line([
+			Vector((bounds_group.min.x, center, bounds_group.min.z+padding)),
 			Vector((bounds_group.min.x, center, bounds_group.min.z)),
-			Vector((bounds_group.max.x, center, bounds_group.min.z))
-		], padding)
+			Vector((bounds_group.max.x, center, bounds_group.min.z)),
+			Vector((bounds_group.max.x, center, bounds_group.min.z+padding))
+		], alpha=0.33)
 
 	# Draw grids
 	# for i in range(len(grid_x.groups)):
@@ -489,6 +503,10 @@ def get_key(obj):
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
 		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
 			name = name[:-4]
+
+		# Split Camel Case
+		split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
+		name = '_'.join(split)
 
 		# Split
 		split_chars = [' ','_','.','-']

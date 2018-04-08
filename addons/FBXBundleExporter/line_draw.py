@@ -3,6 +3,7 @@ import os
 import mathutils
 from mathutils import Vector
 import math
+import random
 
 
 class LineDraw:
@@ -66,13 +67,24 @@ class LineDraw:
 		print("...")
 
 
+	def add_circle(self, position, radius = 1, sides = 8):
 
-	def add_lines(self, lines, dash=0.0):
+		for i in range(sides):
+			a0 = ((i+0) * (360 / sides))*math.pi/180
+			a1 = ((i+1) * (360 / sides))*math.pi/180
+			A = position + Vector((math.cos(a0), math.sin(a0), 0))*radius
+			B = position + Vector((math.cos(a1), math.sin(a1), 0))*radius
+			self.add_line([A,B])
+
+
+
+
+	def add_lines(self, lines, alpha=1.0, dash=0.0):
 		for line in lines:
-			self.add_line(line, mode)
+			self.add_line(line, alpha, dash)
 
 
-	def add_line(self, points, dash=0.0):
+	def add_line(self, points, alpha=1.0, dash=0.0):
 		stroke = self.get_gp_stroke()
 		offset = len(stroke.points)
 
@@ -82,7 +94,7 @@ class LineDraw:
 			stroke.points[index].co = points[i]
 			stroke.points[index].select   = True
 			stroke.points[index].pressure = 1
-			stroke.points[index].strength = 1
+			stroke.points[index].strength = alpha
 
 
 	def add_text(self, text, pos=Vector((0,0,0)), size=1.0):
@@ -105,14 +117,11 @@ class LineDraw:
 				# add_mesh_edges(bm, path)
 				self.add_line(path)
 
-		# Grid Font: https://image.shutterstock.com/z/stock-vector-set-of-font-design-base-on-line-and-dot-which-represent-connection-link-and-network-vector-621619463.jpg			
-		
 		# 6 -- 7 -- 8
 		# |    |    |
 		# 3 -- 4 -- 5
 		# |    |    |
 		# 0 -- 1 -- 2
-
 		chars = {
 			# Alhabet Uppercase
 			'A':[[0,3,7,5,2],[3,5]],
