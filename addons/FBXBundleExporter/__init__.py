@@ -246,10 +246,111 @@ def fence_bounds(name, objects, bounds):
 	
 
 
-def draw_fence_grid(objects, bounds):
+def draw_fence_grid(objects, bounds_group):
 	draw = get_draw()
+	padding = bpy.context.scene.FBXBundleSettings.padding
 
-	def is_collide(A_min, A_max, B_min, B_max):
+	bounds_objects = {}
+	for o in objects:
+		bounds_objects[o] = ObjectBounds(o)
+
+	grid_x = SortedGridAxis(objects, bounds_objects, 'x') 
+	# grid_y = SortedGridAxis(objects, bounds_objects, 'y') 
+
+	# Draw grids
+	# for i in range(len(grid_x.groups)):
+	# 	A = grid_x.bounds[i][1] #End first item
+	# 	# B = grid_x.bounds[i+1][0] #Start next item
+	# 	# center = A + (B-A)/2
+	# 	center = grid_x.bounds[i][0]
+
+	# 	draw.add_line([
+	# 		Vector((center, bounds_group.min.y, bounds_group.min.z)),
+	# 		Vector((center, bounds_group.max.y, bounds_group.min.z))
+	# 	], padding)
+
+	# 	draw.add_text("A"+str(i), Vector((center, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
+	# 	draw.add_text("B"+str(i), Vector((center, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
+
+	# Draw grids
+	for i in range(len(grid_x.groups)):
+		A = grid_x.bounds[i][0]
+		B = grid_x.bounds[i][1]
+		# center = A + (B-A)/2
+		# center = grid_x.bounds[i][0]
+
+		draw.add_line([
+			Vector((A, bounds_group.min.y, bounds_group.min.z)),
+			Vector((A, bounds_group.max.y, bounds_group.min.z))
+		], padding)
+
+		draw.add_line([
+			Vector((B, bounds_group.min.y, bounds_group.min.z)),
+			Vector((B, bounds_group.max.y, bounds_group.min.z))
+		], padding)
+
+
+		draw.add_text("A"+str(i), Vector((A, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
+		draw.add_text("B"+str(i), Vector((B, bounds_group.min.y-padding, bounds_group.min.z)), padding*0.5)
+
+	# for i in range(len(grid_y.groups)-1):
+	# 	A = grid_y.bounds[i][1] #End first item
+	# 	B = grid_y.bounds[i+1][0] #Start next item
+	# 	center = A + (B-A)/2
+
+	# 	draw.add_line([
+	# 		Vector((bounds_group.min.x, center, bounds_group.min.z)),
+	# 		Vector((bounds_group.max.x, center, bounds_group.min.z))
+	# 	], padding)
+
+
+
+class SortedGridAxis:
+	groups = []
+	bounds = []
+
+	def __init__(self, objects, bounds, axis_var='x'):
+		self.groups = [[o] for o in objects]
+		self.bounds = [[getattr(bounds[o].min, axis_var), getattr(bounds[o].max, axis_var)] for o in objects]
+		# self.setup_gp()
+
+		# Calculate clusters
+		for i in range(len(self.groups)):	
+			for j in range(len(self.groups)):
+				if i != j and i < len(self.groups) and j < len(self.groups):
+					group0 = self.groups[i]
+					group1 = self.groups[j]
+
+					b0 = self.bounds[i]
+					b1 = self.bounds[j]
+					if self.is_collide(b0[0], b0[1], b1[0], b1[1]):
+						for o in group1:
+							group0.append(o)
+						b0[0] = min(b0[0], b1[0])
+						b0[1] = max(b0[1], b1[1])
+
+						# print("... Group {} : {}x".format(group0[0].name, len(group0) ))
+						self.groups.remove(group1)
+						self.bounds.remove(b1)
+
+		print("Final groups {}x {}".format(len(self.groups), len(self.bounds)))
+		
+		# Sort
+		values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
+		ordered = sorted(values.items(), key=operator.itemgetter(1))
+		if len(self.groups) > 1:
+			copy_groups = self.groups.copy()
+			copy_bounds = self.bounds.copy()
+
+			index = 0
+			for s in ordered:
+				print(".. Sorted {} = {}".format(s[0], s[1]))
+				self.groups[index] = copy_groups[ s[0] ]
+				self.bounds[index] = copy_bounds[ s[0] ]
+				index+=1
+
+
+	def is_collide(self, A_min, A_max, B_min, B_max):
 		# One line is inside the other
 		length_A = A_max-A_min
 		length_B = B_max-B_min
@@ -257,64 +358,7 @@ def draw_fence_grid(objects, bounds):
 		center_B = B_min + length_B/2
 		return abs(center_A - center_B) <= (length_A+length_B)/2
 
-	object_bounds = {}
-	for o in objects:
-		b = ObjectBounds(o)
-		object_bounds[o] = b
 
-
-	groups_x = [[o] for o in objects]
-	bounds_x = [[object_bounds[o].min.x, object_bounds[o].max.x] for o in objects]
-
-	# groups_y = [[o] for o in objects]
-
-	for i in range(len(groups_x)):	
-		for j in range(len(groups_x)):
-			if i != j and i < len(groups_x) and j < len(groups_x):
-				group0 = groups_x[i]
-				group1 = groups_x[j]
-
-				b0 = bounds_x[i]
-				b1 = bounds_x[j]
-				if is_collide(b0[0], b0[1], b1[0], b1[1]):
-					for o in group1:
-						group0.append(o)
-					print("... Group {} : {}x".format(group0[0].name, len(group0) ))
-					groups_x.remove(group1)
-					bounds_x.remove(b1)
-	
-
-	print("Final groups {}x".format(len(groups_x)))
-
-	# Dictionary: Index, min bounds
-	values_x = {(bounds_x.index(b)):(b[0]) for b in bounds_x}
-	sorted_x = sorted(values_x.items(), key=operator.itemgetter(1))#Sort by values, store tuples
-	# sortedSizes.reverse()
-	if len(groups_x) > 1:
-		for s in sorted_x:
-			index = s[0]
-			
-		print(".. Sorted {} = {}".format(s[0], s[1]))
-
-
-
-	# for i in range(len(objects)):
-	# 	for j in range(i, len(objects)):
-	# 		if i != j:
-	# 			print("Compare {} | {}".format(i,j))
-
-	# 			b0 = object_bounds[ objects[i] ]
-	# 			b1 = object_bounds[ objects[j] ]
-	# 			if is_collide_1D(b0.min.x, b0.max.x, b1.min.x, b1.max.x):
-
-class SortedGridAxis:
-	groups = []
-	bounds = []
-
-	def __init__(self, objects, axis_var='x'):
-		self.groups = [[o] for o in objects]
-		self.bounds = color
-		# self.setup_gp()
 
 
 def get_pivot(objects, bounds):
