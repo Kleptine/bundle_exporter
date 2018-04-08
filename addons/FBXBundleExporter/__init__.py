@@ -8,6 +8,7 @@ import bpy, bmesh
 import os
 import mathutils
 from mathutils import Vector
+import operator
 import math
 
 from bpy.props import (
@@ -225,10 +226,16 @@ def fence_bounds(name, objects, bounds):
 	# Text
 	draw.add_text(name, min, padding)
 
-	# Draw pivot
+	# Draw pole + Flag
 	pivot = get_pivot(objects, bounds)
-	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,max.z+size.z*0.5))], dash=padding*0.2)
-
+	height = size.z*2.0
+	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,min.z+height))], dash=padding*0.2)
+	draw.add_line( [
+		Vector((pivot.x, pivot.y, min.z + height - padding)),
+		Vector((pivot.x - padding, pivot.y - padding, min.z + height - padding/2)),
+		Vector((pivot.x, pivot.y, min.z + height))
+	] )
+	
 	# Grid lines
 	draw_fence_grid(objects, bounds)
 
@@ -269,13 +276,27 @@ def draw_fence_grid(objects, bounds):
 
 				b0 = bounds_x[i]
 				b1 = bounds_x[j]
-				if is_collide(b0[0], b0[1], b1[0], b1[1]):			
-					print("Collision {} : {}".format(group0[0].name, group1[0].name))
-					# Merge j into i
+				if is_collide(b0[0], b0[1], b1[0], b1[1]):
 					for o in group1:
 						group0.append(o)
-					print("Group {} : {}x".format(group0[0].name, len(group0) ))
+					print("... Group {} : {}x".format(group0[0].name, len(group0) ))
 					groups_x.remove(group1)
+					bounds_x.remove(b1)
+	
+
+	print("Final groups {}x".format(len(groups_x)))
+
+	# Dictionary: Index, min bounds
+	values_x = {(bounds_x.index(b)):(b[0]) for b in bounds_x}
+	sorted_x = sorted(values_x.items(), key=operator.itemgetter(1))#Sort by values, store tuples
+	# sortedSizes.reverse()
+	if len(groups_x) > 1:
+		for s in sorted_x:
+			index = s[0]
+			
+		print(".. Sorted {} = {}".format(s[0], s[1]))
+
+
 
 	# for i in range(len(objects)):
 	# 	for j in range(i, len(objects)):
@@ -286,7 +307,14 @@ def draw_fence_grid(objects, bounds):
 	# 			b1 = object_bounds[ objects[j] ]
 	# 			if is_collide_1D(b0.min.x, b0.max.x, b1.min.x, b1.max.x):
 
+class SortedGridAxis:
+	groups = []
+	bounds = []
 
+	def __init__(self, objects, axis_var='x'):
+		self.groups = [[o] for o in objects]
+		self.bounds = color
+		# self.setup_gp()
 
 
 def get_pivot(objects, bounds):
