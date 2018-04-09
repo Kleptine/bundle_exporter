@@ -1,16 +1,19 @@
 if "bpy" in locals():
 	import imp
-	imp.reload(line_draw)
+	imp.reload(gp_draw)
+	imp.reload(objects_organise)
+	imp.reload(objects_io)
 else:
-	from . import line_draw
+	from . import gp_draw
+	from . import objects_organise
+	from . import objects_io
 
 import bpy, bmesh
 import os
 import mathutils
 from mathutils import Vector
-import operator
 import math
-import re
+
 
 from bpy.props import (
 	StringProperty,
@@ -74,6 +77,18 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		layout = self.layout
 		
 		box = layout.box()
+
+
+
+		
+		if bpy.app.debug_value != 0:
+			row = box.row(align=True)
+			row.alert = True
+			row.operator(op_debug_setup.bl_idname, text="Setup Debug", icon='IMPORT')
+
+
+
+
 		row = box.row()
 		if context.scene.FBXBundleSettings.path == "":
 			row.alert = True
@@ -95,7 +110,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# box.label(text="[] Merge to single Mesh")
 		layout.separator()
 		# Get bundles
-		bundles = get_bundles()
+		bundles = objects_organise.get_bundles()
 
 		# row = layout.row()
 		# row.label('Files: '+str(len(bundles))+"x")
@@ -107,15 +122,16 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			row.alert = True
 			row.operator(op_import.bl_idname, text="Import Objects", icon='IMPORT')
 
+		row = col.row(align=True)
+		row.operator(op_fence.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
 
 		row = col.row(align=True)
 		row.scale_y = 1.7
 		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 
-		col.separator()
-		row = col.row(align=True)
-		row.operator(op_fence.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
-		row.operator(op_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
+		# col.separator()
+		
 		
 		# Debug Tools
 		if bpy.app.debug_value != 0:
@@ -131,7 +147,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			box.label(text="Align")
 			row = box.row(align=True)
 			row.operator(op_fence_clear.bl_idname, text="Pack Bundles")
-			row.operator(op_fence_clear.bl_idname, text="Align Z")
+			row.operator(op_fence_clear.bl_idname, text="Ground Z")
 
 
 		
@@ -164,12 +180,46 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 
 
+class op_debug_lines(bpy.types.Operator):
+	bl_idname = "fbxbundle.debug_lines"
+	bl_label = "Debug"
+
+	def execute(self, context):
+		print ("Debug Operator")
+
+		gp_draw.draw_debug()
+
+		return {'FINISHED'}
+
+
+class op_debug_setup(bpy.types.Operator):
+	bl_idname = "fbxbundle.debug_setup"
+	bl_label = "Setup"
+
+	def execute(self, context):
+		print ("Debug Setup Operator")
+
+		# Disable grid
+		bpy.context.space_data.show_axis_x = False
+		bpy.context.space_data.show_axis_y = False
+		bpy.context.space_data.show_axis_z = False
+		bpy.context.space_data.grid_lines = 0
+		bpy.context.space_data.grid_subdivisions = 1
+		bpy.context.space_data.grid_scale = 0
+		bpy.context.space_data.show_floor = False
+
+		bpy.context.space_data.show_all_objects_origin = True
+
+
+		return {'FINISHED'}
+
+
 class op_select(bpy.types.Operator):
 	bl_idname = "fbxbundle.select"
 	bl_label = "Select"
 	key = bpy.props.StringProperty (name="Key")
 	def execute(self, context):
-		bundles = get_bundles()
+		bundles = objects_organise.get_bundles()
 		if self.key in bundles:
 			bpy.ops.object.select_all(action='DESELECT')
 			for obj in bundles[self.key]:
@@ -183,7 +233,7 @@ class op_remove(bpy.types.Operator):
 	bl_label = "Remove"
 	key = bpy.props.StringProperty (name="Key")
 	def execute(self, context):
-		bundles = get_bundles()
+		bundles = objects_organise.get_bundles()
 		if self.key in bundles:
 			for obj in bundles[self.key]:
 				obj.select = False
@@ -195,263 +245,29 @@ class op_fence(bpy.types.Operator):
 	bl_idname = "fbxbundle.fence"
 	bl_label = "Fence"
 
+
+	@classmethod
+	def poll(cls, context):
+		if len(bpy.context.selected_objects) > 0:
+			return True
+		return False
+
 	def execute(self, context):
 		print ("Fence Operator")
 
-		# test_grease_pencil()
-		draw = get_draw()
-		draw.clear()
+		gp_draw.clear()
 
-		bundles = get_bundles()
+		bundles = objects_organise.get_bundles()
 		for name,objects in bundles.items():
 			if len(objects) > 0:
-				bounds = ObjectBounds(objects[0])
+				bounds = objects_organise.ObjectBounds(objects[0])
 				if len(objects) > 1:
 					for i in range(1,len(objects)):
-						bounds.combine( ObjectBounds(objects[i]) )
+						bounds.combine( objects_organise.ObjectBounds(objects[i]) )
 
-				fence_bounds(name, objects, bounds)
-
-		return {'FINISHED'}
-
-
-
-def fence_bounds(name, objects, bounds):
-	print("Fence {}".format(name))
-
-	padding = bpy.context.scene.FBXBundleSettings.padding
-	
-	
-	pos = bounds.center
-
-	min = bounds.min
-	max = bounds.max
-	min-= Vector((padding,padding,0))
-	max+= Vector((padding,padding,0))
-	size = max - min
-
-	# Bounds
-	draw = get_draw()
-	draw.add_line(
-		[min +Vector((0,0,0)),
-		min +Vector((size.x,0,0)),
-		min +Vector((size.x,size.y,0)),
-		min +Vector((0,size.y,0)),
-		min +Vector((0,0,0))]
-	)
-	draw.add_line([min +Vector((0,0,0)), min +Vector((0,0,padding))] )
-	draw.add_line([min +Vector((size.x,0,0)), min +Vector((size.x,0,padding))] )
-	draw.add_line([min +Vector((size.x,size.y,0)), min +Vector((size.x,size.y,padding))] )
-	draw.add_line([min +Vector((0,size.y,0)), min +Vector((0,size.y,padding))] )
-
-
-	# Text
-	label = name
-	if len(objects) > 1:
-		label = "{} {}x".format(name, len(objects))
-	draw.add_text(label, min, padding)
-
-	# Draw pole + Flag
-	pivot = get_pivot(objects, bounds)
-	height = size.z*2.0
-	draw.add_line( [ Vector((pivot.x, pivot.y, min.z)), Vector((pivot.x, pivot.y,min.z+height))], dash=padding*0.2)
-	draw.add_line( [
-		Vector((pivot.x, pivot.y, min.z + height - padding)),
-		Vector((pivot.x - padding, pivot.y - padding, min.z + height - padding/2)),
-		Vector((pivot.x, pivot.y, min.z + height))
-	] )
-	draw.add_circle( Vector((pivot.x, pivot.y, min.z)), padding, sides=8)
-	
-	# Grid lines
-	draw_fence_grid(objects, bounds)
-
-				# print("Collide {}".format(  ))
-
-	# draw.add_box( Vector((b.min.x, bounds.min.y, bounds.min.z)), padding*0.25)
-		# draw.add_box( Vector((b.max.x, bounds.min.y, bounds.min.z)), padding*0.25)
-	
-
-
-def draw_fence_grid(objects, bounds_group):
-	draw = get_draw()
-	padding = bpy.context.scene.FBXBundleSettings.padding
-
-	bounds_objects = {}
-	for o in objects:
-		bounds_objects[o] = ObjectBounds(o)
-
-	grid_x = SortedGridAxis(objects, bounds_objects, 'x') 
-	grid_y = SortedGridAxis(objects, bounds_objects, 'y') 
-
-	# Draw grids
-	for i in range(len(grid_x.groups)-1):
-		A = grid_x.bounds[i][1] #End first item
-		B = grid_x.bounds[i+1][0] #Start next item
-		center = A + (B-A)/2
-
-		draw.add_line([
-			Vector((center, bounds_group.min.y, bounds_group.min.z+padding)),
-			Vector((center, bounds_group.min.y, bounds_group.min.z)),
-			Vector((center, bounds_group.max.y, bounds_group.min.z)),
-			Vector((center, bounds_group.max.y, bounds_group.min.z+padding))
-		], alpha=0.33)
-
-	for i in range(len(grid_y.groups)-1):
-		A = grid_y.bounds[i][1] #End first item
-		B = grid_y.bounds[i+1][0] #Start next item
-		center = A + (B-A)/2
-
-		draw.add_line([
-			Vector((bounds_group.min.x, center, bounds_group.min.z+padding)),
-			Vector((bounds_group.min.x, center, bounds_group.min.z)),
-			Vector((bounds_group.max.x, center, bounds_group.min.z)),
-			Vector((bounds_group.max.x, center, bounds_group.min.z+padding))
-		], alpha=0.33)
-
-	# Draw grids
-	# for i in range(len(grid_x.groups)):
-	# 	A = grid_x.bounds[i][0]
-	# 	B = grid_x.bounds[i][1]
-	# 	# center = A + (B-A)/2
-	# 	# center = grid_x.bounds[i][0]
-
-	# 	draw.add_line([
-	# 		Vector((A, bounds_group.min.y, bounds_group.min.z)),
-	# 		Vector((A, bounds_group.max.y, bounds_group.min.z))
-	# 	], padding)
-
-	# 	draw.add_line([
-	# 		Vector((B, bounds_group.min.y, bounds_group.min.z)),
-	# 		Vector((B, bounds_group.max.y, bounds_group.min.z))
-	# 	], padding)
-
-
-	# 	draw.add_text(str(i)+"A", Vector((A, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
-	# 	draw.add_text(str(i)+"B", Vector((B, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
-
-	
-
-
-
-class SortedGridAxis:
-	groups = []
-	bounds = []
-
-	def __init__(self, objects, bounds, axis_var='x'):
-		self.groups = [[o] for o in objects]
-		self.bounds = [[getattr(bounds[o].min, axis_var), getattr(bounds[o].max, axis_var)] for o in objects]
-		# self.setup_gp()
-
-		# Calculate clusters
-
-		for i in range(len(self.groups)):
-			print("i {}. / {}".format(i, len(self.groups)))
-
-			j = 0
-			for x in range(len(self.groups)):
-				print("  j {}. / {}".format(j, len(self.groups)))
-
-				if i != j and i < len(self.groups) and j < len(self.groups):
-					g0 = self.groups[i]
-					g1 = self.groups[j]
-					b0 = self.bounds[i]
-					b1 = self.bounds[j]
-					# if g0 not in processed:
-					if self.is_collide(b0[0], b0[1], b1[0], b1[1]):
-						for o in g1:
-							g0.append(o)
-						b0[0] = min(b0[0], b1[0])
-						b0[1] = max(b0[1], b1[1])
-						self.groups.remove(g1)
-						self.bounds.remove(b1)
-						j-=1
-						print("    Grp @ {} {} = {}x".format(i,j,len(self.groups)))
-						# break
-						# j-=1
-						# i-=1
-						# processed.append(g0)
-				j+=1
-			# 	j+=1
-			# i+=1
-
-
-		print("Final {} x {}".format(len(self.groups), len(self.bounds)))
-		
-		# Sort
-		values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
-		ordered = sorted(values.items(), key=operator.itemgetter(1))
-		if len(self.groups) > 1:
-			copy_groups = self.groups.copy()
-			copy_bounds = self.bounds.copy()
-
-			index = 0
-			for s in ordered:
-				print(".. Sorted {} = {}".format(s[0], s[1]))
-				self.groups[index] = copy_groups[ s[0] ]
-				self.bounds[index] = copy_bounds[ s[0] ]
-				index+=1
-
-
-	def is_collide(self, A_min, A_max, B_min, B_max):
-		# One line is inside the other
-		length_A = A_max-A_min
-		length_B = B_max-B_min
-		center_A = A_min + length_A/2
-		center_B = B_min + length_B/2
-		return abs(center_A - center_B) <= (length_A+length_B)/2
-
-
-
-
-def get_pivot(objects, bounds):
-	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
-
-	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
-	if mode_pivot == 'NAME_FIRST':
-		if len(objects) > 0:
-			return objects[0].location
-
-	elif mode_pivot == 'BOUNDS_BOTTOM':
-		return bounds.min
-
-	elif mode_pivot == 'SCENE':
-		return Vector((0,0,0))
-
-	# Default
-	return Vector((0,0,0))
-
-
-
-class op_debug_lines(bpy.types.Operator):
-	bl_idname = "fbxbundle.debug_lines"
-	bl_label = "Debug"
-
-	def execute(self, context):
-		print ("Debug Operator")
-
-		# test_grease_pencil()
-		padding = bpy.context.scene.FBXBundleSettings.padding
-
-		draw = get_draw()
-		draw.clear()
-
-		draw.add_text("ABCDEFGHIJKLM", Vector((0,0,0)), padding)
-		draw.add_text("NOPQRSTUVWXYZ", Vector((0,-1,0)), padding)
-		draw.add_text("0123456789", Vector((0,-2,0)), padding)
-		draw.add_text("~!@#$%^&*()", Vector((0,-3,0)), padding)
-		draw.add_text("_-+\"';:,.<>[](){}\\/?", Vector((0,-4,0)), padding)
-		draw.add_text("www.renderhjs.net", Vector((0,-5,0)), padding)
+				gp_draw.draw_bounds(name, objects, bounds)
 
 		return {'FINISHED'}
-
-
-_draw = None
-def get_draw():
-	global _draw
-	if _draw == None:
-		_draw = line_draw.LineDraw("fence",(0,0.8,1.0))
-	return _draw
-
 
 
 
@@ -460,14 +276,8 @@ class op_fence_clear(bpy.types.Operator):
 	bl_label = "Fence"
 
 	def execute(self, context):
-		print ("Fence clear Operator")
-
-		draw = get_draw()
-		draw.clear()
-
+		gp_draw.clear()
 		return {'FINISHED'}
-
-
 
 
 
@@ -476,8 +286,7 @@ class op_import(bpy.types.Operator):
 	bl_label = "Import"
 
 	def execute(self, context):
-		# https://blender.stackexchange.com/questions/5064/how-to-batch-import-wavefront-obj-files
-		# http://ricardolovelace.com/batch-import-and-export-obj-files-in-blender.html
+		objects_io.import_objects()
 		return {'FINISHED'}
 
 
@@ -486,231 +295,17 @@ class op_export(bpy.types.Operator):
 	bl_idname = "fbxbundle.export"
 	bl_label = "Export"
 
+	@classmethod
+	def poll(cls, context):
+		if len(bpy.context.selected_objects) > 0:
+			return True
+		return False
+
 	def execute(self, context):
-		export_fbx( get_bundles() )
+		objects_io.export_objects()
 		return {'FINISHED'}
 
 
-
-def export_fbx(bundles):
-	print("_____________")
-
-	if not os.path.dirname(bpy.data.filepath):
-		raise Exception("Blend file is not saved")
-
-	if bpy.context.scene.FBXBundleSettings.path == "":
-		raise Exception("Export path not set")
-
-	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
-
-	for name,objects in bundles.items():
-		path = os.path.join(path_folder, name)
-		print("Export {}".format(path))
-		# # offset
-		# offset = objects[0].location.copy();
-		
-		# # Select Group
-		# for object in objects:
-		# 	object.select = True
-		# 	object.location =  object.location.copy() - offset;#
-
-		# #Export
-		# path = os.path.join(dir, fileName)
-		# export_FBX(path)
-
-		# #Restore offset
-		# for object in objects:
-		# 	object.location=object.location + offset;
-
-
-
-def get_key(obj):
-	mode_bundle = bpy.context.scene.FBXBundleSettings.mode_bundle
-
-	if mode_bundle == 'NAME':
-		name = obj.name
-		# Remove blender naming digits, e.g. cube.001, cube.002,...
-		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
-			name = name[:-4]
-
-		# Split Camel Case
-		split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
-		name = '_'.join(split)
-
-		# Split
-		split_chars = [' ','_','.','-']
-		split = name.lower()
-		for char in split_chars:
-			split = split.replace(char,' ')
-		
-		# Combine
-		strings = split.split(' ')
-		if len(strings) > 1:
-			name = '_'.join(strings[0:-1])
-		else:
-			name = strings[0]
-		return name
-
-
-	elif mode_bundle == 'GROUP':
-		if len(obj.users_group) >= 1:
-			return obj.users_group[0].name
-
-
-	elif mode_bundle == 'SPACE':
-		# print("_________")
-
-		# Do objects share same space with bounds?
-		objects = get_objects()
-		clusters = []
-
-		for o in objects: 
-			clusters.append({'bounds':ObjectBounds(o), 'objects':[o], 'merged':False})
-
-
-		for clusterA in clusters:
-			if len(clusterA['objects']) > 0:
-
-				for clusterB in clusters:
-					if clusterA != clusterB and len(clusterB['objects']) > 0:
-
-						boundsA = clusterA['bounds']
-						boundsB = clusterB['bounds']
-						if boundsA.is_colliding(boundsB):
-							
-							# print("Merge {} --> {}x = {}".format(nA, len(clusterB['objects']), ",".join( [o.name for o in clusterB['objects'] ] )   ))
-							for o in clusterB['objects']:
-								clusterA['objects'].append( o )
-							clusterB['objects'].clear()
-							
-							boundsA.combine(boundsB)
-
-		for cluster in clusters:
-			if obj in cluster['objects']:
-				return cluster['objects'][0].name
-
-
-	return "unknown"
-
-
-
-
-
-def sort_objects_name(objects):
-	names = {}
-	for obj in objects:
-		names[obj.name] = obj
-
-	# now sort
-	sorted_objects = []
-	for key in sorted(names.keys()):
-		sorted_objects.append(names[key])
-
-	return sorted_objects
-
-
-
-
-
-
-
-def get_objects():
-	objects = []
-	for obj in bpy.context.selected_objects:
-		if obj.type == 'MESH':
-			objects.append(obj)
-
-	return sort_objects_name(objects)
-
-
-
-def get_bundles():
-	objects = get_objects()
-
-	# Collect groups by key
-	groups = []
-	for obj in objects:
-		key = get_key(obj)
-
-		if(len(groups) == 0):
-			groups.append([obj])
-		else:
-			isFound = False
-			for group in groups:
-				if key == get_key(group[0]):
-					group.append(obj)
-					isFound = True
-					break
-			if not isFound:
-				groups.append([obj])
-
-	# Sort keys alphabetically
-	keys = [get_key(group[0]) for group in groups]
-	keys.sort()
-	key_groups = {}
-	for key in keys:
-		if key not in key_groups:
-			key_groups[key] = []
-
-		for group in groups:
-			if key == get_key(group[0]):
-				key_groups[key] = group
-				break
-
-	return key_groups
-
-
-
-
-class ObjectBounds:
-	obj = None
-	min = Vector((0,0,0))
-	max = Vector((0,0,0))
-	size = Vector((0,0,0))
-	center = Vector((0,0,0))
-
-	def __init__(self, obj):
-		self.obj = obj
-		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
-
-		self.min = Vector((corners[0].x, corners[0].y, corners[0].z))
-		self.max = Vector((corners[0].x, corners[0].y, corners[0].z))
-		for corner in corners:
-			self.min.x = min(self.min.x, corner.x)
-			self.min.y = min(self.min.y, corner.y)
-			self.min.z = min(self.min.z, corner.z)
-			self.max.x = max(self.max.x, corner.x)
-			self.max.y = max(self.max.y, corner.y)
-			self.max.z = max(self.max.z, corner.z)
-
-		self.size = self.max - self.min
-		self.center = self.min+(self.max-self.min)/2
-
-
-	def combine(self, other):
-		self.min.x = min(self.min.x, other.min.x)
-		self.min.y = min(self.min.y, other.min.y)
-		self.min.z = min(self.min.z, other.min.z)
-		self.max.x = max(self.max.x, other.max.x)
-		self.max.y = max(self.max.y, other.max.y)
-		self.max.z = max(self.max.z, other.max.z)
-
-		self.size = self.max - self.min
-		self.center = self.min+(self.max-self.min)/2
-
-	def is_colliding(self, other):
-		def is_collide_1D(A_min, A_max, B_min, B_max):
-			# One line is inside the other
-			length_A = A_max-A_min
-			length_B = B_max-B_min
-			center_A = A_min + length_A/2
-			center_B = B_min + length_B/2
-			return abs(center_A - center_B) <= (length_A+length_B)/2
-
-		collide_x = is_collide_1D(self.min.x, self.max.x, other.min.x, other.max.x)
-		collide_y = is_collide_1D(self.min.y, self.max.y, other.min.y, other.max.y)
-		collide_z = is_collide_1D(self.min.z, self.max.z, other.min.z, other.max.z)
-		return collide_x and collide_y and collide_z
 
 
 
