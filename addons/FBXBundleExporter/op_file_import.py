@@ -12,7 +12,18 @@ class op(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
+		if bpy.context.scene.FBXBundleSettings.path == "":
+			return False
+			
 		return True
 
 	def execute(self, context):
+		import_files()
 		return {'FINISHED'}
+
+
+
+def import_files():
+	# https://blender.stackexchange.com/questions/5064/how-to-batch-import-wavefront-obj-files
+	# http://ricardolovelace.com/batch-import-and-export-obj-files-in-blender.html
+	pass

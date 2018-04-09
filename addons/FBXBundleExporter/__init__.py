@@ -2,7 +2,6 @@ if "bpy" in locals():
 	import imp
 	imp.reload(gp_draw)
 	imp.reload(objects_organise)
-	imp.reload(objects_io)
 	imp.reload(op_file_export)
 	imp.reload(op_file_import)
 	imp.reload(op_fence_draw)
@@ -10,7 +9,6 @@ if "bpy" in locals():
 else:
 	from . import gp_draw
 	from . import objects_organise
-	from . import objects_io
 	from . import op_file_export
 	from . import op_file_import
 	from . import op_fence_draw
@@ -154,8 +152,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			box.alert =True
 			box.label(text="Align")
 			row = box.row(align=True)
-			row.operator(op_fence_clear.bl_idname, text="Pack Bundles")
-			row.operator(op_fence_clear.bl_idname, text="Ground Z")
+			row.operator(op_fence_clear.op.bl_idname, text="Pack Bundles")
+			row.operator(op_fence_clear.op.bl_idname, text="Ground Z")
 
 
 		
