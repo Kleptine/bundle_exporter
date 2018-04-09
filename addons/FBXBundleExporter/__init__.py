@@ -3,10 +3,14 @@ if "bpy" in locals():
 	imp.reload(gp_draw)
 	imp.reload(objects_organise)
 	imp.reload(objects_io)
+	imp.reload(op_file_export)
+	imp.reload(op_file_import)
 else:
 	from . import gp_draw
 	from . import objects_organise
 	from . import objects_io
+	from . import op_file_export
+	from . import op_file_import
 
 import bpy, bmesh
 import os
@@ -120,7 +124,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		if bpy.app.debug_value != 0:
 			row = col.row(align=True)
 			row.alert = True
-			row.operator(op_import.bl_idname, text="Import Objects", icon='IMPORT')
+			row.operator(op_file_import.op.bl_idname, text="Import Objects", icon='IMPORT')
 
 		row = col.row(align=True)
 		row.operator(op_fence.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
@@ -128,7 +132,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		row = col.row(align=True)
 		row.scale_y = 1.7
-		row.operator(op_export.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 
 		# col.separator()
 		
