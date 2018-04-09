@@ -3,16 +3,17 @@ import os
 import mathutils
 from mathutils import Vector
 
-from . import objects_organise
+from . import gp_draw
 
 class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_import"
-	bl_label = "Import"
-	bl_description = "Import multiple objects"
+	bl_idname = "fbxbundle.fence_clear"
+	bl_label = "Clear Fences"
+	bl_description = "Clears all drawn fences in the scene"
 
 	@classmethod
 	def poll(cls, context):
 		return True
 
 	def execute(self, context):
+		gp_draw.clear()
 		return {'FINISHED'}

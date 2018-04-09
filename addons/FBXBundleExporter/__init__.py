@@ -5,12 +5,16 @@ if "bpy" in locals():
 	imp.reload(objects_io)
 	imp.reload(op_file_export)
 	imp.reload(op_file_import)
+	imp.reload(op_fence_draw)
+	imp.reload(op_fence_clear)
 else:
 	from . import gp_draw
 	from . import objects_organise
 	from . import objects_io
 	from . import op_file_export
 	from . import op_file_import
+	from . import op_fence_draw
+	from . import op_fence_clear
 
 import bpy, bmesh
 import os
@@ -121,27 +125,27 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		col = layout.column(align=True)
 
-		if bpy.app.debug_value != 0:
-			row = col.row(align=True)
-			row.alert = True
-			row.operator(op_file_import.op.bl_idname, text="Import Objects", icon='IMPORT')
-
-		row = col.row(align=True)
-		row.operator(op_fence.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
-		row.operator(op_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
-
-		row = col.row(align=True)
-		row.scale_y = 1.7
-		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
-
-		# col.separator()
 		
+
+		row = col.row(align=True)
+		row.operator(op_fence_draw.op.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 		
 		# Debug Tools
 		if bpy.app.debug_value != 0:
 			row = col.row(align=True)
 			row.alert =True
 			row.operator(op_debug_lines.bl_idname, text="Draw Debug")
+
+		col = layout.column(align=True)	
+		row = col.row(align=True)
+		row.scale_y = 1.7
+		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+		row = col.row(align=True)
+		row.operator(op_file_import.op.bl_idname, text="Import Objects", icon='IMPORT')
+	
+		
+		
 		
 		layout.separator()
 
@@ -244,44 +248,6 @@ class op_remove(bpy.types.Operator):
 		return {'FINISHED'}
 
 
-
-class op_fence(bpy.types.Operator):
-	bl_idname = "fbxbundle.fence"
-	bl_label = "Fence"
-
-
-	@classmethod
-	def poll(cls, context):
-		if len(bpy.context.selected_objects) > 0:
-			return True
-		return False
-
-	def execute(self, context):
-		print ("Fence Operator")
-
-		gp_draw.clear()
-
-		bundles = objects_organise.get_bundles()
-		for name,objects in bundles.items():
-			if len(objects) > 0:
-				bounds = objects_organise.ObjectBounds(objects[0])
-				if len(objects) > 1:
-					for i in range(1,len(objects)):
-						bounds.combine( objects_organise.ObjectBounds(objects[i]) )
-
-				gp_draw.draw_bounds(name, objects, bounds)
-
-		return {'FINISHED'}
-
-
-
-class op_fence_clear(bpy.types.Operator):
-	bl_idname = "fbxbundle.fence_clear"
-	bl_label = "Fence"
-
-	def execute(self, context):
-		gp_draw.clear()
-		return {'FINISHED'}
 
 
 

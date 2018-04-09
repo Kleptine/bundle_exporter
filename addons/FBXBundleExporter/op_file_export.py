@@ -3,6 +3,8 @@ import os
 import mathutils
 from mathutils import Vector
 
+from . import objects_organise
+
 class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.file_export"
 	bl_label = "export"

@@ -39,7 +39,8 @@ def draw_debug():
 	draw.add_text("_-+\"';:,.<>[](){}\\/?", Vector((0,-4,0)), padding)
 	draw.add_text("www.renderhjs.net", Vector((0,-5,0)), padding)
 
-	draw.add_circle(Vector((5,-5,0)), 5, 42)
+	for i in range(1,5):
+		draw.add_circle(Vector((4,-4-6,0)), i, i*4)
 
 
 
