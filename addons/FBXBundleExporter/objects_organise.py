@@ -68,7 +68,16 @@ def get_bundles():
 
 
 
-def get_pivot(objects, bounds):
+def get_bounds_combined(objects):
+	bounds = ObjectBounds(objects[0])
+	if len(objects) > 1:
+		for i in range(1,len(objects)):
+			bounds.combine( ObjectBounds(objects[i]) )
+	return bounds
+
+
+
+def get_pivot(objects):
 	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
 
 	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
@@ -77,6 +86,7 @@ def get_pivot(objects, bounds):
 			return objects[0].location
 
 	elif mode_pivot == 'BOUNDS_BOTTOM':
+		bounds = get_bounds_combined(objects)
 		return Vector((
 			bounds.min.x + bounds.size.x/2,
 			bounds.min.y + bounds.size.y/2,

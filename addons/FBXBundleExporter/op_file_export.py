@@ -43,30 +43,38 @@ def export(self):
 	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
 
 	for name,objects in bundles.items():
+		pivot = objects_organise.get_pivot(objects).copy()
+
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
+		# Select objects to export
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in objects:
 			obj.select = True
+			obj.location-= pivot;
+
+		# Export FBX
+		bpy.ops.export_scene.fbx(
+			filepath=path + ".fbx", 
+			use_selection=True, 
+			
+			axis_forward='-Z', 
+			axis_up='Y', 
+			
+			global_scale =0.01, 
+			use_mesh_modifiers=True, 
+			mesh_smooth_type='OFF', 
+			batch_mode='OFF', 
+			use_custom_props=False
+		)
+
+		#Restore offset
+		for obj in objects:
+			obj.location+= pivot;
 
 
-
-		# # offset
-		# offset = objects[0].location.copy();
 		
-		# # Select Group
-		# for object in objects:
-		# 	object.select = True
-		# 	object.location =  object.location.copy() - offset;#
-
-		# #Export
-		# path = os.path.join(dir, fileName)
-		# export_FBX(path)
-
-		# #Restore offset
-		# for object in objects:
-		# 	object.location=object.location + offset;
 
 	# restore mode
 	

@@ -25,12 +25,8 @@ class op(bpy.types.Operator):
 		bundles = objects_organise.get_bundles()
 		for name,objects in bundles.items():
 			if len(objects) > 0:
-				bounds = objects_organise.ObjectBounds(objects[0])
-				if len(objects) > 1:
-					for i in range(1,len(objects)):
-						bounds.combine( objects_organise.ObjectBounds(objects[i]) )
-
-				draw_bounds(name, objects, bounds)
+				bounds_combined = objects_organise.get_bounds_combined(objects)
+				draw_bounds(name, objects, bounds_combined)
 
 		return {'FINISHED'}
 
@@ -73,7 +69,7 @@ def draw_bounds(name, objects, bounds):
 	draw.add_text(label, _min, padding*0.5)
 
 	# Draw pole + Flag
-	pivot = objects_organise.get_pivot(objects, bounds)
+	pivot = objects_organise.get_pivot(objects)
 	height = max(padding, size.z)*2.0
 	draw.add_line( [ Vector((pivot.x, pivot.y, _min.z)), Vector((pivot.x, pivot.y,_min.z+height))], dash=padding*0.2)
 	draw.add_line( [
