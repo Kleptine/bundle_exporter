@@ -209,9 +209,9 @@ class op_debug_setup(bpy.types.Operator):
 		bpy.context.space_data.show_axis_x = False
 		bpy.context.space_data.show_axis_y = False
 		bpy.context.space_data.show_axis_z = False
-		bpy.context.space_data.grid_lines = 0
+		bpy.context.space_data.grid_lines = 6
 		bpy.context.space_data.grid_subdivisions = 1
-		bpy.context.space_data.grid_scale = 0
+		bpy.context.space_data.grid_scale = 1
 		bpy.context.space_data.show_floor = False
 
 		bpy.context.space_data.show_all_objects_origin = True

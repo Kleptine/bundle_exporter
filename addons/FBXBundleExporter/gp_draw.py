@@ -13,13 +13,14 @@ _draw = None
 
 def get_draw():
 	global _draw
-	if _draw == None:
+	if not _draw or not _draw.is_valid():
 		_draw = LineDraw("fence",(0,0.8,1.0))
 	return _draw
 
 
 
 def clear():
+	print("Clear")
 	draw = get_draw()
 	draw.clear()
 
@@ -243,8 +244,18 @@ class LineDraw:
 				add_character(chars['?'])
 			offset+=1
 
+	def is_valid(self):
+		if not self.gp:
+			return False
+		if not self.gp_layer:
+			return False
+		if not self.gp_palette:
+			return False
+
+		return True
 
 	def setup_gp(self):
+		# Documentation https://wiki.blender.org/index.php/User:Antoniov/Grease_Pencil_Api_Changes
 		id_grease = "id_grease"
 		id_layer = "id_layer"
 		id_palette = "id_palette"
@@ -252,12 +263,24 @@ class LineDraw:
 		# 
 		bpy.context.space_data.show_grease_pencil = True
 
+		# gp = scene.grease_pencil
+		# if not gp:
+		# 	gp = bpy.data.grease_pencil.get(gname, None)
+		# 	if not gp:
+		# 		gp = bpy.data.grease_pencil.new(gname)
+		# 		print("Created new Grease Pencil", gp.name)
+		# 	scene.grease_pencil = gp
+		# 	print("Added Grease Pencil %s to current scene" % (gp.name) ) 
+		# return gp
+
 		# Grease Pencil
-		if id_grease in bpy.data.grease_pencil:
-			self.gp = bpy.data.grease_pencil.get(id_grease, None)
-		else:
-			self.gp = bpy.data.grease_pencil.new(id_grease)
-		bpy.context.scene.grease_pencil = self.gp
+		self.gp = bpy.context.scene.grease_pencil
+		if not self.gp:
+			if id_grease in bpy.data.grease_pencil:
+				self.gp = bpy.data.grease_pencil.get(id_grease, None)
+			else:
+				self.gp = bpy.data.grease_pencil.new(id_grease)
+			bpy.context.scene.grease_pencil = self.gp
 
 		# Layer
 		if id_layer in self.gp.layers:
