@@ -91,7 +91,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
-			row.operator(op_debug_setup.bl_idname, text="Setup Debug", icon='IMPORT')
+			row.operator(op_debug_setup.bl_idname, text="Setup", icon='COLOR')
+			row.operator(op_debug_lines.bl_idname, text="Draw", icon='GREASEPENCIL')
 
 		row = box.row()
 		if context.scene.FBXBundleSettings.path == "":
@@ -139,12 +140,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 		
 		col.separator()
+
 		
-		# Debug Tools
-		if bpy.app.debug_value != 0:
-			row = col.row(align=True)
-			row.alert =True
-			row.operator(op_debug_lines.bl_idname, text="Draw Debug")
 
 		col = layout.column(align=True)	
 		row = col.row(align=True)
@@ -160,12 +157,11 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		layout.separator()
 
 		if bpy.app.debug_value != 0:
-			box = layout.box()
-			box.alert =True
-			box.label(text="Align")
-			row = box.row(align=True)
-			row.operator(op_fence_clear.op.bl_idname, text="Pack Bundles")
-			row.operator(op_fence_clear.op.bl_idname, text="Ground Z")
+			row = layout.row(align=True)
+			row.alert =True
+			row.operator(op_fence_clear.op.bl_idname, text="Pack", icon='IMGDISPLAY')
+			row.operator(op_fence_clear.op.bl_idname, text="Align Z", icon='TRIA_DOWN_BAR')
+			layout.separator()
 
 
 		

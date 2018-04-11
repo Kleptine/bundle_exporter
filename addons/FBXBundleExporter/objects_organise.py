@@ -114,32 +114,61 @@ def get_pivot(objects):
 
 
 
+
 def get_key(obj):
 	mode_bundle = bpy.context.scene.FBXBundleSettings.mode_bundle
 
 	if mode_bundle == 'NAME':
+
+		# chars = {
+		# 	'':'<0>', #CamelCase
+		# 	' ':'<1>',
+		# 	'_':'<1>',
+		# 	'_':'<1>',
+		# }
+
+
+
 		name = obj.name
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
 		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
 			name = name[:-4]
 
+
+
 		# Split Camel Case
 		split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
-		name = '_'.join(split)
+		name = '<0>'.join(split)
 
 		# Split
-		split_chars = [' ','_','.','-']
-		split = name #.lower()
-		for char in split_chars:
-			split = split.replace(char,' ')
+		split_chars = ['',' ','_','.','-']
+		# split = name #.lower()
+		for i in range(len(split_chars)):
+			char = split_chars[i]
+			if len(char) > 0:
+				name = name.replace(char,'<{}>'.format(i))
 		
+
+		split = name.split("<") 
+		fill = []
+		for i in range(len(split)):
+			element = split[i]
+			if i > 0:
+				key = element[0:1]
+				fill.append( split_chars[int(key)] )
+				split[i] = split[i][2:]
+
+		name = ' '.join(split)
+
+
 		# Combine
-		strings = split.split(' ')
-		if len(strings) > 1:
-			name = '_'.join(strings[0:-1])
+		split = name.split(' ')
+		if len(split) > 1:
+			name = ' '.join(split[0:-1])
 		else:
-			name = strings[0]
-		return name
+			name = split[0]
+
+		return name+"__>"+"|".join(fill)
 
 
 	elif mode_bundle == 'GROUP':
