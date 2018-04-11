@@ -60,9 +60,10 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		subtype='DISTANCE'
 	)
 	mode_bundle = bpy.props.EnumProperty(items= 
-		[('NAME', 'Name', "Group by matching names"), 
+		[('NAME', 'Name', "Group by matching object names"), 
 		('SPACE', 'Space', "Group by shared space"), 
-		('GROUP', 'Group', "Group by 'Groups'")
+		('GROUP', 'Group', "Group by 'Groups'"),
+		('MATERIAL', 'Material', "Group by matching material names")
 		], name = "Bundle Mode", default = 'NAME'
 	)
 	mode_pivot = bpy.props.EnumProperty(items=[
@@ -87,16 +88,10 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		box = layout.box()
 
-
-
-		
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
 			row.operator(op_debug_setup.bl_idname, text="Setup Debug", icon='IMPORT')
-
-
-
 
 		row = box.row()
 		if context.scene.FBXBundleSettings.path == "":
@@ -105,11 +100,17 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		
 		col = box.column(align=True)
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='SURFACE_NCYLINDER')
-		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_OB_EMPTY', expand=False)
+		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
+		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
-		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=False)
+		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
 		
+
+
+
+		# Warnings
+		if context.scene.FBXBundleSettings.path == "":
+			layout.label(text="No export path defined", icon='ERROR')
 
 		# layout.separator()
 		
@@ -124,6 +125,11 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# row = layout.row()
 		# row.label('Files: '+str(len(bundles))+"x")
 		
+
+
+
+
+
 		col = layout.column(align=True)
 
 		
@@ -143,7 +149,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.scale_y = 1.7
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 		row = col.row(align=True)
-		row.operator(op_file_import.op.bl_idname, text="Import Objects", icon='IMPORT')
+		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 	
 		
 		
@@ -161,6 +167,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		
 		if(len(bundles) > 0):
+			# box_files = layout.box()
+			# box_files.active = False
 
 			for fileName,objects in bundles.items():
 
@@ -173,7 +181,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 				if(fileName == "unknown"):
 					row.alert = True
 				
-				row.operator(op_select.bl_idname,icon='MOD_SOLIDIFY', text="{}.fbx".format(fileName)).key = fileName
+				row.operator(op_select.bl_idname,icon='MESH_CUBE', emboss=False, text="{}.fbx".format(fileName)).key = fileName
 				r = row.row(align=True)
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName

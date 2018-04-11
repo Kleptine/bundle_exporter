@@ -1,6 +1,7 @@
 import bpy, bmesh
 import os
 import mathutils
+import math
 from mathutils import Vector
 
 from . import objects_organise
@@ -18,6 +19,9 @@ class op(bpy.types.Operator):
 		if bpy.context.scene.FBXBundleSettings.path == "":
 			return False
 
+		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
+			return False
+
 		return True
 
 	def execute(self, context):
@@ -27,18 +31,27 @@ class op(bpy.types.Operator):
 
 def export(self):
 	print("_____________")
-	bpy.ops.object.mode_set(mode='OBJECT')
 
-	bundles = objects_organise.get_bundles()
-	selected_obj = bpy.context.selected_objects.copy()
 
-	# if not os.path.dirname(bpy.data.filepath):
-		# raise Exception("Blend file is not saved")
-
+	# Warnings
 	if bpy.context.scene.FBXBundleSettings.path == "":
 		raise Exception("")
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
+
+
+
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	bundles = objects_organise.get_bundles()
+
+	# Store previous settings
+	previous_selection = bpy.context.selected_objects.copy()
+	previous_unit_system = bpy.context.scene.unit_settings.system
+
+
+	bpy.context.scene.unit_settings.system = 'METRIC'	
 
 	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
 
@@ -48,12 +61,16 @@ def export(self):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
-		# Select objects to export
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in objects:
 			obj.select = True
 			obj.location-= pivot;
 
+			# X-rotation fix
+			bpy.context.scene.objects.active = obj
+			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+		
 		# Export FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
@@ -61,23 +78,29 @@ def export(self):
 			
 			axis_forward='-Z', 
 			axis_up='Y', 
-			
-			global_scale =0.01, 
+
+			object_types={'ARMATURE', 'MESH', 'EMPTY'},
+
+			global_scale =1.00, 
 			use_mesh_modifiers=True, 
 			mesh_smooth_type='OFF', 
 			batch_mode='OFF', 
 			use_custom_props=False
 		)
 
-		#Restore offset
 		for obj in objects:
+			#Restore offset
 			obj.location+= pivot;
 
+			# Restore X-rotation fix
+			bpy.context.scene.objects.active = obj
+			bpy.ops.transform.rotate(value = (+math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
-		
 
-	# restore mode
+	# Restore previous settings
+	bpy.context.scene.unit_settings.system = previous_unit_system
 	
 	bpy.ops.object.select_all(action='DESELECT')
-	for obj in selected_obj:
+	for obj in previous_selection:
 		obj.select = True

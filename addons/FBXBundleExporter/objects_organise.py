@@ -82,38 +82,32 @@ def get_pivot(objects):
 
 	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
 
-	if mode_pivot == 'OBJECT_FIRST':
-		if len(objects) > 0:
-			return objects[0].location
+	if len(objects):
+		if mode_pivot == 'OBJECT_FIRST':
+			if len(objects) > 0:
+				return objects[0].location
 
-	elif mode_pivot == 'BOUNDS_BOTTOM':
-		bounds = get_bounds_combined(objects)
-		return Vector((
-			bounds.min.x + bounds.size.x/2,
-			bounds.min.y + bounds.size.y/2,
-			bounds.min.z
-		))
-	elif mode_pivot == 'OBJECT_LOWEST':
+		elif mode_pivot == 'BOUNDS_BOTTOM':
+			bounds = get_bounds_combined(objects)
+			return Vector((
+				bounds.min.x + bounds.size.x/2,
+				bounds.min.y + bounds.size.y/2,
+				bounds.min.z
+			))
+		elif mode_pivot == 'OBJECT_LOWEST':
 
-		obj_bounds = {}
-		for obj in objects:
-			b = ObjectBounds(obj)
-			obj_bounds[obj] = b.min.z
+			obj_bounds = {}
+			for obj in objects:
+				b = ObjectBounds(obj)
+				obj_bounds[obj] = b.min.z
 
-		# Sort
-		ordered = sorted(obj_bounds.items(), key=operator.itemgetter(1))
-		return ordered[0][0]
-			# values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
-			# ordered = sorted(values.items(), key=operator.itemgetter(1))
-			# if len(self.groups) > 1:
-			# 	copy_groups = self.groups.copy()
-	
-			# 	index = 0
-			# 	for s in ordered:
-			# 		print(".. Sorted {} = {}".format(s[0], s[1]))
+			# Sort
+			ordered = sorted(obj_bounds.items(), key=operator.itemgetter(1))
+			return ordered[0][0].location
 
-	elif mode_pivot == 'SCENE':
-		return Vector((0,0,0))
+
+		elif mode_pivot == 'SCENE':
+			return Vector((0,0,0))
 
 	# Default
 	return Vector((0,0,0))
@@ -135,7 +129,7 @@ def get_key(obj):
 
 		# Split
 		split_chars = [' ','_','.','-']
-		split = name.lower()
+		split = name #.lower()
 		for char in split_chars:
 			split = split.replace(char,' ')
 		
@@ -149,8 +143,15 @@ def get_key(obj):
 
 
 	elif mode_bundle == 'GROUP':
+		# Use group name
 		if len(obj.users_group) >= 1:
 			return obj.users_group[0].name
+
+
+	elif mode_bundle == 'MATERIAL':
+		# Use material name
+		if len(obj.material_slots) >= 1:
+			return obj.material_slots[0].name
 
 
 	elif mode_bundle == 'SPACE':

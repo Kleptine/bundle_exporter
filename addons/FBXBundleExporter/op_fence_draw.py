@@ -16,6 +16,10 @@ class op(bpy.types.Operator):
 	def poll(cls, context):
 		if len(bpy.context.selected_objects) > 0:
 			return True
+
+		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
+			return False
+
 		return False
 
 	def execute(self, context):
