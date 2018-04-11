@@ -7,6 +7,8 @@ import operator
 from . import objects_organise
 from . import gp_draw
 
+
+
 class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.fence_draw"
 	bl_label = "Draw Fences"

@@ -61,6 +61,7 @@ def export(self):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
+		# Select objects
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in objects:
 			obj.select = True
@@ -71,7 +72,7 @@ def export(self):
 			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 		
-		# Export FBX
+		# Export selected as FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 

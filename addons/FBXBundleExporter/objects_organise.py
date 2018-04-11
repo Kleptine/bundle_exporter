@@ -114,20 +114,45 @@ def get_pivot(objects):
 
 
 
+split_chars = ['',' ','_','.','-']
+
+
+def encode(name):
+	
+	# Split Camel Case
+	split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
+	name = '<0>'.join(split)
+
+	# Split
+	for i in range(len(split_chars)):
+		char = split_chars[i]
+		if len(char) > 0:
+			name = name.replace(char,'<{}>'.format(i))
+	
+	return name
+	# split = name.split("<") 
+	# fill = []
+	# for i in range(len(split)):
+	# 	element = split[i]
+	# 	if i > 0:
+	# 		key = element[0:1]
+	# 		fill.append( split_chars[int(key)] )
+	# 		split[i] = split[i][2:]
+
+	# return ' '.join(split)
+
+
+
+def decode(name):
+	# pass #+"__>"+"|".join(fill)
+	return name
+
+
 
 def get_key(obj):
 	mode_bundle = bpy.context.scene.FBXBundleSettings.mode_bundle
 
 	if mode_bundle == 'NAME':
-
-		# chars = {
-		# 	'':'<0>', #CamelCase
-		# 	' ':'<1>',
-		# 	'_':'<1>',
-		# 	'_':'<1>',
-		# }
-
-
 
 		name = obj.name
 		# Remove blender naming digits, e.g. cube.001, cube.002,...
@@ -135,30 +160,7 @@ def get_key(obj):
 			name = name[:-4]
 
 
-
-		# Split Camel Case
-		split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
-		name = '<0>'.join(split)
-
-		# Split
-		split_chars = ['',' ','_','.','-']
-		# split = name #.lower()
-		for i in range(len(split_chars)):
-			char = split_chars[i]
-			if len(char) > 0:
-				name = name.replace(char,'<{}>'.format(i))
-		
-
-		split = name.split("<") 
-		fill = []
-		for i in range(len(split)):
-			element = split[i]
-			if i > 0:
-				key = element[0:1]
-				fill.append( split_chars[int(key)] )
-				split[i] = split[i][2:]
-
-		name = ' '.join(split)
+		name = encode(name)
 
 
 		# Combine
@@ -168,7 +170,7 @@ def get_key(obj):
 		else:
 			name = split[0]
 
-		return name+"__>"+"|".join(fill)
+		return decode(name)
 
 
 	elif mode_bundle == 'GROUP':
