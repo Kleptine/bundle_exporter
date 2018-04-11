@@ -5,7 +5,7 @@ from mathutils import Vector
 import math
 import random
 import re
-
+import operator
 
 def get_objects():
 	objects = []
@@ -81,7 +81,8 @@ def get_pivot(objects):
 	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
 
 	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
-	if mode_pivot == 'NAME_FIRST':
+
+	if mode_pivot == 'OBJECT_FIRST':
 		if len(objects) > 0:
 			return objects[0].location
 
@@ -92,6 +93,24 @@ def get_pivot(objects):
 			bounds.min.y + bounds.size.y/2,
 			bounds.min.z
 		))
+	elif mode_pivot == 'OBJECT_LOWEST':
+
+		obj_bounds = {}
+		for obj in objects:
+			b = ObjectBounds(obj)
+			obj_bounds[obj] = b.min.z
+
+		# Sort
+		ordered = sorted(obj_bounds.items(), key=operator.itemgetter(1))
+		return ordered[0][0]
+			# values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
+			# ordered = sorted(values.items(), key=operator.itemgetter(1))
+			# if len(self.groups) > 1:
+			# 	copy_groups = self.groups.copy()
+	
+			# 	index = 0
+			# 	for s in ordered:
+			# 		print(".. Sorted {} = {}".format(s[0], s[1]))
 
 	elif mode_pivot == 'SCENE':
 		return Vector((0,0,0))

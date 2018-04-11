@@ -62,12 +62,15 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Group by matching names"), 
 		('SPACE', 'Space', "Group by shared space"), 
-		('GROUP', 'Group', "Group by 'Groups'")], name = "Bundle Mode", default = 'NAME'
+		('GROUP', 'Group', "Group by 'Groups'")
+		], name = "Bundle Mode", default = 'NAME'
 	)
-	mode_pivot = bpy.props.EnumProperty(items= 
-		[('NAME_FIRST', 'First Child', "First object sorted by name of the group"), 
+	mode_pivot = bpy.props.EnumProperty(items=[
+		('OBJECT_FIRST', 'First Name', "First object sorted by name of the group"), 
+		('OBJECT_LOWEST', 'Lowest Object', "The Scene center 0,0,0'"),
 		('BOUNDS_BOTTOM', 'Bottom Center', "Bottom center of the bounds of the group"), 
-		('SCENE', 'Scene Origin', "The Scene center 0,0,0'")], name = "Pivot From", default = 'NAME_FIRST'
+		('SCENE', 'Scene 0,0,0', "The Scene center 0,0,0'")
+		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
 
 
