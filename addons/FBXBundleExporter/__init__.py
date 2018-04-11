@@ -118,7 +118,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# box = layout.box()
 		# box.label(text="[] Copy Modifiers")
 		# box.label(text="[] Merge to single Mesh")
-		layout.separator()
+		
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
@@ -132,11 +132,13 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		col = layout.column(align=True)
 
-		
+		col.separator()
 
 		row = col.row(align=True)
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
+		
+		col.separator()
 		
 		# Debug Tools
 		if bpy.app.debug_value != 0:
@@ -146,10 +148,11 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		col = layout.column(align=True)	
 		row = col.row(align=True)
-		row.scale_y = 1.7
-		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
-		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
+		row = col.row(align=True)
+		row.scale_y = 1.85
+		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+		
 	
 		
 		

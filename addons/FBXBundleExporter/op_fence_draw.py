@@ -81,7 +81,10 @@ def draw_bounds(name, objects, bounds):
 		Vector((pivot.x - padding, pivot.y - padding, _min.z + height - padding/2)),
 		Vector((pivot.x, pivot.y, _min.z + height))
 	] )
-	draw.add_circle( Vector((pivot.x, pivot.y, _min.z)), padding, sides=8)
+
+	draw.add_circle( pivot, padding, sides=8)
+	draw.add_line([pivot+Vector((-padding/2,0,0)), pivot+Vector((padding/2,0,0)) ])
+	draw.add_line([pivot+Vector((0,-padding/2,0)), pivot+Vector((0,padding/2,0)) ])
 	
 	# Draw Grid
 	draw_grid(objects, bounds)
