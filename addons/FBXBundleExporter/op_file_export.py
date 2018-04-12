@@ -49,9 +49,14 @@ def export(self):
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
 	previous_unit_system = bpy.context.scene.unit_settings.system
+	previous_pivot = bpy.context.space_data.pivot_point
+
 
 
 	bpy.context.scene.unit_settings.system = 'METRIC'	
+	bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
+
+
 
 	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
 
@@ -61,17 +66,26 @@ def export(self):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
+		
+		for obj in objects:
+			bpy.ops.object.select_all(action="DESELECT")
+			obj.select = True
+			bpy.context.scene.objects.active = obj
+
+			# Offset
+			obj.location-= pivot;
+
+			# X-rotation fix
+			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+		
+
 		# Select objects
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in objects:
 			obj.select = True
-			obj.location-= pivot;
 
-			# X-rotation fix
-			bpy.context.scene.objects.active = obj
-			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-		
+
 		# Export selected as FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
@@ -90,18 +104,23 @@ def export(self):
 		)
 
 		for obj in objects:
+			bpy.ops.object.select_all(action="DESELECT")
+			obj.select = True
+			bpy.context.scene.objects.active = obj
+
 			#Restore offset
 			obj.location+= pivot;
 
 			# Restore X-rotation fix
-			bpy.context.scene.objects.active = obj
 			bpy.ops.transform.rotate(value = (+math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
 
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
-	
+	bpy.context.space_data.pivot_point = previous_pivot
+
+
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True

@@ -118,7 +118,9 @@ split_chars = ['',' ','_','.','-']
 
 
 def encode(name):
-	
+	name = name.replace("<","")
+	name = name.replace(">","")
+
 	# Split Camel Case
 	split = re.sub('(?!^)([A-Z][a-z]+)', r' \1', name).split()
 	name = '<0>'.join(split)
@@ -129,23 +131,29 @@ def encode(name):
 		if len(char) > 0:
 			name = name.replace(char,'<{}>'.format(i))
 	
-	return name
-	# split = name.split("<") 
-	# fill = []
-	# for i in range(len(split)):
-	# 	element = split[i]
-	# 	if i > 0:
-	# 		key = element[0:1]
-	# 		fill.append( split_chars[int(key)] )
-	# 		split[i] = split[i][2:]
 
-	# return ' '.join(split)
+	split = name.split("<") 
+	fill = []
+	for i in range(len(split)):
+		element = split[i]
+		if i > 0:
+			key = element[0:1]
+			fill.append( split_chars[int(key)] )
+			split[i] = split[i][2:]
+
+	return " ".join(split), fill
 
 
+def decode(name, fill):
 
-def decode(name):
-	# pass #+"__>"+"|".join(fill)
-	return name
+	n = ""
+	split = name.split(" ")
+	for i in range(len(split)):
+		n+=split[i]
+		if i < len(split)-1:
+			n+=fill[i]
+
+	return n
 
 
 
@@ -160,7 +168,7 @@ def get_key(obj):
 			name = name[:-4]
 
 
-		name = encode(name)
+		name, fill = encode(name)
 
 
 		# Combine
@@ -170,7 +178,7 @@ def get_key(obj):
 		else:
 			name = split[0]
 
-		return decode(name)
+		return decode(name, fill)
 
 
 	elif mode_bundle == 'GROUP':
