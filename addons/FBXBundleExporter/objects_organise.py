@@ -225,7 +225,7 @@ def get_key(obj):
 			if obj in cluster['objects']:
 				return cluster['objects'][0].name
 
-	return "unknown"
+	return "UNDEFINED"
 
 
 

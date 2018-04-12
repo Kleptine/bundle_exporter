@@ -66,7 +66,7 @@ def export(self):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
-		
+		# Apply Transforms
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True
@@ -96,13 +96,17 @@ def export(self):
 
 			object_types={'ARMATURE', 'MESH', 'EMPTY'},
 
+			apply_scale_options = 'FBX_SCALE_ALL',
 			global_scale =1.00, 
+			apply_unit_scale=True,
+
 			use_mesh_modifiers=True, 
 			mesh_smooth_type='OFF', 
 			batch_mode='OFF', 
 			use_custom_props=False
 		)
 
+		# Restore transforms
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True

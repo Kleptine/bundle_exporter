@@ -107,11 +107,18 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
 		
 
+		# Get bundles
+		bundles = objects_organise.get_bundles()
 
 
 		# Warnings
 		if context.scene.FBXBundleSettings.path == "":
 			layout.label(text="No export path defined", icon='ERROR')
+
+		elif len(bundles) == 1 and 'UNDEFINED' in bundles:
+			layout.label(text="No bundles matched", icon='ERROR')
+			bundles.clear() 
+
 
 		# layout.separator()
 		
@@ -120,8 +127,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# box.label(text="[] Copy Modifiers")
 		# box.label(text="[] Merge to single Mesh")
 		
-		# Get bundles
-		bundles = objects_organise.get_bundles()
+		
 
 		# row = layout.row()
 		# row.label('Files: '+str(len(bundles))+"x")
