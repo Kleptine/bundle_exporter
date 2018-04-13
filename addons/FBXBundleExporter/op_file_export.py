@@ -71,14 +71,14 @@ def export(self):
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True
 			bpy.context.scene.objects.active = obj
-
+			
 			# Offset
 			obj.location-= pivot;
-
+			'''
 			# X-rotation fix
 			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-		
+			'''
 
 		# Select objects
 		bpy.ops.object.select_all(action="DESELECT")
@@ -114,11 +114,11 @@ def export(self):
 
 			#Restore offset
 			obj.location+= pivot;
-
+			'''
 			# Restore X-rotation fix
 			bpy.ops.transform.rotate(value = (+math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-
+			'''
 
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system

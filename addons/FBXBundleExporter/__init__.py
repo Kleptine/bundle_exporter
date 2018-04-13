@@ -119,6 +119,8 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			layout.label(text="No bundles matched", icon='ERROR')
 			bundles.clear() 
 
+		elif bpy.context.scene.unit_settings.scale_length != 1.00:
+			layout.label(text="Scene units not in meters", icon='ERROR')
 
 		# layout.separator()
 		
