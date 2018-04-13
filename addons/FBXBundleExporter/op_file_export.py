@@ -29,6 +29,8 @@ class op(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+prefix_copy = "EXPORT_ORG_"
+
 def export(self):
 	print("_____________")
 
@@ -66,6 +68,39 @@ def export(self):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
+		copies = []
+		for obj in objects:
+			name = obj.name
+			obj.name = prefix_copy+name
+
+			bpy.ops.object.select_all(action="DESELECT")
+			obj.select = True
+			bpy.context.scene.objects.active = obj
+
+			# Copy
+			bpy.ops.object.duplicate()
+			bpy.ops.object.convert(target='MESH')
+			bpy.context.object.name = name
+
+			# Offset
+			bpy.context.object.location-= pivot;
+
+			# Rotation
+			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+
+			copies.append(bpy.context.object)
+
+
+		bpy.ops.object.select_all(action="DESELECT")
+		for obj in copies:
+			obj.select = True
+
+
+		#Export FBX
+
+		
+		'''
 		# Apply Transforms
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
@@ -74,11 +109,11 @@ def export(self):
 			
 			# Offset
 			obj.location-= pivot;
-			'''
+			
 			# X-rotation fix
 			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			'''
+			
 
 		# Select objects
 		bpy.ops.object.select_all(action="DESELECT")
@@ -114,12 +149,12 @@ def export(self):
 
 			#Restore offset
 			obj.location+= pivot;
-			'''
+
 			# Restore X-rotation fix
 			bpy.ops.transform.rotate(value = (+math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			'''
-
+			
+		'''
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
 	bpy.context.space_data.pivot_point = previous_pivot
