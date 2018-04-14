@@ -62,14 +62,14 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	merge = bpy.props.BoolProperty (
 		name="Merge",
 		default=False,
-		description="Merge objects in a bundle to a single mesh"
+		description="Merge objects into a bundle to a single mesh"
 	)
 	mode_bundle = bpy.props.EnumProperty(items= 
-		[('NAME', 'Name', "Group by matching object names"), 
-		('SPACE', 'Space', "Group by shared space"), 
-		('GROUP', 'Group', "Group by 'Groups'"),
-		('MATERIAL', 'Material', "Group by matching material names"),
-		('SCENE', 'Scene', "Group by current scene")
+		[('NAME', 'Name', "Bundle by matching object names"), 
+		('SPACE', 'Space', "Bundle by shared space"), 
+		('GROUP', 'Group', "Bundle by 'Groups'"),
+		('MATERIAL', 'Material', "Bundle by matching material names"),
+		('SCENE', 'Scene', "Bundle by current scene")
 		], name = "Bundle Mode", default = 'NAME'
 	)
 	mode_pivot = bpy.props.EnumProperty(items=[
@@ -110,6 +110,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
 		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
+
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
 		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge", expand=True)
 		
@@ -183,6 +184,10 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		if(len(bundles) > 0):
 			# box_files = layout.box()
 			# box_files.active = False
+			if len(bundles) == 1:
+				layout.label(text = "1x File")
+			else:
+				layout.label(text = "{}x Files".format(len(bundles)))
 
 			for fileName,objects in bundles.items():
 

@@ -77,14 +77,16 @@ def draw_bounds(name, objects, bounds):
 	# Draw pole + Flag
 	pivot = objects_organise.get_pivot(objects)
 	height = max(padding, size.z)*2.0
-	draw.add_line( [ Vector((pivot.x, pivot.y, _min.z)), Vector((pivot.x, pivot.y,_min.z+height))], dash=padding*0.2)
+	draw.add_line( [ Vector((pivot.x, pivot.y, _min.z)), Vector((pivot.x, pivot.y,_min.z+height))], dash=padding*0.25)
+	# Flag
 	draw.add_line( [
 		Vector((pivot.x, pivot.y, _min.z + height - padding)),
 		Vector((pivot.x - padding, pivot.y - padding, _min.z + height - padding/2)),
-		Vector((pivot.x, pivot.y, _min.z + height))
+		Vector((pivot.x, pivot.y, _min.z + height)),
+		Vector((pivot.x, pivot.y, _min.z + height - padding))
 	] )
 
-	draw.add_circle( pivot, padding, sides=8)
+	draw.add_circle( pivot, padding, sides=8, alpha = 0.4)
 	draw.add_line([pivot+Vector((-padding/2,0,0)), pivot+Vector((padding/2,0,0)) ])
 	draw.add_line([pivot+Vector((0,-padding/2,0)), pivot+Vector((0,padding/2,0)) ])
 	
@@ -116,7 +118,7 @@ def draw_grid(objects, bounds_group):
 			Vector((center, bounds_group.min.y, bounds_group.min.z)),
 			Vector((center, bounds_group.max.y, bounds_group.min.z)),
 			Vector((center, bounds_group.max.y, bounds_group.min.z+padding))
-		], alpha=0.33)
+		], alpha=0.4)
 
 	for i in range(len(grid_y.groups)-1):
 		A = grid_y.bounds[i][1] #End first item
@@ -128,7 +130,7 @@ def draw_grid(objects, bounds_group):
 			Vector((bounds_group.min.x, center, bounds_group.min.z)),
 			Vector((bounds_group.max.x, center, bounds_group.min.z)),
 			Vector((bounds_group.max.x, center, bounds_group.min.z+padding))
-		], alpha=0.33)
+		], alpha=0.4)
 
 	# Draw grids
 	# for i in range(len(grid_x.groups)):

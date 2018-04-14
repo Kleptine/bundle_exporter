@@ -33,16 +33,25 @@ def draw_debug():
 	draw = get_draw()
 	draw.clear()
 
-	draw.add_text("ABCDEFGHIJKLM", Vector((0,0,0)), padding)
-	draw.add_text("NOPQRSTUVWXYZ", Vector((0,-1,0)), padding)
-	draw.add_text("0123456789", Vector((0,-2,0)), padding)
-	draw.add_text("~!@#$%^&*()", Vector((0,-3,0)), padding)
-	draw.add_text("_-+\"';:,.<>[](){}\\/?", Vector((0,-4,0)), padding)
-	draw.add_text("www.renderhjs.net", Vector((0,-5,0)), padding)
+	step = 0
+	def add_text(step,text):
+		draw.add_text(text, Vector((0,-step,0)), padding)
+		return step+1
+
+	step = add_text(step,"abcdefghijklm")
+	step = add_text(step,"nopqrstuvwxyz")
+
+	step = add_text(step,"ABCDEFGHIJKLM")
+	step = add_text(step,"NOPQRSTUVWXYZ")
+
+	step = add_text(step,"0123456789")
+	step = add_text(step,"~!@#$%^&*()")
+	step = add_text(step,"_-+\"';:,.<>[](){}\\/?")
+	step = add_text(step,"www.renderhjs.net")
 
 	# Draw circles
-	for i in range(1,5):
-		draw.add_circle(Vector((4,-4-6,0)), i, i*4)
+	# for i in range(1,8):
+	# 	draw.add_circle(Vector((4,4,0)), i*0.5, i*3)
 
 
 class LineDraw:
@@ -106,14 +115,14 @@ class LineDraw:
 		print("...")
 
 
-	def add_circle(self, position, radius = 1, sides = 8):
+	def add_circle(self, position, radius = 1, sides = 8, alpha = 1.0, dash = 0.0):
 
 		for i in range(sides):
 			a0 = ((i+0) * (360 / sides))*math.pi/180
 			a1 = ((i+1) * (360 / sides))*math.pi/180
 			A = position + Vector((math.cos(a0), math.sin(a0), 0))*radius
 			B = position + Vector((math.cos(a1), math.sin(a1), 0))*radius
-			self.add_line([A,B])
+			self.add_line([A,B], alpha = alpha, dash = dash)
 
 
 
@@ -124,20 +133,92 @@ class LineDraw:
 
 
 	def add_line(self, points, alpha=1.0, dash=0.0):
-		stroke = self.get_gp_stroke()
-		offset = len(stroke.points)
+		
+		if dash == 0:
+			stroke = self.get_gp_stroke()
+			offset = len(stroke.points)
 
-		stroke.points.add(len(points))
-		for i in range(len(points)):
-			index = offset+i
-			stroke.points[index].co = points[i]
-			stroke.points[index].select   = True
-			stroke.points[index].pressure = 1
-			stroke.points[index].strength = alpha
+			stroke.points.add(len(points))
+			for i in range(len(points)):
+				index = offset+i
+				stroke.points[index].co = points[i]
+				stroke.points[index].select   = True
+				stroke.points[index].pressure = 1
+				stroke.points[index].strength = alpha
+
+		else:
+			for i in range(len(points)-1):
+				# stroke = self.get_gp_stroke()
+				length = (points[i] - points[i-1]).magnitude
+				steps = math.floor((length / dash)/2)
+				A = points[i]
+				B = points[i+1]
+
+				for s in range(steps):
+					stroke = self.get_gp_stroke()
+					stroke.points.add(2)
+					stroke.points[-2].co = A + (B-A).normalized() * (s*(dash*2))
+					stroke.points[-2].select   = True
+					stroke.points[-2].pressure = 1
+					stroke.points[-2].strength = alpha
+
+					stroke.points[-1].co = A + (B-A).normalized() * (s*(dash*2)+ dash)
+					stroke.points[-1].select   = True
+					stroke.points[-1].pressure = 1
+					stroke.points[-1].strength = alpha
+
+
+		# stroke = self.get_gp_stroke()
+		# # offset = len(stroke.points)
+
+		# offset = 0 #Used for dashed lines
+		# for i in range(len(points)):
+		# 	if i == 0:
+		# 		stroke.points.add(1)
+		# 		stroke.points[-1].co = points[i]
+		# 		stroke.points[-1].select   = True
+		# 		stroke.points[-1].pressure = 1
+		# 		stroke.points[-1].strength = alpha
+		# 	else:
+		# 		if dash == 0:
+		# 			stroke.points.add(1)
+		# 			stroke.points[-1].co = points[i]
+		# 			stroke.points[-1].select   = True
+		# 			stroke.points[-1].pressure = 1
+		# 			stroke.points[-1].strength = alpha
+		# 		else:
+		# 			A = points[i-1]
+		# 			B = points[i]
+		# 			length = (points[i] - points[i-1]).magnitude
+		# 			steps = math.floor((length / dash)/2)
+		# 			print("Steps {} = {} / {}".format(steps, length, dash))
+					
+		# 			for s in range(steps):
+		# 				if s%2 == 0:
+		# 					stroke.points.add(2)
+		# 					stroke.points[-2].co = A + (B-A).normalized() * (s*(dash*2))
+		# 					stroke.points[-2].select   = True
+		# 					stroke.points[-2].pressure = 1
+		# 					stroke.points[-2].strength = alpha
+
+		# 					stroke.points[-1].co = A + (B-A).normalized() * (s*(dash*2)+ dash)
+		# 					stroke.points[-1].select   = True
+		# 					stroke.points[-1].pressure = 1
+		# 					stroke.points[-1].strength = alpha
+
+
+
+		# stroke.points.add(len(points))
+		# for i in range(len(points)):
+		# 	index = offset+i
+		# 	stroke.points[index].co = points[i]
+		# 	stroke.points[index].select   = True
+		# 	stroke.points[index].pressure = 1
+		# 	stroke.points[index].strength = alpha
 
 
 	def add_text(self, text, pos=Vector((0,0,0)), size=1.0):
-		text = text.upper()
+		# text = text.upper()
 		size_xy = Vector((0.66,1)) * size
 		padding = size_xy.x/2
 
@@ -161,7 +242,26 @@ class LineDraw:
 		# 3 -- 4 -- 5
 		# |    |    |
 		# 0 -- 1 -- 2
+		# |    |    |
+		#-3 - -2 - -1
 		chars = {
+			'a':[[0,3,5,1,0],[5,2]],
+			'b':[[6,0,2,5,3]],
+			'c':[[5,3,0,2]],
+			'd':[[8,2,0,3,5]],
+			'e':[[5,3,0,5],[0,2]],
+			'f':[[7,3,0],[3,4]],
+			'g':[[2,5,3,0,2,-2,-3]],
+			'h':[[6,0],[3,5,2]],
+			'i':[[4,1],[7,8]],
+			'j':[[4,1,-3],[7,8]],
+			'k':[[6,0],[3,4],[3,1]],
+			'l':[[6,0,1]],
+			'm':[[0,3,5,2],[4,1]],
+			'n':[[0,3,2,5]],
+			'o':[[0,3,5,2,0]],
+			'p':[[-3,3,5,2,0]],
+
 			# Alhabet Uppercase
 			'A':[[0,3,7,5,2],[3,5]],
 			'B':[[0,6,8,4,2,0],[3,4]],
@@ -189,6 +289,7 @@ class LineDraw:
 			'X':[[6,2],[0,8]],
 			'Y':[[6,4,8],[4,1]],
 			'Z':[[6,8,0,2]],
+
 
 
 			# Special
@@ -246,6 +347,8 @@ class LineDraw:
 
 	def is_valid(self):
 		if not self.gp:
+			return False
+		if not bpy.context.scene.grease_pencil or self.gp != bpy.context.scene.grease_pencil:
 			return False
 		if not self.gp_layer:
 			return False
