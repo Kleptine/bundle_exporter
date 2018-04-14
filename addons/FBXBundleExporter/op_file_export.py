@@ -46,12 +46,14 @@ def export(self):
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
+	merge = bpy.context.scene.FBXBundleSettings.merge
 	bundles = objects_organise.get_bundles()
 
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
 	previous_unit_system = bpy.context.scene.unit_settings.system
 	previous_pivot = bpy.context.space_data.pivot_point
+	previous_cursor = bpy.context.space_data.cursor_location.copy()
 
 
 
@@ -81,15 +83,17 @@ def export(self):
 			bpy.ops.object.duplicate()
 			bpy.ops.object.convert(target='MESH')
 			bpy.context.object.name = name
+			copies.append(bpy.context.object)
+			bpy.context.scene.objects.active = bpy.context.object
 
 			# Offset
 			bpy.context.object.location-= pivot;
 
 			# Rotation
-			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+			if not merge:
+				bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+				bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
-			copies.append(bpy.context.object)
 
 
 		bpy.ops.object.select_all(action="DESELECT")
@@ -97,28 +101,18 @@ def export(self):
 			obj.select = True
 
 
-		#Export FBX
+		if merge:
+			# Merge objects into single item
+			bpy.ops.object.join()
+			bpy.context.space_data.cursor_location = Vector((0,0,0))
+			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-		
-		'''
-		# Apply Transforms
-		for obj in objects:
-			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
-			bpy.context.scene.objects.active = obj
-			
-			# Offset
-			obj.location-= pivot;
-			
-			# X-rotation fix
 			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			
+		
+			copies = [bpy.context.scene.objects.active]
 
-		# Select objects
-		bpy.ops.object.select_all(action="DESELECT")
-		for obj in objects:
-			obj.select = True
+
 
 
 		# Export selected as FBX
@@ -141,6 +135,38 @@ def export(self):
 			use_custom_props=False
 		)
 
+		bpy.ops.object.delete()
+		copies.clear()
+		
+		# Restore names
+		for obj in objects:
+			obj.name = obj.name.replace(prefix_copy,"")
+
+
+
+		'''
+		# Apply Transforms
+		for obj in objects:
+			bpy.ops.object.select_all(action="DESELECT")
+			obj.select = True
+			bpy.context.scene.objects.active = obj
+			
+			# Offset
+			obj.location-= pivot;
+			
+			# X-rotation fix
+			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+			
+
+		# Select objects
+		bpy.ops.object.select_all(action="DESELECT")
+		for obj in objects:
+			obj.select = True
+
+
+		
+
 		# Restore transforms
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
@@ -158,7 +184,7 @@ def export(self):
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
 	bpy.context.space_data.pivot_point = previous_pivot
-
+	bpy.context.space_data.cursor_location = previous_cursor
 
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:

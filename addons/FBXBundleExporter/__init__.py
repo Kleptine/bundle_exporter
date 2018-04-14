@@ -59,11 +59,17 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		description="Padding for fences or Space bundling",
 		subtype='DISTANCE'
 	)
+	merge = bpy.props.BoolProperty (
+		name="Merge",
+		default=False,
+		description="Merge objects in a bundle to a single mesh"
+	)
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Group by matching object names"), 
 		('SPACE', 'Space', "Group by shared space"), 
 		('GROUP', 'Group', "Group by 'Groups'"),
-		('MATERIAL', 'Material', "Group by matching material names")
+		('MATERIAL', 'Material', "Group by matching material names"),
+		('SCENE', 'Scene', "Group by current scene")
 		], name = "Bundle Mode", default = 'NAME'
 	)
 	mode_pivot = bpy.props.EnumProperty(items=[
@@ -105,6 +111,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
+		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge", expand=True)
 		
 
 		# Get bundles

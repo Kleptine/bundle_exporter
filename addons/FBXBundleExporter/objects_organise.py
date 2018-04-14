@@ -193,6 +193,11 @@ def get_key(obj):
 			return obj.material_slots[0].name
 
 
+	elif mode_bundle == 'SCENE':
+		# Use scene name
+		return bpy.context.scene.name
+
+
 	elif mode_bundle == 'SPACE':
 		# print("_________")
 
