@@ -111,8 +111,8 @@ class LineDraw:
 		])
 
 
-	def add_cross(self, position, size=1.0):
-		print("...")
+	# def add_cross(self, position, size=1.0):
+	# 	print("...")
 
 
 	def add_circle(self, position, radius = 1, sides = 8, alpha = 1.0, dash = 0.0):
@@ -168,54 +168,6 @@ class LineDraw:
 					stroke.points[-1].strength = alpha
 
 
-		# stroke = self.get_gp_stroke()
-		# # offset = len(stroke.points)
-
-		# offset = 0 #Used for dashed lines
-		# for i in range(len(points)):
-		# 	if i == 0:
-		# 		stroke.points.add(1)
-		# 		stroke.points[-1].co = points[i]
-		# 		stroke.points[-1].select   = True
-		# 		stroke.points[-1].pressure = 1
-		# 		stroke.points[-1].strength = alpha
-		# 	else:
-		# 		if dash == 0:
-		# 			stroke.points.add(1)
-		# 			stroke.points[-1].co = points[i]
-		# 			stroke.points[-1].select   = True
-		# 			stroke.points[-1].pressure = 1
-		# 			stroke.points[-1].strength = alpha
-		# 		else:
-		# 			A = points[i-1]
-		# 			B = points[i]
-		# 			length = (points[i] - points[i-1]).magnitude
-		# 			steps = math.floor((length / dash)/2)
-		# 			print("Steps {} = {} / {}".format(steps, length, dash))
-					
-		# 			for s in range(steps):
-		# 				if s%2 == 0:
-		# 					stroke.points.add(2)
-		# 					stroke.points[-2].co = A + (B-A).normalized() * (s*(dash*2))
-		# 					stroke.points[-2].select   = True
-		# 					stroke.points[-2].pressure = 1
-		# 					stroke.points[-2].strength = alpha
-
-		# 					stroke.points[-1].co = A + (B-A).normalized() * (s*(dash*2)+ dash)
-		# 					stroke.points[-1].select   = True
-		# 					stroke.points[-1].pressure = 1
-		# 					stroke.points[-1].strength = alpha
-
-
-
-		# stroke.points.add(len(points))
-		# for i in range(len(points)):
-		# 	index = offset+i
-		# 	stroke.points[index].co = points[i]
-		# 	stroke.points[index].select   = True
-		# 	stroke.points[index].pressure = 1
-		# 	stroke.points[index].strength = alpha
-
 
 	def add_text(self, text, pos=Vector((0,0,0)), size=1.0):
 		# text = text.upper()
@@ -256,11 +208,21 @@ class LineDraw:
 			'i':[[4,1],[7,8]],
 			'j':[[4,1,-3],[7,8]],
 			'k':[[6,0],[3,4],[3,1]],
-			'l':[[6,0,1]],
+			'l':[[6,3,1]],
 			'm':[[0,3,5,2],[4,1]],
 			'n':[[0,3,2,5]],
 			'o':[[0,3,5,2,0]],
 			'p':[[-3,3,5,2,0]],
+			'q':[[-1,5,3,0,2]],
+			'r':[[3,0,4,5]],
+			's':[[5,4,0,2,-2,-3]],
+			't':[[3,5],[4,1]],
+			'u':[[3,0,2,5]],
+			'v':[[3,1,5]],
+			'w':[[3,0,4,1,5]],
+			'x':[[3,2],[0,5]],
+			'y':[[3,1],[5,-3]],
+			'z':[[3,5,0,2]],
 
 			# Alhabet Uppercase
 			'A':[[0,3,7,5,2],[3,5]],
@@ -290,11 +252,10 @@ class LineDraw:
 			'Y':[[6,4,8],[4,1]],
 			'Z':[[6,8,0,2]],
 
-
-
 			# Special
 			' ':[],
 			'.':[[1,2]],
+			',':[[1,-2]],
 			'+':[[3,5],[7,1]],
 			'-':[[3,5]],
 			'_':[[0,2]],
@@ -309,8 +270,8 @@ class LineDraw:
 			'@':[[0,6,8,2,1,4]],
 			'$':[[0,1,5,3,7,8],[7,1]],
 			'^':[[3,7,5]],
-			# ';':[[7,8],[4,0]],
-			':':[[1,2],[4,5]],
+			':':[[4,5],[1,2]],
+			';':[[4,5],[1,-3]],
 			# '&':[[2,3,6,7,4,3,0,5]],
 
 			# Pairs
@@ -320,8 +281,7 @@ class LineDraw:
 			']':[[7,8,2,1]],
 			'<':[[8,3,2]],
 			'>':[[6,5,0]],
-			
-
+		
 			# Numbers
 			'0':[[6,8,2,0,6],[0,8]],		
 			'1':[[0,2],[1,7,6]],

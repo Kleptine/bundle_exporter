@@ -72,7 +72,7 @@ def draw_bounds(name, objects, bounds):
 	label = name
 	if len(objects) > 1:
 		label = "{} {}x".format(name, len(objects))
-	draw.add_text(label, _min, padding*0.5)
+	draw.add_text(label.upper(), _min, padding*0.5)
 
 	# Draw pole + Flag
 	pivot = objects_organise.get_pivot(objects)

@@ -180,7 +180,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			layout.separator()
 
 
-		
+		# merge = 
 		if(len(bundles) > 0):
 			# box_files = layout.box()
 			# box_files.active = False
@@ -212,6 +212,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 				# col = box.column(align=True)
 				for i in range(0,len(objects)):
 					row = column.row(align=True)
+					row.active = not bpy.context.scene.FBXBundleSettings.merge
 					row.label(text=objects[i].name)
 
 
