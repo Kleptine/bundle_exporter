@@ -32,57 +32,85 @@ from bpy.props import (
 )
 
 bl_info = {
-	"name": "FBX Bundle Exporter",
-	"description": "Export object selection in FBX bundles",
-	"author": "Hendrik Schoenmaker",
+	"name": "FBX Bundle",
+	"description": "Export object selections in FBX bundles",
+	"author": "renderhjs",
 	"blender": (2, 7, 9),
-	"version": (0, 1, 0),
+	"version": (1, 0, 0),
 	"category": "Import-Export",
-	"location": "3D Viewport tools panel: FBX Bundle Exporter",
+	"location": "3D Viewport > tools panel > FBX Bundle",
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
 }
 
 
+class Panel_Preferences(bpy.types.AddonPreferences):
+	bl_idname = __name__
+
+	target_platform = bpy.props.EnumProperty(items= 
+		[	
+			('BLENDER', 'Blender', 'Default Blender export'), 
+			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis')
+		], 
+		description="Target platform for the FBX exports.",
+		name = "Target Platform", 
+		default = 'UNITY'
+	)
+
+	def draw(self, context):
+		layout = self.layout
+
+		box = layout.box()
+		col = box.column(align=True)
+		col.prop(self, "target_platform", icon='FILE_SCRIPT')
+		if self.target_platform == 'BLENDER':
+			col.label(text="Default blender FBX export and import")
+		elif self.target_platform == 'UNITY':
+			col.label(text="Unity engine export, objects are rotated -90° x axis")
+		
+		
+
+
+
 class FBXBundleSettings(bpy.types.PropertyGroup):
 	path = bpy.props.StringProperty (
 		name="Output Path",
 		default="",
-		description="Define the path where to export",
+		description="Define the path where to export or import from",
 		subtype='DIR_PATH'
 	)
 	padding = bpy.props.FloatProperty (
 		name="Padding",
 		default=0.5,
 		min = 0,
-		description="Padding for fences or Space bundling",
+		description="Padding for fences or space bundling",
 		subtype='DISTANCE'
 	)
 	merge = bpy.props.BoolProperty (
 		name="Merge",
 		default=False,
-		description="Merge objects into a bundle to a single mesh"
+		description="Merge objects in a bundle into a single mesh when exporting"
 	)
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
-		('SPACE', 'Space', "Bundle by shared space"), 
+		# ('SPACE', 'Space', "Bundle by shared space"), 
 		('GROUP', 'Group', "Bundle by 'Groups'"),
 		('MATERIAL', 'Material', "Bundle by matching material names"),
 		('SCENE', 'Scene', "Bundle by current scene")
 		], name = "Bundle Mode", default = 'NAME'
 	)
 	mode_pivot = bpy.props.EnumProperty(items=[
-		('OBJECT_FIRST', 'First Name', "First object sorted by name of the group"), 
-		('OBJECT_LOWEST', 'Lowest Object', "The Scene center 0,0,0'"),
-		('BOUNDS_BOTTOM', 'Bottom Center', "Bottom center of the bounds of the group"), 
-		('SCENE', 'Scene 0,0,0', "The Scene center 0,0,0'")
+		('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
+		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
+		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
+		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center at 0,0,0'")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
 
 
-class FBXBundleExporterPanel(bpy.types.Panel):
-	bl_idname = "FBX_bundle_exporter_panel"
+class FBXBundlePanel(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel"
 	bl_label = "FBX Bundle"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
@@ -100,11 +128,6 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 			row.operator(op_debug_setup.bl_idname, text="Setup", icon='COLOR')
 			row.operator(op_debug_lines.bl_idname, text="Draw", icon='GREASEPENCIL')
 
-		row = box.row()
-		if context.scene.FBXBundleSettings.path == "":
-			row.alert = True
-		row.prop(context.scene.FBXBundleSettings, "path", text="")
-		
 		col = box.column(align=True)
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
@@ -122,10 +145,6 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		# Warnings
 		if context.scene.FBXBundleSettings.path == "":
 			layout.label(text="No export path defined", icon='ERROR')
-
-		elif len(bundles) == 1 and 'UNDEFINED' in bundles:
-			layout.label(text="No bundles matched", icon='ERROR')
-			bundles.clear() 
 
 		elif bpy.context.scene.unit_settings.scale_length != 1.00:
 			layout.label(text="Scene units not in meters", icon='ERROR')
@@ -152,7 +171,7 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 		col.separator()
 
 		row = col.row(align=True)
-		row.operator(op_fence_draw.op.bl_idname, text="Draw Fence", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='STICKY_UVS_LOC')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 		
 		col.separator()
@@ -161,11 +180,17 @@ class FBXBundleExporterPanel(bpy.types.Panel):
 
 		col = layout.column(align=True)	
 		row = col.row(align=True)
+		if context.scene.FBXBundleSettings.path == "":
+			row.alert = True
+		row.prop(context.scene.FBXBundleSettings, "path", text="")
+
+		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		row = col.row(align=True)
 		row.scale_y = 1.85
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
 		
+
 	
 		
 		
@@ -314,7 +339,7 @@ def register():
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
 
 def unregister():
-	bpy.utils.unregister_class(FBXBundleExporterPanel)
+	bpy.utils.unregister_class(FBXBundlePanel)
 	del bpy.types.Scene.FBXBundleSettings
 
 

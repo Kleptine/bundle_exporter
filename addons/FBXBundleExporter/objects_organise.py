@@ -54,17 +54,23 @@ def get_bundles():
 	# Sort keys alphabetically
 	keys = [get_key(group[0]) for group in groups]
 	keys.sort()
-	key_groups = {}
+	bundles = {}
 	for key in keys:
-		if key not in key_groups:
-			key_groups[key] = []
+		if key not in bundles:
+			bundles[key] = []
 
 		for group in groups:
 			if key == get_key(group[0]):
-				key_groups[key] = group
+				bundles[key] = group
 				break
 
-	return key_groups
+	if len(bundles) == 1 and 'UNDEFINED' in bundles:
+		bundles.clear() 
+
+
+
+
+	return bundles
 
 
 

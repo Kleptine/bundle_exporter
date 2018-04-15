@@ -22,18 +22,20 @@ class op(bpy.types.Operator):
 		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
 			return False
 
+		if len( objects_organise.get_bundles() ) == 0:
+			return False
+
+
 		return True
 
 	def execute(self, context):
-		export(self)
+		export(self, bpy.context.user_preferences.addons["FBXBundleExporter"].preferences.target_platform)
 		return {'FINISHED'}
 
 
 prefix_copy = "EXPORT_ORG_"
 
-def export(self):
-	print("_____________")
-
+def export(self, target_platform):
 
 	# Warnings
 	if bpy.context.scene.FBXBundleSettings.path == "":
@@ -51,6 +53,7 @@ def export(self):
 
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
+	previous_active = bpy.context.scene.objects.active
 	previous_unit_system = bpy.context.scene.unit_settings.system
 	previous_pivot = bpy.context.space_data.pivot_point
 	previous_cursor = bpy.context.space_data.cursor_location.copy()
@@ -72,8 +75,8 @@ def export(self):
 
 		copies = []
 		for obj in objects:
-			name = obj.name
-			obj.name = prefix_copy+name
+			name_original = obj.name
+			obj.name = prefix_copy+name_original
 
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True
@@ -82,18 +85,14 @@ def export(self):
 			# Copy
 			bpy.ops.object.duplicate()
 			bpy.ops.object.convert(target='MESH')
-			bpy.context.object.name = name
+			bpy.context.object.name = name_original
 			copies.append(bpy.context.object)
-			bpy.context.scene.objects.active = bpy.context.object
-
-			# Offset
+			
 			bpy.context.object.location-= pivot;
 
 			# Rotation
 			if not merge:
-				bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-				bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-
+				transform_target_platform(bpy.context.object, target_platform)
 
 
 		bpy.ops.object.select_all(action="DESELECT")
@@ -103,25 +102,30 @@ def export(self):
 
 		if merge:
 			# Merge objects into single item
+
 			bpy.ops.object.join()
+			bpy.context.object.name = name
 			bpy.context.space_data.cursor_location = Vector((0,0,0))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-		
-			copies = [bpy.context.scene.objects.active]
+			transform_target_platform(bpy.context.object, target_platform)
+
+			copies = [bpy.context.object]
 
 
-
+		# Axis vectors for different platforms
+		axis_forward, axis_up = 'Y', 'Z' #Default
+		if target_platform == 'UNITY':
+			axis_forward = '-Z'
+			axis_up = 'Y'
 
 		# Export selected as FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 
 			
-			axis_forward='-Z', 
-			axis_up='Y', 
+			axis_forward=axis_forward, 
+			axis_up=axis_up, 
 
 			object_types={'ARMATURE', 'MESH', 'EMPTY'},
 
@@ -143,49 +147,23 @@ def export(self):
 			obj.name = obj.name.replace(prefix_copy,"")
 
 
-
-		'''
-		# Apply Transforms
-		for obj in objects:
-			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
-			bpy.context.scene.objects.active = obj
-			
-			# Offset
-			obj.location-= pivot;
-			
-			# X-rotation fix
-			bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			
-
-		# Select objects
-		bpy.ops.object.select_all(action="DESELECT")
-		for obj in objects:
-			obj.select = True
-
-
-		
-
-		# Restore transforms
-		for obj in objects:
-			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
-			bpy.context.scene.objects.active = obj
-
-			#Restore offset
-			obj.location+= pivot;
-
-			# Restore X-rotation fix
-			bpy.ops.transform.rotate(value = (+math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			
-		'''
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
 	bpy.context.space_data.pivot_point = previous_pivot
 	bpy.context.space_data.cursor_location = previous_cursor
+	bpy.context.scene.objects.active = previous_active
 
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True
+
+
+
+
+def transform_target_platform(obj, target_platform):
+	bpy.context.scene.objects.active = obj
+
+	if target_platform == 'UNITY':
+		# Apply -90 degrees rotation offset
+		bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+		bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
