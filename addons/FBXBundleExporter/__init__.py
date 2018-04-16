@@ -6,6 +6,7 @@ if "bpy" in locals():
 	imp.reload(op_file_import)
 	imp.reload(op_fence_draw)
 	imp.reload(op_fence_clear)
+	imp.reload(op_file_copy_unity_script)
 else:
 	from . import gp_draw
 	from . import objects_organise
@@ -13,6 +14,7 @@ else:
 	from . import op_file_import
 	from . import op_fence_draw
 	from . import op_fence_clear
+	from . import op_file_copy_unity_script
 
 import bpy, bmesh
 import os
@@ -68,7 +70,10 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 			col.label(text="Default blender FBX export and import")
 		elif self.target_platform == 'UNITY':
 			col.label(text="Unity engine export, objects are rotated -90° x axis")
-		
+
+		box = layout.box()
+		box.operator(op_file_copy_unity_script.op.bl_idname, icon='SCRIPT')
+		box.label(text="Copies a Unity Editor script to automatically reset rotations on the x-axis and assign materials by name")
 		
 
 
