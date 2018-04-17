@@ -1,10 +1,8 @@
 # FBX Bundle Addon #
 
-The FBX Bundle Addon is a Blender 2.79 addon that simplifies the process of batch exporting FBX files. It's easy to use: specify a folder, select your objects, press 'Export'.
+The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process of batch exporting FBX files. It's easy to use: specify a folder, select your objects, press 'Export'. FBX files for Unity will have correct rotations and scale values assigned as well as automatically existing materials assigned if their names match with Blender's materials per object.
 
-FBX files for Unity will have correct rotations and scale values assigned.
-
-**Features**
+## Features ##
 
 * **Export** selected objects as FBX bundles
 * **Import** 3D files from a folder
@@ -20,7 +18,7 @@ FBX files for Unity will have correct rotations and scale values assigned.
 
 * [FBX_Bundle_1.0.0.zip](http://renderhjs.net/textools/blender/Blender_TexTools_0.9.0.zip)
 
-**Installation**
+## Installation ##
 
 1. Download the FBX Bundle Addon
 2. In Blender from the **File** menu open **User Preferences** ![](http://renderhjs.net/textools/blender/img/installation_open_preferences.png) 
@@ -78,4 +76,20 @@ Bottom center of the bounds of the group.
 ## Scene Origin ##
 The Scene center 0,0,0
 
+
+---
+
+# Working with Unity #
+
+The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project.
+
+**Copying Unity Editor script**
+
+1. In Blender from the **File** menu open **User Preferences** ![](http://renderhjs.net/textools/blender/img/installation_open_preferences.png) 
+2. Go to the **Add-ons** tab ![](http://renderhjs.net/textools/blender/img/installation_addons.png).
+3. In the search field enter **'FBX Bundle'**
+4. Inside the FBX Bundle addon panel press the 'Copy Unity Script' buttn
+5. Browse for your Unity assets project folder and confirm
+
+The script will create an 'Editor' folder with a C# script inside called 'PostprocessorMeshes.cs'. This script modifies the FBX file object inside Unity each time the file gets re-imported or updated.
 
