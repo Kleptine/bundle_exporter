@@ -5,6 +5,7 @@ The FBX Bundle Addon is a Blender 2.79 addon that simplifies the process of batc
 FBX files for Unity will have correct rotations and scale values assigned.
 
 **Features**
+
 * **Export** selected objects as FBX bundles
 * **Import** 3D files from a folder
 * **Preview** of export files as you select objects
@@ -16,9 +17,11 @@ FBX files for Unity will have correct rotations and scale values assigned.
 ////![] (https://farm1.staticflickr.com/787/40907228092_b74d8b8f90_o.png)
 
 ## Download ##
+
 * [FBX_Bundle_1.0.0.zip](http://renderhjs.net/textools/blender/Blender_TexTools_0.9.0.zip)
 
 **Installation**
+
 1. Download the FBX Bundle Addon
 2. In Blender from the **File** menu open **User Preferences** ![](http://renderhjs.net/textools/blender/img/installation_open_preferences.png) 
 3. Go to the **Add-ons** tab ![](http://renderhjs.net/textools/blender/img/installation_addons.png).
@@ -27,15 +30,11 @@ FBX files for Unity will have correct rotations and scale values assigned.
 6. The FBX Bundle panel can be found in the **3D view tools panel**
 
 
-**Copy Unity Editor Script**
-1. Inside the addon preferences press the 'Copy Unity Editor' button top copy the Editor script
-2. Select your Unity Asset folder
-3. Press copy
-
 ---
 
 # Draw Fences #
 Draws grease pencil lines around your selected object bundles.
+
 * The border uses the padding from the settings
 * The pole represents the bundle origin when exporting FBX files
 * A thin grid is drawn to seperate within a bundle

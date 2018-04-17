@@ -1,7 +1,14 @@
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 public class PostprocessorMeshes : AssetPostprocessor {
+
+	protected ModelImporter ModelImporter {
+		get {
+			return (ModelImporter)assetImporter;
+		}
+	}
 
 	private void OnPreprocessModel() {
 		if (ModelImporter.assetPath.Contains("Resources")) {
@@ -20,6 +27,8 @@ public class PostprocessorMeshes : AssetPostprocessor {
 		Renderer[] renders = gameObject.GetComponentsInChildren<Renderer>(true);
 		foreach (Renderer render in renders) {
 			render.transform.localEulerAngles += Vector3.right * 90f;
+
+			//Snap to 0 if close to 0
 			if (Mathf.Abs(render.transform.localEulerAngles.x) <= 0.02) {
 				render.transform.localEulerAngles = new Vector3(0f, render.transform.localEulerAngles.y, render.transform.localEulerAngles.z);
 			}
@@ -27,28 +36,27 @@ public class PostprocessorMeshes : AssetPostprocessor {
 	}
 
 	public Material OnAssignMaterialModel(Material material, Renderer renderer) {
-		//Reference: https://forum.unity3d.com/threads/assetpostprocessor-onassignmaterialmodel-c.188278/
 		string name = material.name;
 		if (name.Length > 0 && name.Contains(".")) {
 			name = name.Substring(0, name.IndexOf("."));
 		}
 
-		string path = "_Page2Car/Assets/Materials/" + name + ".mat";
-		Material loadedMaterial = UtilitiesEditor.LoadAsset<Material>(path);
-		if (loadedMaterial != null) {
-			return loadedMaterial;
-		} else {
-			if (name.Length > 0) {
-				Debug.LogWarning("Unkown material: " + name + ".mat for " + renderer.name);
+		//Find all project materials, and match by name
+		string[] materialIDs =  AssetDatabase.FindAssets("t:Material");
+
+		foreach (string materialID in materialIDs) {
+			string path = AssetDatabase.GUIDToAssetPath(materialID);
+			string extension = Path.GetExtension(path);
+			if (extension == ".mat") {
+				string nameMaterial = Path.GetFileNameWithoutExtension(path);
+				if (nameMaterial == name) {
+					return AssetDatabase.LoadAssetAtPath<Material>(path);
+				}
 			}
 		}
 
-		return null;
-	}
+		//Crate Empty material?
 
-	protected ModelImporter ModelImporter {
-		get {
-			return (ModelImporter)assetImporter;
-		}
+		return null;
 	}
 }
