@@ -4,7 +4,7 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 
 ## Download ##
 
-* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/textools/blender/Blender_TexTools_0.9.0.zip)
+* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.0.0.zip)
 
 
 ## Features ##
