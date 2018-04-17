@@ -41,6 +41,22 @@ Use the red '**x**' button to clear the fence drawings.
 
 ////![] (https://farm1.staticflickr.com/787/40907228092_b74d8b8f90_o.png)
 
+
+---
+
+# Export #
+Exports the selected FBX bundles to the specified directory.
+
+
+# Import #
+Import all selected 3D files from the specified directory. Supported file types are:
+
+* fbx
+* obj
+* 3ds
+
+
+
 ---
 
 # Bundle Types #
