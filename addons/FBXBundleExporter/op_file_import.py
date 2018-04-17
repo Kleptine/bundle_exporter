@@ -28,19 +28,33 @@ def import_files(path):
 	# http://ricardolovelace.com/batch-import-and-export-obj-files-in-blender.html
 	path = bpy.path.abspath(path)
 
+	extensions = ['fbx', 'obj', '3ds']
+
 
 	filenames = sorted(os.listdir(path))
-	filenames = [name for name in filenames if (name.lower().endswith('.fbx') or name.lower().endswith('.obj') )]
+	filenames_valid = []
+
+	for filename in filenames:
+		for ext in extensions:
+			if filename.lower().endswith('.{}'.format(ext)):
+				filenames_valid.append(filename)
+				break
 
 
-	for name in filenames:
+	for name in filenames_valid:
 		file_path = os.path.join(path, name)
 		extension = (os.path.splitext(file_path)[1])[1:].lower()
 		print("- {} = {}".format(extension, file_path))
 
 		# https://docs.blender.org/api/2.78a/bpy.ops.import_scene.html
 		if extension == 'fbx':
-			bpy.ops.import_scene.fbx(filepath = file_path)
+			if hasattr(bpy.types, bpy.ops.import_scene.fbx.idname()):
+				bpy.ops.import_scene.fbx(filepath = file_path)
 		elif extension == 'obj':
-			bpy.ops.import_scene.obj(filepath = file_path)
+			if hasattr(bpy.types, bpy.ops.import_scene.obj.idname()):
+				bpy.ops.import_scene.obj(filepath = file_path)
+		elif extension == '3ds':
+			if hasattr(bpy.types, bpy.ops.import_scene.autodesk_3ds.idname()):
+				bpy.ops.import_scene.autodesk_3ds(filepath = file_path)
+
 

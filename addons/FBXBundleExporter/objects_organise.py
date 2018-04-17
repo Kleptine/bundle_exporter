@@ -173,9 +173,7 @@ def get_key(obj):
 		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
 			name = name[:-4]
 
-
 		name, fill = encode(name)
-
 
 		# Combine
 		split = name.split(' ')
@@ -185,6 +183,21 @@ def get_key(obj):
 			name = split[0]
 
 		return decode(name, fill)
+
+
+	elif mode_bundle == 'PARENT':
+		# Use group name
+		if obj.parent:
+			limit = 100
+			obj_parent = obj.parent
+			for i in range(limit):
+				if obj_parent.parent:
+					obj_parent = obj_parent.parent
+				else:
+					break
+			return obj_parent.name
+		else:
+			return obj.name
 
 
 	elif mode_bundle == 'GROUP':

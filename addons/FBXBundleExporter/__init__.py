@@ -39,12 +39,14 @@ bl_info = {
 	"author": "renderhjs",
 	"blender": (2, 7, 9),
 	"version": (1, 0, 0),
-	"category": "Import-Export",
-	"location": "3D Viewport > tools panel > FBX Bundle",
+	"category": "3D View",
+	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
 }
+
+
 
 
 class Panel_Preferences(bpy.types.AddonPreferences):
@@ -65,14 +67,18 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 
 		box = layout.box()
 		col = box.column(align=True)
-		col.prop(self, "target_platform", icon='FILE_SCRIPT')
+
+		icon = icon_get(self.target_platform.lower())
+
+		col.prop(self, "target_platform", icon_value=icon)
 		if self.target_platform == 'BLENDER':
 			col.label(text="Default blender FBX export and import")
 		elif self.target_platform == 'UNITY':
 			col.label(text="Unity engine export, objects are rotated -90° x axis")
 
+
 		box = layout.box()
-		box.operator(op_file_copy_unity_script.op.bl_idname, icon='SCRIPT')
+		box.operator(op_file_copy_unity_script.op.bl_idname, icon='SAVE_COPY')
 		box.label(text="Copies a Unity Editor script to automatically reset rotations on the x-axis and assign materials by name")
 		
 
@@ -99,6 +105,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
+		('PARENT', 'Parent', "Bundle by the parent object"), 
 		# ('SPACE', 'Space', "Bundle by shared space"), 
 		('GROUP', 'Group', "Bundle by 'Groups'"),
 		('MATERIAL', 'Material', "Bundle by matching material names"),
@@ -126,7 +133,7 @@ class FBXBundlePanel(bpy.types.Panel):
 		layout = self.layout
 		
 		box = layout.box()
-
+		box.label(text='Bundles', icon='MESH_CUBE')
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
@@ -176,7 +183,7 @@ class FBXBundlePanel(bpy.types.Panel):
 		col.separator()
 
 		row = col.row(align=True)
-		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='STICKY_UVS_LOC')
+		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 		
 		col.separator()
@@ -193,7 +200,11 @@ class FBXBundlePanel(bpy.types.Panel):
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		row = col.row(align=True)
 		row.scale_y = 1.85
-		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon='EXPORT')
+		
+		
+		target_platform = bpy.context.user_preferences.addons["FBXBundleExporter"].preferences.target_platform
+		icon = icon_get(target_platform.lower())
+		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 		
 
 	
@@ -310,38 +321,29 @@ class op_remove(bpy.types.Operator):
 
 
 
-class op_import(bpy.types.Operator):
-	bl_idname = "fbxbundle.import"
-	bl_label = "Import"
-
-	def execute(self, context):
-		objects_io.import_objects()
-		return {'FINISHED'}
+def icon_get(name):
+	return preview_icons[name].icon_id
 
 
-
-class op_export(bpy.types.Operator):
-	bl_idname = "fbxbundle.export"
-	bl_label = "Export"
-
-	@classmethod
-	def poll(cls, context):
-		if len(bpy.context.selected_objects) > 0:
-			return True
-		return False
-
-	def execute(self, context):
-		objects_io.export_objects()
-		return {'FINISHED'}
-
-
-
+preview_icons = bpy.utils.previews.new()
+def icon_register(fileName):
+	name = fileName.split('.')[0]   # Don't include file extension
+	icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
 
 
 # registers
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
+
+	# Register Icons
+	icons = [
+		"unity.png", 
+		"blender.png"
+	]
+	for icon in icons:
+		icon_register(icon)
 
 def unregister():
 	bpy.utils.unregister_class(FBXBundlePanel)
