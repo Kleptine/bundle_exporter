@@ -50,9 +50,11 @@ def import_files(path):
 		if extension == 'fbx':
 			if hasattr(bpy.types, bpy.ops.import_scene.fbx.idname()):
 				bpy.ops.import_scene.fbx(filepath = file_path)
+
 		elif extension == 'obj':
 			if hasattr(bpy.types, bpy.ops.import_scene.obj.idname()):
 				bpy.ops.import_scene.obj(filepath = file_path)
+				
 		elif extension == '3ds':
 			if hasattr(bpy.types, bpy.ops.import_scene.autodesk_3ds.idname()):
 				bpy.ops.import_scene.autodesk_3ds(filepath = file_path)

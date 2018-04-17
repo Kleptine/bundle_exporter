@@ -9,8 +9,8 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 
 ## Features ##
 
-* **Export** selected objects as FBX bundles
-* **Import** 3D files from a folder
+* **Batch Export** selected objects as FBX bundles
+* **Batch Import** 3D files from a folder
 * **Preview** FBX bundles as you select objects
 * **Bundle objects** by name, group, material or scene
 * **Fix Unity** rotation, scale and material issues
@@ -115,6 +115,8 @@ Bundles selected objects of the current scene. This is the easiest option to exp
 # Pivot Types #
 
 ![](https://farm1.staticflickr.com/826/39711247600_eed039c5d7_o.png)
+
+Determines the origin point for each exported FBX file.
 
 ### First Child ###
 Use the pivot of the first object sorted by name.

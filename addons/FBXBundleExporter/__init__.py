@@ -42,7 +42,7 @@ bl_info = {
 	"category": "3D View",
 	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
-	"wiki_url": "",
+	"wiki_url": "https://bitbucket.org/renderhjs/blender-addon-fbx-bundle",
 	"tracker_url": "",
 }
 
