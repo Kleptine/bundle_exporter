@@ -11,9 +11,9 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 
 * **Export** selected objects as FBX bundles
 * **Import** 3D files from a folder
-* **Preview** of export files as you select objects
+* **Preview** FBX bundles as you select objects
 * **Bundle objects** by name, group, material or scene
-* Set file **pivots** to: first object, bottom center or scene origin
+* **Fix Unity** rotation, scale and material issues
 * **Draw fences** around bundles of objects
 
 
@@ -33,6 +33,9 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 ---
 
 # Draw Fences #
+
+![](https://farm1.staticflickr.com/812/40627267655_540fe2a5b3_o.png)
+
 Draws grease pencil lines around your selected object bundles.
 
 * The border uses the padding from the settings
@@ -47,6 +50,9 @@ Use the red '**x**' button to clear the fence drawings.
 ---
 
 # Export #
+
+![](https://farm1.staticflickr.com/939/26650599827_7b38a2c414_o.png)
+
 Exports the selected FBX bundles to the specified directory.
 
 **Note** By default the addon will export FBX files aimed for the Unity engine. You can change the target platform in the Addon preferences for the 'FBX bundle' addon
@@ -55,6 +61,9 @@ Exports the selected FBX bundles to the specified directory.
 
 
 # Import #
+
+![](https://farm1.staticflickr.com/837/27649976458_abae4ffddf_o.png)
+
 Import all selected 3D files from the specified directory. Supported file types are:
 
 * fbx
@@ -64,6 +73,13 @@ Import all selected 3D files from the specified directory. Supported file types 
 
 
 ---
+# Merge #
+
+![](https://farm1.staticflickr.com/887/39711493860_b652128fb1_o.png)
+
+When merge is enabled all objects of a bundle are merged into a single mesh when exporting.
+
+
 
 # Bundle Types #
 
@@ -114,14 +130,16 @@ The Scene center 0,0,0
 
 The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project.
 
+![](https://farm1.staticflickr.com/826/39710256050_2c1a6b407c_o.png)
+
 **Copying Unity Editor script**
 
 1. In Blender from the **File** menu open **User Preferences** ![](http://renderhjs.net/textools/blender/img/installation_open_preferences.png) 
 2. Go to the **Add-ons** tab ![](http://renderhjs.net/textools/blender/img/installation_addons.png).
 3. In the search field enter **'FBX Bundle'**
-4. Inside the FBX Bundle addon panel press the 'Copy Unity Script' button 
-![](https://farm1.staticflickr.com/826/39710256050_2c1a6b407c_o.png)
+4. Inside the FBX Bundle addon panel press the '**Copy Unity Script**' button 
 5. Browse for your Unity assets project folder and confirm
 
 The script will create an 'Editor' folder with a C# script inside called '**PostprocessorMeshes.cs**'. This script modifies the FBX file object inside Unity each time the file gets re-imported or updated.
 
+Alternatively the C# script can also be found in the addon zip file under "*FBXBundleExporter/resources/PostprocessorMeshes.cs*"
