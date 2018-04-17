@@ -10,22 +10,40 @@ class op(bpy.types.Operator):
 	bl_label = "Copy Unity Script"
 	bl_description = "Copy Unity editor script to folder"
 
+	filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+
+
+	def invoke(self, context, event):
+		if self.filepath == "":
+			self.filepath = bpy.context.scene.FBXBundleSettings.path
+
+		context.window_manager.fileselect_add(self)
+		return {'RUNNING_MODAL'}
+
+
+	def draw(self, context):
+		layout = self.layout
+
+		col = layout.column()
+		col.label(text="Custom Interface!_________")
+		col.prop(self, "filepath")
+
+
 	@classmethod
 	def poll(cls, context):
-		if bpy.context.scene.FBXBundleSettings.path == "":
-			return False
-			
 		return True
 
 	def execute(self, context):
-		copy_script(bpy.context.scene.FBXBundleSettings.path)
+		copy_script(self.filepath)
 		return {'FINISHED'}
 
 
 
-def import_files(path):
+def copy_script(path):
 	# https://blenderapi.wordpress.com/2011/09/26/file-selection-with-python/
 
+	print("Path {}".format(path))
+	pass
 
 	'''
 import bpy
@@ -71,8 +89,7 @@ bpy.ops.object.custom_draw('INVOKE_DEFAULT')
 
 
 	
-	pass
-
+	
 	# path = bpy.path.abspath(path)
 
 
