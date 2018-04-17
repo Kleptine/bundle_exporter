@@ -1,5 +1,7 @@
 import bpy, bmesh
 import os
+import pathlib
+import shutil
 import mathutils
 from mathutils import Vector
 
@@ -24,9 +26,7 @@ class op(bpy.types.Operator):
 	def draw(self, context):
 		layout = self.layout
 
-		col = layout.column()
-		col.label(text="Custom Interface!_________")
-		col.prop(self, "filepath")
+		layout.label(text="Choose your Unity Asset directory")
 
 
 	@classmethod
@@ -42,70 +42,15 @@ class op(bpy.types.Operator):
 def copy_script(path):
 	# https://blenderapi.wordpress.com/2011/09/26/file-selection-with-python/
 
-	print("Path {}".format(path))
-	pass
+	# Create Editor Folder
+	path = os.path.join( bpy.path.abspath(path), "Editor")
+	pathlib.Path(path).mkdir(parents=True, exist_ok=True) 
 
-	'''
-import bpy
-import struct
- 
-class CustomDrawOperator(bpy.types.Operator):
-    bl_idname = "object.custom_draw"
-    bl_label = "Import"
- 
-    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
- 
-    my_float = bpy.props.FloatProperty(name="Float")
-    my_bool = bpy.props.BoolProperty(name="Toggle Option")
-    my_string = bpy.props.StringProperty(name="String Value")
- 
-    def execute(self, context):
-        print()
-        return {'FINISHED'}
- 
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
- 
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column()
-        col.label(text="Custom Interface!")
- 
-        row = col.row()
-        row.prop(self, "my_float")
-        row.prop(self, "my_bool")
- 
-        col.prop(self, "my_string")
- 
-bpy.utils.register_class(CustomDrawOperator)
- 
-# test call
-bpy.ops.object.custom_draw('INVOKE_DEFAULT')
-'''
+	# Find Editor Script
+	path_script = os.path.join(os.path.dirname(__file__), "resources/PostprocessorMeshes.cs")
+	if not os.path.exists(path_script):
+		self.report({'ERROR_INVALID_INPUT'}, "Could not find PostprocessorMeshes.cs script" )
+		return
 
-
-
-
-
-	
-	
-	# path = bpy.path.abspath(path)
-
-
-
-	# filenames = sorted(os.listdir(path))
-	# filenames = [name for name in filenames if (name.lower().endswith('.fbx') or name.lower().endswith('.obj') )]
-
-
-	# for name in filenames:
-	# 	file_path = os.path.join(path, name)
-	# 	extension = (os.path.splitext(file_path)[1])[1:].lower()
-	# 	print("- {} = {}".format(extension, file_path))
-
-	# 	# https://docs.blender.org/api/2.78a/bpy.ops.import_scene.html
-	# 	if extension == 'fbx':
-	# 		bpy.ops.import_scene.fbx(filepath = file_path)
-	# 	elif extension == 'obj':
-	# 		bpy.ops.import_scene.obj(filepath = file_path)
-
+	# Copy Editor Script
+	shutil.copy(path_script, path)

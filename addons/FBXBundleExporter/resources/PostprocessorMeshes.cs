@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-public class PreprocessorMeshes : AssetPostprocessor {
+public class PostprocessorMeshes : AssetPostprocessor {
 
 	private void OnPreprocessModel() {
 		if (ModelImporter.assetPath.Contains("Resources")) {
