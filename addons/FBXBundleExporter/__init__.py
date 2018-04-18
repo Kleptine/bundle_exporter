@@ -1,3 +1,4 @@
+
 if "bpy" in locals():
 	import imp
 	imp.reload(gp_draw)
@@ -21,17 +22,8 @@ import os
 import mathutils
 from mathutils import Vector
 import math
+import bpy.utils.previews
 
-
-from bpy.props import (
-	StringProperty,
-	BoolProperty,
-	IntProperty,
-	FloatProperty,
-	FloatVectorProperty,
-	EnumProperty,
-	PointerProperty,
-)
 
 bl_info = {
 	"name": "FBX Bundle",
@@ -46,7 +38,15 @@ bl_info = {
 	"tracker_url": "",
 }
 
-
+from bpy.props import (
+	StringProperty,
+	BoolProperty,
+	IntProperty,
+	FloatProperty,
+	FloatVectorProperty,
+	EnumProperty,
+	PointerProperty,
+)
 
 
 class Panel_Preferences(bpy.types.AddonPreferences):
@@ -133,14 +133,21 @@ class FBXBundlePanel(bpy.types.Panel):
 		layout = self.layout
 		
 		box = layout.box()
-		box.label(text='Bundles', icon='MESH_CUBE')
+		box.label(text='Settings', icon='PREFERENCES')
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
 			row.operator(op_debug_setup.bl_idname, text="Setup", icon='COLOR')
 			row.operator(op_debug_lines.bl_idname, text="Draw", icon='GREASEPENCIL')
 
+
 		col = box.column(align=True)
+
+		row = col.row(align=True)
+		if context.scene.FBXBundleSettings.path == "":
+			row.alert = True
+		row.prop(context.scene.FBXBundleSettings, "path", text="")
+
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
 		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
@@ -156,26 +163,12 @@ class FBXBundlePanel(bpy.types.Panel):
 
 		# Warnings
 		if context.scene.FBXBundleSettings.path == "":
-			layout.label(text="No export path defined", icon='ERROR')
+			box = box.box()
+			box.label(text="No path defined", icon='ERROR')
 
 		elif bpy.context.scene.unit_settings.scale_length != 1.00:
-			layout.label(text="Scene units not in meters", icon='ERROR')
-
-		# layout.separator()
-		
-		# layout.label(text="Add Modifier")
-		# box = layout.box()
-		# box.label(text="[] Copy Modifiers")
-		# box.label(text="[] Merge to single Mesh")
-		
-		
-
-		# row = layout.row()
-		# row.label('Files: '+str(len(bundles))+"x")
-		
-
-
-
+			box = box.box()
+			box.label(text="Scene units not in meters", icon='ERROR')
 
 
 		col = layout.column(align=True)
@@ -191,10 +184,7 @@ class FBXBundlePanel(bpy.types.Panel):
 		
 
 		col = layout.column(align=True)	
-		row = col.row(align=True)
-		if context.scene.FBXBundleSettings.path == "":
-			row.alert = True
-		row.prop(context.scene.FBXBundleSettings, "path", text="")
+		
 
 		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
@@ -226,9 +216,9 @@ class FBXBundlePanel(bpy.types.Panel):
 			# box_files = layout.box()
 			# box_files.active = False
 			if len(bundles) == 1:
-				layout.label(text = "1x File")
+				layout.label(text = "1x Bundle")
 			else:
-				layout.label(text = "{}x Files".format(len(bundles)))
+				layout.label(text = "{}x Bundles".format(len(bundles)))
 
 			for fileName,objects in bundles.items():
 
