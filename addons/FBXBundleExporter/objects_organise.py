@@ -10,7 +10,7 @@ import operator
 def get_objects():
 	objects = []
 	for obj in bpy.context.selected_objects:
-		if obj.type == 'MESH' or obj.type == 'FONT':
+		if obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE':
 			objects.append(obj)
 
 	return sort_objects_name(objects)
