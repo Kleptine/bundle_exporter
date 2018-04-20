@@ -29,7 +29,7 @@ class op(bpy.types.Operator):
 		return True
 
 	def execute(self, context):
-		export(self, bpy.context.user_preferences.addons["FBXBundleExporter"].preferences.target_platform)
+		export(self, bpy.context.scene.FBXBundleSettings.target_platform)
 		return {'FINISHED'}
 
 
@@ -152,7 +152,6 @@ def export(self, target_platform):
 	bpy.context.space_data.pivot_point = previous_pivot
 	bpy.context.space_data.cursor_location = previous_cursor
 	bpy.context.scene.objects.active = previous_active
-
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True

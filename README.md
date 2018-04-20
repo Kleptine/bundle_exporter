@@ -4,17 +4,19 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 
 ## Download ##
 
-* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.0.0.zip)
+* [FBX_Bundle_1.1.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.1.0.zip)
 
 
 ## Features ##
 
 * **Batch Export** selected objects as FBX bundles
 * **Batch Import** 3D files from a folder
+* **Templates** for Unity, Unreal and Blender
 * **Preview** FBX bundles as you select objects
 * **Bundle objects** by name, group, material or scene
 * **Fix Unity** rotation, scale and material issues
 * **Draw fences** around bundles of objects
+* **Align pivots** to common ground
 
 
 ![](http://renderhjs.net/blender/fbx_bundle/overview.gif)
@@ -46,6 +48,15 @@ Use the red '**x**' button to clear the fence drawings.
 
 ![](https://farm1.staticflickr.com/866/40806993094_dc2d16dbac_o.png)
 
+---
+
+# Ground pivot #
+
+![](https://farm1.staticflickr.com/909/40858121474_6fdd7c9e23_o.png)
+
+Sets the pivot points of selected objects to the ground of the bounding box of the bundle.
+
+![](https://farm1.staticflickr.com/861/39761054960_6dd0a411a9_o.gif)
 
 ---
 
@@ -55,10 +66,18 @@ Use the red '**x**' button to clear the fence drawings.
 
 Exports the selected FBX bundles to the specified directory.
 
-**Note** By default the addon will export FBX files aimed for the Unity engine. You can change the target platform in the Addon preferences for the 'FBX bundle' addon
+**Note** By default the addon will export FBX files aimed for the Unity engine. You can change the target platform settings.
 
-![](https://farm1.staticflickr.com/904/41479052362_55f7c14f90_o.gif)
+![](https://farm1.staticflickr.com/842/41528382392_55f776a7aa_o.gif)
 
+
+## Merge ##
+
+![](https://farm1.staticflickr.com/887/39711493860_b652128fb1_o.png)
+
+When merge is enabled all objects of a bundle are merged into a single mesh when exporting.
+
+---
 
 # Import #
 
@@ -73,12 +92,6 @@ Import all selected 3D files from the specified directory. Supported file types 
 
 
 ---
-# Merge #
-
-![](https://farm1.staticflickr.com/887/39711493860_b652128fb1_o.png)
-
-When merge is enabled all objects of a bundle are merged into a single mesh when exporting.
-
 
 
 # Bundle Types #
@@ -130,9 +143,9 @@ The Scene center 0,0,0
 
 # Working with Unity #
 
-The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project.
+The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project. This script is completely optional and not mandatory at all.
 
-![](https://farm1.staticflickr.com/826/39710256050_2c1a6b407c_o.png)
+![](https://farm1.staticflickr.com/934/39760671570_e9bbe13f6c_o.png)
 
 **Copying Unity Editor script**
 
@@ -145,3 +158,9 @@ The addon comes with an Unity Editor script which automatically resets the -90 d
 The script will create an 'Editor' folder with a C# script inside called '**PostprocessorMeshes.cs**'. This script modifies the FBX file object inside Unity each time the file gets re-imported or updated.
 
 Alternatively the C# script can also be found in the addon zip file under "*FBXBundleExporter/resources/PostprocessorMeshes.cs*"
+
+### Auto assigning materiarls ###
+The Unity Editor script can automatically assign existing materials if the material names between Blender and the Unity project match.
+
+![](http://renderhjs.net/blender/fbx_bundle/unity_material_matching.gif)
+

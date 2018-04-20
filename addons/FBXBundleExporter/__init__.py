@@ -3,19 +3,21 @@ if "bpy" in locals():
 	import imp
 	imp.reload(gp_draw)
 	imp.reload(objects_organise)
+	imp.reload(op_fence_clear)
+	imp.reload(op_fence_draw)
+	imp.reload(op_file_copy_unity_script)
 	imp.reload(op_file_export)
 	imp.reload(op_file_import)
-	imp.reload(op_fence_draw)
-	imp.reload(op_fence_clear)
-	imp.reload(op_file_copy_unity_script)
+	imp.reload(op_pivot_ground)
 else:
 	from . import gp_draw
 	from . import objects_organise
+	from . import op_fence_clear
+	from . import op_fence_draw
+	from . import op_file_copy_unity_script
 	from . import op_file_export
 	from . import op_file_import
-	from . import op_fence_draw
-	from . import op_fence_clear
-	from . import op_file_copy_unity_script
+	from . import op_pivot_ground
 
 import bpy, bmesh
 import os
@@ -52,34 +54,17 @@ from bpy.props import (
 class Panel_Preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
-	target_platform = bpy.props.EnumProperty(items= 
-		[	
-			('BLENDER', 'Blender', 'Default Blender export'), 
-			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis')
-		], 
-		description="Target platform for the FBX exports.",
-		name = "Target Platform", 
-		default = 'UNITY'
-	)
-
 	def draw(self, context):
 		layout = self.layout
 
+
 		box = layout.box()
+		row = box.row()
+		row.label(text="Unity Editor script")
+		row.operator(op_file_copy_unity_script.op.bl_idname, icon='SAVE_COPY')
 		col = box.column(align=True)
-
-		icon = icon_get(self.target_platform.lower())
-
-		col.prop(self, "target_platform", icon_value=icon)
-		if self.target_platform == 'BLENDER':
-			col.label(text="Default blender FBX export and import")
-		elif self.target_platform == 'UNITY':
-			col.label(text="Unity engine export, objects are rotated -90° x axis")
-
-
-		box = layout.box()
-		box.operator(op_file_copy_unity_script.op.bl_idname, icon='SAVE_COPY')
-		box.label(text="Copies a Unity Editor script to automatically reset rotations on the x-axis and assign materials by name")
+		col.label(text="Copies a Unity Editor script to automatically reset")
+		col.label(text="rotations on the x-axis and assign materials by name")
 		
 
 
@@ -119,6 +104,17 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center at 0,0,0'")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
+	target_platform = bpy.props.EnumProperty(items= 
+		[	
+			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis'),
+			('UNREAL', 'Unreal ', 'Unreal engine export'),
+			('BLENDER', 'Blender', 'Default Blender export'), 
+			
+		], 
+		description="Target platform for the FBX exports.",
+		name = "Target Platform", 
+		default = 'UNITY'
+	)
 
 
 class FBXBundlePanel(bpy.types.Panel):
@@ -133,7 +129,15 @@ class FBXBundlePanel(bpy.types.Panel):
 		layout = self.layout
 		
 		box = layout.box()
-		box.label(text='Settings', icon='PREFERENCES')
+
+		row = box.row()
+		row.label(text='Settings', icon='PREFERENCES')
+
+		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
+		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
+		
+
+
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
@@ -178,28 +182,19 @@ class FBXBundlePanel(bpy.types.Panel):
 		row = col.row(align=True)
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
-		
+		row = col.row(align=True)
+		row.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
+
 		col.separator()
 
-		
 
 		col = layout.column(align=True)	
-		
-
 		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		row = col.row(align=True)
 		row.scale_y = 1.85
-		
-		
-		target_platform = bpy.context.user_preferences.addons["FBXBundleExporter"].preferences.target_platform
-		icon = icon_get(target_platform.lower())
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
-		
 
-	
-		
-		
 		
 		layout.separator()
 
@@ -330,6 +325,7 @@ def register():
 	# Register Icons
 	icons = [
 		"unity.png", 
+		"unreal.png", 
 		"blender.png"
 	]
 	for icon in icons:
