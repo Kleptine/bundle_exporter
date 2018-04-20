@@ -32,7 +32,7 @@ bl_info = {
 	"description": "Export object selections in FBX bundles",
 	"author": "renderhjs",
 	"blender": (2, 7, 9),
-	"version": (1, 0, 0),
+	"version": (1, 1, 0),
 	"category": "3D View",
 	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
