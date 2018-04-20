@@ -145,7 +145,8 @@ The Scene center 0,0,0
 
 The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project. This script is completely optional and not mandatory at all.
 
-![](https://farm1.staticflickr.com/934/39760671570_e9bbe13f6c_o.png)
+![](https://farm1.staticflickr.com/925/39763685890_aa1801d581_o.png)
+
 
 **Copying Unity Editor script**
 
@@ -154,6 +155,8 @@ The addon comes with an Unity Editor script which automatically resets the -90 d
 3. In the search field enter **'FBX Bundle'**
 4. Inside the FBX Bundle addon panel press the '**Copy Unity Script**' button 
 5. Browse for your Unity assets project folder and confirm
+
+![](https://farm1.staticflickr.com/934/39760671570_e9bbe13f6c_o.png)
 
 The script will create an 'Editor' folder with a C# script inside called '**PostprocessorMeshes.cs**'. This script modifies the FBX file object inside Unity each time the file gets re-imported or updated.
 
