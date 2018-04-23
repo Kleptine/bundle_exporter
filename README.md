@@ -1,3 +1,8 @@
+
+
+
+![](https://farm1.staticflickr.com/806/27771131538_8a727b6ca8_o.png)
+
 # FBX Bundle Addon #
 
 The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process of batch exporting FBX files. It's easy to use: specify a folder, select your objects, press 'Export'. FBX files for Unity will have correct rotations and scale values assigned as well as automatically existing materials assigned if their names match with Blender's materials per object.
