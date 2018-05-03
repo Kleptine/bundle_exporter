@@ -37,13 +37,18 @@ prefix_copy = "EXPORT_ORG_"
 
 def export(self, target_platform):
 
+	
+
 	# Warnings
 	if bpy.context.scene.FBXBundleSettings.path == "":
 		raise Exception("")
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
 
-
+	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+	if not os.path.exists(path_folder):
+		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
+		return
 
 
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -65,7 +70,10 @@ def export(self, target_platform):
 
 
 
-	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+
+
+
+
 
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()

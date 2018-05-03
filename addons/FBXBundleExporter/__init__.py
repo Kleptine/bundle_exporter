@@ -8,6 +8,7 @@ if "bpy" in locals():
 	imp.reload(op_file_copy_unity_script)
 	imp.reload(op_file_export)
 	imp.reload(op_file_import)
+	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
 else:
 	from . import gp_draw
@@ -17,6 +18,7 @@ else:
 	from . import op_file_copy_unity_script
 	from . import op_file_export
 	from . import op_file_import
+	from . import op_file_open_folder
 	from . import op_pivot_ground
 
 import bpy, bmesh
@@ -133,16 +135,13 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 
 
 
-class Panel_Units(bpy.types.Panel):
+class Panel_Core(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel_core"
 	bl_label = " "
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "FBX Bundle"
 	bl_options = {'HIDE_HEADER'}
-
-	def draw_header(self, _):
-		layout = self.layout
-		layout.label(text="Size: {} x {}".format(bpy.context.scene.texToolsSettings.size[0], bpy.context.scene.texToolsSettings.size[1]))
 
 	def draw(self, context):
 		layout = self.layout
@@ -169,6 +168,8 @@ class Panel_Units(bpy.types.Panel):
 		if context.scene.FBXBundleSettings.path == "":
 			row.alert = True
 		row.prop(context.scene.FBXBundleSettings, "path", text="")
+		row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
+
 
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
@@ -176,35 +177,56 @@ class Panel_Units(bpy.types.Panel):
 		
 
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
+
+
+		# Warnings
+		if context.scene.FBXBundleSettings.path == "":
+			box = col.box()
+			box.label(text="No path defined", icon='ERROR')
+
+		elif bpy.context.scene.unit_settings.scale_length != 1.00:
+			box = col.box()
+			box.label(text="Scene units not in meters", icon='ERROR')
+
 		
 
-
-class FBXBundlePanel(bpy.types.Panel):
-	bl_idname = "FBX_bundle_group_LOD"
+'''
+class Panel_LOD(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel_LOD"
 	bl_label = "LOD"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "FBX Bundle"
 	bl_context = "objectmode"
+	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
 
-	def draw_header(self, _):
+	# def draw_header(self, _):
+	# 	layout = self.layout
+	# 	row = layout.row(align=True)
+	# 	# row.operator("wm.url_open", text="", icon='INFO').url = "http://renderhjs.net/textools/blender/index.html#uvlayout"
+	# 	row.label(text ="Unwrap")
+	def draw(self, context):
 		layout = self.layout
-		row = layout.row(align=True)
-		# row.operator("wm.url_open", text="", icon='INFO').url = "http://renderhjs.net/textools/blender/index.html#uvlayout"
-		row.label(text ="Unwrap")
+		col = layout.column()
+		col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
+		if context.scene.FBXBundleSettings.LOD_enable:
+			col.prop(context.scene.FBXBundleSettings, "LOD_levels", text="Levels", expand=True)
+'''
 
 
-class FBXBundlePanel(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel"
-	bl_label = "FBX Bundle"
+
+class Panel_Tools(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel_tools"
+	bl_label = "Tools"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "FBX Bundle"
 	bl_context = "objectmode"
+	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
@@ -213,23 +235,11 @@ class FBXBundlePanel(bpy.types.Panel):
 		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
 
 
-		col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
-		if context.scene.FBXBundleSettings.LOD_enable:
-			col.prop(context.scene.FBXBundleSettings, "LOD_levels", text="Levels", expand=True)
-		
 
+		
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
-
-		# Warnings
-		if context.scene.FBXBundleSettings.path == "":
-			box = box.box()
-			box.label(text="No path defined", icon='ERROR')
-
-		elif bpy.context.scene.unit_settings.scale_length != 1.00:
-			box = box.box()
-			box.label(text="Scene units not in meters", icon='ERROR')
 
 
 		col = layout.column(align=True)
@@ -244,17 +254,6 @@ class FBXBundlePanel(bpy.types.Panel):
 
 		col.separator()
 
-
-		col = layout.column(align=True)	
-		row = col.row(align=True)
-		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
-		row = col.row(align=True)
-		row.scale_y = 1.85
-		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
-
-		
-		layout.separator()
-
 		if bpy.app.debug_value != 0:
 			row = layout.row(align=True)
 			row.alert =True
@@ -263,6 +262,35 @@ class FBXBundlePanel(bpy.types.Panel):
 			layout.separator()
 
 
+
+
+class Panel_Files(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel_files"
+	bl_label = "Bundles"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "FBX Bundle"
+	bl_context = "objectmode"
+	# bl_options = {'HIDE_HEADER'}
+
+	def draw(self, context):
+		layout = self.layout
+		col = layout.column()
+
+		# Get bundles
+		bundles = objects_organise.get_bundles()
+
+		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
+
+		col = layout.column(align=True)	
+		row = col.row(align=True)
+		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
+		row = col.row(align=True)
+		row.scale_y = 1.85
+		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
+		
+		layout.separator()
+		
 		# merge = 
 		if(len(bundles) > 0):
 			# box_files = layout.box()
@@ -297,7 +325,6 @@ class FBXBundlePanel(bpy.types.Panel):
 					row = column.row(align=True)
 					row.active = not bpy.context.scene.FBXBundleSettings.merge
 					row.label(text=objects[i].name)
-
 
 
 class op_debug_lines(bpy.types.Operator):
