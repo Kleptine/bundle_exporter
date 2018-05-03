@@ -88,6 +88,19 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		default=False,
 		description="Merge objects in a bundle into a single mesh when exporting"
 	)
+	LOD_enable = bpy.props.BoolProperty (
+		name="Merge",
+		default=False,
+		description=""
+	)
+	LOD_levels = bpy.props.IntProperty (
+		name="LOD Levels",
+		default=0,
+		min=0,
+		max=8,
+		description="LOD levels to generate"
+	)
+
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
 		('PARENT', 'Parent', "Bundle by the parent object"), 
@@ -117,17 +130,22 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 
 
-class FBXBundlePanel(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel"
-	bl_label = "FBX Bundle"
+
+
+
+class Panel_Units(bpy.types.Panel):
+	bl_label = " "
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "FBX Bundle"
-	bl_context = "objectmode"
+	bl_options = {'HIDE_HEADER'}
+
+	def draw_header(self, _):
+		layout = self.layout
+		layout.label(text="Size: {} x {}".format(bpy.context.scene.texToolsSettings.size[0], bpy.context.scene.texToolsSettings.size[1]))
 
 	def draw(self, context):
 		layout = self.layout
-		
 		box = layout.box()
 
 		row = box.row()
@@ -158,7 +176,46 @@ class FBXBundlePanel(bpy.types.Panel):
 		
 
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
-		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge", expand=True)
+		
+
+
+class FBXBundlePanel(bpy.types.Panel):
+	bl_idname = "FBX_bundle_group_LOD"
+	bl_label = "LOD"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "FBX Bundle"
+	bl_context = "objectmode"
+
+	def draw(self, context):
+		layout = self.layout
+		col = layout.column()
+
+	def draw_header(self, _):
+		layout = self.layout
+		row = layout.row(align=True)
+		# row.operator("wm.url_open", text="", icon='INFO').url = "http://renderhjs.net/textools/blender/index.html#uvlayout"
+		row.label(text ="Unwrap")
+
+
+class FBXBundlePanel(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel"
+	bl_label = "FBX Bundle"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "FBX Bundle"
+	bl_context = "objectmode"
+
+	def draw(self, context):
+		layout = self.layout
+		col = layout.column()
+
+		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
+
+
+		col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
+		if context.scene.FBXBundleSettings.LOD_enable:
+			col.prop(context.scene.FBXBundleSettings, "LOD_levels", text="Levels", expand=True)
 		
 
 		# Get bundles
