@@ -37,8 +37,6 @@ prefix_copy = "EXPORT_ORG_"
 
 def export(self, target_platform):
 
-	
-
 	# Warnings
 	if bpy.context.scene.FBXBundleSettings.path == "":
 		raise Exception("")
@@ -63,17 +61,8 @@ def export(self, target_platform):
 	previous_pivot = bpy.context.space_data.pivot_point
 	previous_cursor = bpy.context.space_data.cursor_location.copy()
 
-
-
 	bpy.context.scene.unit_settings.system = 'METRIC'	
 	bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
-
-
-
-
-
-
-
 
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()
@@ -128,9 +117,14 @@ def export(self, target_platform):
 			axis_up = 'Y'
 
 		# Export selected as FBX
-		set_apply_scale_options = 'FBX_SCALE_ALL'
+		scale_options = 'FBX_SCALE_ALL'
+		
 		if target_platform == 'UNREAL':
-			set_apply_scale_options = 'FBX_SCALE_NONE'
+			scale_options = 'FBX_SCALE_NONE'
+		elif target_platform == 'UNITY':
+			scale_options = 'FBX_SCALE_ALL'
+
+
 
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
@@ -141,7 +135,7 @@ def export(self, target_platform):
 
 			object_types={'ARMATURE', 'MESH', 'EMPTY'},
 
-			apply_scale_options = set_apply_scale_options,
+			apply_scale_options = scale_options,
 			global_scale =1.00, 
 			apply_unit_scale=True,
 
