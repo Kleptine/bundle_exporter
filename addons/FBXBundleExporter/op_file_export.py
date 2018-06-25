@@ -128,6 +128,10 @@ def export(self, target_platform):
 			axis_up = 'Y'
 
 		# Export selected as FBX
+		set_apply_scale_options = 'FBX_SCALE_ALL'
+		if target_platform == 'UNREAL':
+			set_apply_scale_options = 'FBX_SCALE_NONE'
+
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 
@@ -137,7 +141,7 @@ def export(self, target_platform):
 
 			object_types={'ARMATURE', 'MESH', 'EMPTY'},
 
-			apply_scale_options = 'FBX_SCALE_ALL',
+			apply_scale_options = set_apply_scale_options,
 			global_scale =1.00, 
 			apply_unit_scale=True,
 
