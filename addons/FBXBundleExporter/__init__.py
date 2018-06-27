@@ -124,7 +124,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis'),
 			('UNREAL', 'Unreal ', 'Unreal engine export'),
 			('BLENDER', 'Blender', 'Default Blender export'), 
-			
+			('UNITY_EXPERIMENTAL', 'Unity (!EXPERIMENTAL! Apply Transform) ', 'Unity engine export, Bake space transform into each objects'),
 		], 
 		description="Target platform for the FBX exports.",
 		name = "Target Platform", 
@@ -410,7 +410,8 @@ def register():
 	icons = [
 		"unity.png", 
 		"unreal.png", 
-		"blender.png"
+		"blender.png", 
+		"unity_experimental.png"
 	]
 	for icon in icons:
 		icon_register(icon)
