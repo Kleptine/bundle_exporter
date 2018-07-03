@@ -5,9 +5,14 @@ from mathutils import Vector
 
 
 class Modifier:
-	label = ""					#Material name from external blend file
-	mode = 'EMIT'
+	label = "Modifier"
+	mode = 'NONE'
 
-	def __init__(self, label="", mode='EMIT'):
-		self.label = label
-		self.mode = mode
+	def __init__(self):
+		pass
+
+	def execute():
+		pass
+
+	def print():
+		print("Modifier '{}'' mode: {}".format(label, mode))

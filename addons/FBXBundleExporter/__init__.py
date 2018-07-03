@@ -20,6 +20,7 @@ else:
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
+	from . import modifier_LOD
 
 import bpy, bmesh
 import os
@@ -90,18 +91,24 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		default=False,
 		description="Merge objects in a bundle into a single mesh when exporting"
 	)
-	LOD_enable = bpy.props.BoolProperty (
+	copyModifier = bpy.props.BoolProperty (
 		name="Merge",
 		default=False,
-		description=""
+		description="Merge objects in a bundle into a single mesh when exporting"
 	)
-	LOD_levels = bpy.props.IntProperty (
-		name="LOD Levels",
-		default=0,
-		min=0,
-		max=8,
-		description="LOD levels to generate"
-	)
+
+	# LOD_enable = bpy.props.BoolProperty (
+	# 	name="Merge",
+	# 	default=False,
+	# 	description=""
+	# )
+	# LOD_levels = bpy.props.IntProperty (
+	# 	name="LOD Levels",
+	# 	default=0,
+	# 	min=0,
+	# 	max=8,
+	# 	description="LOD levels to generate"
+	# )
 
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
@@ -232,8 +239,7 @@ class Panel_Tools(bpy.types.Panel):
 		layout = self.layout
 		col = layout.column()
 
-		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
-
+		
 
 
 		
@@ -242,13 +248,16 @@ class Panel_Tools(bpy.types.Panel):
 
 
 
-		col = layout.column(align=True)
+		# col = layout.column(align=True)
 
-		col.separator()
+		# col.separator()
 
 		row = col.row(align=True)
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
+		
+		col.separator()
+
 		row = col.row(align=True)
 		row.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
 
@@ -260,6 +269,35 @@ class Panel_Tools(bpy.types.Panel):
 			row.operator(op_fence_clear.op.bl_idname, text="Pack", icon='IMGDISPLAY')
 			row.operator(op_fence_clear.op.bl_idname, text="Align Z", icon='TRIA_DOWN_BAR')
 			layout.separator()
+
+
+
+class Panel_Modifiers(bpy.types.Panel):
+	bl_idname = "FBX_bundle_panel_modifiers"
+	bl_label = "Bundle Modifiers"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "FBX Bundle"
+	bl_context = "objectmode"
+	bl_options = {'DEFAULT_CLOSED'}
+
+	def draw(self, context):
+		layout = self.layout
+		col = layout.column()
+
+		col.label(text="LOD Modifier")
+		col.label(text="Rename Modifier")
+		col.label(text="Collider Modifier")
+		col.label(text="Copy Modifier")
+		# col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
+
+
+		# col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
+
+
+
+
+
 
 
 

@@ -6,9 +6,8 @@ from mathutils import Vector
 from . import modifier
 
 class Modifier(modifier.Modifier):
-	label = ""					#Material name from external blend file
-	mode = 'EMIT'
+	label = "LOD"
+	mode = 'LOD'
 
-	def __init__(self, label="", mode='EMIT'):
-		self.label = label
-		self.mode = mode
+	def __init__(self):
+		super().__init__()
