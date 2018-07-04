@@ -10,6 +10,10 @@ if "bpy" in locals():
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
+
+	imp.reload(modifier_LOD) 
+
+
 else:
 	from . import gp_draw
 	from . import objects_organise
@@ -20,6 +24,7 @@ else:
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
+
 	from . import modifier_LOD
 
 import bpy, bmesh
@@ -52,6 +57,22 @@ from bpy.props import (
 	EnumProperty,
 	PointerProperty,
 )
+
+
+
+
+print("______________________________")
+print("ABC? {}".format(modifier_LOD))
+
+modifiers = list([
+	modifier_LOD.Modifier(),
+	modifier_LOD.Modifier()
+])
+# x = modifier_LOD.Modifier()
+print("Modifiers: {} x".format(len(modifiers)))
+# print("Modifiers: {}".format(len(modifiers)))
+# print("Modifiers: {}".format(len(modifiers)))
+
 
 
 class Panel_Preferences(bpy.types.AddonPreferences):
@@ -274,7 +295,7 @@ class Panel_Tools(bpy.types.Panel):
 
 class Panel_Modifiers(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_modifiers"
-	bl_label = "Bundle Modifiers"
+	bl_label = "Modifiers"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "FBX Bundle"
@@ -285,10 +306,16 @@ class Panel_Modifiers(bpy.types.Panel):
 		layout = self.layout
 		col = layout.column()
 
-		col.label(text="LOD Modifier")
-		col.label(text="Rename Modifier")
-		col.label(text="Collider Modifier")
-		col.label(text="Copy Modifier")
+
+		global modifiers
+		mods = modifiers
+
+		col.label(text="Modifiers {}x".format(len(modifiers)))	
+		for modifier in mods:
+			col.label(text="Mod: {}".format(modifier.label), icon='MOD_ARRAY')	
+
+		
+		
 		# col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
 
 
@@ -426,8 +453,6 @@ class op_remove(bpy.types.Operator):
 
 
 
-
-
 def icon_get(name):
 	return preview_icons[name].icon_id
 
@@ -437,6 +462,8 @@ def icon_register(fileName):
 	name = fileName.split('.')[0]   # Don't include file extension
 	icons_dir = os.path.join(os.path.dirname(__file__), "icons")
 	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
+
+	
 
 
 # registers

@@ -1,5 +1,6 @@
-import bpy, bmesh
-import os
+import bpy
+import bmesh
+import operator
 import mathutils
 from mathutils import Vector
 
@@ -9,6 +10,7 @@ class Modifier:
 	mode = 'NONE'
 
 	def __init__(self):
+		print("Create class modifier")
 		pass
 
 	def execute():
