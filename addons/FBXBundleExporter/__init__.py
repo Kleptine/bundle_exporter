@@ -11,7 +11,10 @@ if "bpy" in locals():
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
 
+	imp.reload(modifier_collider) 
 	imp.reload(modifier_LOD) 
+	imp.reload(modifier_merge) 
+	imp.reload(modifier_modifiers) 
 
 
 else:
@@ -25,7 +28,10 @@ else:
 	from . import op_file_open_folder
 	from . import op_pivot_ground
 
+	from . import modifier_collider
 	from . import modifier_LOD
+	from . import modifier_merge
+	from . import modifier_modifiers
 
 import bpy, bmesh
 import os
@@ -65,8 +71,11 @@ print("______________________________")
 print("ABC? {}".format(modifier_LOD))
 
 modifiers = list([
+	modifier_merge.Modifier(),
+	modifier_modifiers.Modifier(),
 	modifier_LOD.Modifier(),
-	modifier_LOD.Modifier()
+	modifier_collider.Modifier()
+	
 ])
 # x = modifier_LOD.Modifier()
 print("Modifiers: {} x".format(len(modifiers)))
@@ -312,7 +321,8 @@ class Panel_Modifiers(bpy.types.Panel):
 
 		col.label(text="Modifiers {}x".format(len(modifiers)))	
 		for modifier in mods:
-			col.label(text="Mod: {}".format(modifier.label), icon='MOD_ARRAY')	
+			box = col.box()
+			box.label(text="{}".format(modifier.label), icon='MODIFIER')	
 
 		
 		
