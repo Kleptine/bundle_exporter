@@ -7,8 +7,8 @@ from mathutils import Vector
 from . import modifier
 
 class Modifier(modifier.Modifier):
-	label = "Copy Modifiers"
-	mode = 'MODIFIERS'
+	label = "Rename"
+	mode = 'RENAME'
 
 	def __init__(self):
 		super().__init__()

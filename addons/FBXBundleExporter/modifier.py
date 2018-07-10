@@ -13,8 +13,11 @@ class Modifier:
 		print("Create class modifier")
 		pass
 
-	def execute():
+	def execute(self):
 		pass
 
-	def print():
+	def draw(self, layout):
+		layout.label(text="{}".format(self.label), icon='MODIFIER')
+
+	def print(self):
 		print("Modifier '{}'' mode: {}".format(label, mode))

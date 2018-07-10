@@ -10,11 +10,13 @@ if "bpy" in locals():
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
-
+	
+	imp.reload(modifier) 
 	imp.reload(modifier_collider) 
 	imp.reload(modifier_LOD) 
 	imp.reload(modifier_merge) 
 	imp.reload(modifier_modifiers) 
+	imp.reload(modifier_rename) 
 
 
 else:
@@ -28,10 +30,12 @@ else:
 	from . import op_file_open_folder
 	from . import op_pivot_ground
 
+	from . import modifier
 	from . import modifier_collider
 	from . import modifier_LOD
 	from . import modifier_merge
 	from . import modifier_modifiers
+	from . import modifier_rename
 
 import bpy, bmesh
 import os
@@ -74,13 +78,11 @@ modifiers = list([
 	modifier_merge.Modifier(),
 	modifier_modifiers.Modifier(),
 	modifier_LOD.Modifier(),
-	modifier_collider.Modifier()
+	modifier_collider.Modifier(),
+	modifier_rename.Modifier()
 	
 ])
-# x = modifier_LOD.Modifier()
 print("Modifiers: {} x".format(len(modifiers)))
-# print("Modifiers: {}".format(len(modifiers)))
-# print("Modifiers: {}".format(len(modifiers)))
 
 
 
@@ -322,7 +324,8 @@ class Panel_Modifiers(bpy.types.Panel):
 		col.label(text="Modifiers {}x".format(len(modifiers)))	
 		for modifier in mods:
 			box = col.box()
-			box.label(text="{}".format(modifier.label), icon='MODIFIER')	
+			modifier.draw(box)
+			
 
 		
 		
