@@ -70,6 +70,19 @@ def export(self, target_platform):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
+		# Detect if animation export...
+		use_animation = False
+		for obj in objects:
+			if get_uses_animation(obj) == True:
+				use_animation = True
+				break
+		if use_animation:
+			return
+			print("Uses ani: {}\n\n".format(use_animation))
+		
+
+
+
 		copies = []
 		for obj in objects:
 			name_original = obj.name
@@ -163,6 +176,26 @@ def export(self, target_platform):
 		obj.select = True
 
 
+
+
+def get_uses_animation(obj):
+
+	print("_____::: ANI? \t{}".format(obj.name))
+	
+	if obj:
+		#Check for animation data on object
+		if obj.animation_data:
+			print("  ... Found Animation Data")
+			return True
+
+		# Check for armature modifiers
+		for mod in obj.modifiers:
+			if mod.type == 'ARMATURE':
+				print("  ... Found Armature ")
+				return True
+
+	# No animation found
+	return False
 
 
 def transform_target_platform(obj, target_platform):
