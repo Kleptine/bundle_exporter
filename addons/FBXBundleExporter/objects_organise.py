@@ -114,6 +114,10 @@ def get_pivot(objects):
 
 		elif mode_pivot == 'SCENE':
 			return Vector((0,0,0))
+		
+		elif mode_pivot == 'PARENT':
+			if len(objects) > 0:
+				return objects[0].parent.location
 
 	# Default
 	return Vector((0,0,0))

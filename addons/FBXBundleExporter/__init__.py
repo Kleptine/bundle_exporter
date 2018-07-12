@@ -155,7 +155,8 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
 		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
 		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
-		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center at 0,0,0'")
+		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center at 0,0,0'"),
+		('PARENT', 'Parent', "Parent object")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
 	target_platform = bpy.props.EnumProperty(items= 
