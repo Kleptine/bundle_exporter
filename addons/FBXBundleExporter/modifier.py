@@ -21,3 +21,10 @@ class Modifier:
 
 	def print(self):
 		print("Modifier '{}'' mode: {}".format(label, mode))
+
+
+	def get(key):
+		pass
+	
+	def set(key):
+		pass
