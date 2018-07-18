@@ -70,17 +70,9 @@ def export(self, target_platform):
 		path = os.path.join(path_folder, name)
 		print("Export {}x = {}".format(len(objects),path))
 
-		# Detect if animation export...
-		use_animation = False
-		for obj in objects:
-			if get_uses_animation(obj) == True:
-				use_animation = True
-				break
-		if use_animation:
-			return
-			print("Uses ani: {}\n\n".format(use_animation))
-		
 
+		# Detect if animation export...
+		use_animation = objects_organise.get_objects_animation(objects)
 
 
 		copies = []
@@ -98,7 +90,7 @@ def export(self, target_platform):
 			bpy.context.object.name = name_original
 			copies.append(bpy.context.object)
 			
-			bpy.context.object.location-= pivot;
+			bpy.context.object.location-= pivot
 
 			# Rotation
 			if not merge:
@@ -110,7 +102,7 @@ def export(self, target_platform):
 			obj.select = True
 
 
-		if merge:
+		if merge and not objects_organise.get_objects_animation(copies):
 			# Merge objects into single item
 
 			bpy.ops.object.join()
@@ -177,29 +169,12 @@ def export(self, target_platform):
 
 
 
-
-def get_uses_animation(obj):
-
-	print("_____::: ANI? \t{}".format(obj.name))
-	
-	if obj:
-		#Check for animation data on object
-		if obj.animation_data:
-			print("  ... Found Animation Data")
-			return True
-
-		# Check for armature modifiers
-		for mod in obj.modifiers:
-			if mod.type == 'ARMATURE':
-				print("  ... Found Armature ")
-				return True
-
-	# No animation found
-	return False
-
-
 def transform_target_platform(obj, target_platform):
 	bpy.context.scene.objects.active = obj
+
+	# Skip if object contains animation
+	if objects_organise.get_object_animation(obj):
+		return
 
 	if target_platform == 'UNITY':
 		# Apply -90 degrees rotation offset

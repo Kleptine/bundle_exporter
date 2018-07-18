@@ -31,6 +31,36 @@ def sort_objects_name(objects):
 
 
 
+def get_objects_animation(objects):
+	# Detect if animation
+	use_animation = False
+	for obj in objects:
+		if get_object_animation(obj):
+			use_animation = True
+			break
+	return use_animation
+
+
+
+def get_object_animation(obj):
+	print("_____::: ANI? \t{}".format(obj.name))
+	if obj:
+		#Check for animation data on object
+		if obj.animation_data:
+			print("  ... Found Animation Data")
+			return True
+
+		# Check for armature modifiers
+		for mod in obj.modifiers:
+			if mod.type == 'ARMATURE':
+				print("  ... Found Armature ")
+				return True
+
+	# No animation found
+	return False
+
+
+
 def get_bundles():
 	objects = get_objects()
 
@@ -66,9 +96,6 @@ def get_bundles():
 
 	if len(bundles) == 1 and 'UNDEFINED' in bundles:
 		bundles.clear() 
-
-
-
 
 	return bundles
 
@@ -184,7 +211,6 @@ def get_key(obj):
 
 		return decode(name, fill)
 
-
 	elif mode_bundle == 'PARENT':
 		# Use group name
 		if obj.parent:
@@ -199,23 +225,19 @@ def get_key(obj):
 		else:
 			return obj.name
 
-
 	elif mode_bundle == 'GROUP':
 		# Use group name
 		if len(obj.users_group) >= 1:
 			return obj.users_group[0].name
-
 
 	elif mode_bundle == 'MATERIAL':
 		# Use material name
 		if len(obj.material_slots) >= 1:
 			return obj.material_slots[0].name
 
-
 	elif mode_bundle == 'SCENE':
 		# Use scene name
 		return bpy.context.scene.name
-
 
 	elif mode_bundle == 'SPACE':
 		# print("_________")

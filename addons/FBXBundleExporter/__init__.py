@@ -378,6 +378,7 @@ class Panel_Files(bpy.types.Panel):
 			else:
 				layout.label(text = "{}x Bundles".format(len(bundles)))
 
+			# Display bundles
 			for fileName,objects in bundles.items():
 
 				# row = layout.row(align=True)
@@ -389,7 +390,14 @@ class Panel_Files(bpy.types.Panel):
 				if(fileName == "unknown"):
 					row.alert = True
 				
-				row.operator(op_select.bl_idname,icon='MESH_CUBE', emboss=False, text="{}.fbx".format(fileName)).key = fileName
+				# Icon type
+				icon = 'MESH_CUBE';
+				if objects_organise.get_objects_animation(objects):
+					icon = 'RENDER_ANIMATION';
+
+
+
+				row.operator(op_select.bl_idname,icon=icon, emboss=False, text="{}.fbx".format(fileName)).key = fileName
 				r = row.row(align=True)
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
@@ -403,6 +411,10 @@ class Panel_Files(bpy.types.Panel):
 					row = column.row(align=True)
 					row.active = not bpy.context.scene.FBXBundleSettings.merge
 					row.label(text=objects[i].name)
+
+
+
+
 
 
 class op_debug_lines(bpy.types.Operator):
