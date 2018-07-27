@@ -131,11 +131,14 @@ def export(self, target_platform):
 
 		# Export selected as FBX
 		scale_options = 'FBX_SCALE_ALL'
+		mesh_smooth_options = 'OFF'
 		
 		if target_platform == 'UNREAL':
 			scale_options = 'FBX_SCALE_NONE'
+			mesh_smooth_options = 'FACE'
 		elif target_platform == 'UNITY':
 			scale_options = 'FBX_SCALE_ALL'
+			mesh_smooth_options = 'OFF'
 
 
 
@@ -153,7 +156,7 @@ def export(self, target_platform):
 			apply_unit_scale=True,
 
 			use_mesh_modifiers=True, 
-			mesh_smooth_type='OFF', 
+			mesh_smooth_type = mesh_smooth_options, 
 			batch_mode='OFF', 
 			use_custom_props=False
 		)
