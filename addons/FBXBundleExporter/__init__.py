@@ -152,7 +152,8 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
 		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
 		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
-		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center at 0,0,0'")
+		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
+		('PARENT', 'Parent', "Pivot from the parent object")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
 	target_platform = bpy.props.EnumProperty(items= 
@@ -212,7 +213,7 @@ class Panel_Core(bpy.types.Panel):
 		
 
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
-
+		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
 
 		# Warnings
 		if context.scene.FBXBundleSettings.path == "":
@@ -329,7 +330,7 @@ class Panel_Modifiers(bpy.types.Panel):
 			box = col.box()
 			modifier.draw(box)
 			
-		# col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
+		# 
 
 
 		# col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
