@@ -92,10 +92,6 @@ def export(self, target_platform):
 			
 			bpy.context.object.location-= pivot
 
-			# Rotation
-			if not merge:
-				transform_target_platform(bpy.context.object, target_platform)
-
 
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in copies:
@@ -110,8 +106,6 @@ def export(self, target_platform):
 			bpy.context.space_data.cursor_location = Vector((0,0,0))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-			transform_target_platform(bpy.context.object, target_platform)
-
 			copies = [bpy.context.object]
 
 
@@ -121,16 +115,19 @@ def export(self, target_platform):
 			axis_forward = '-Z'
 			axis_up = 'Y'
 
-		# Export selected as FBX
-		scale_options = 'FBX_SCALE_ALL'
+        # Space transform baking. Info: https://docs.blender.org/api/blender_python_api_2_70_5/bpy.ops.export_scene.html
+		bake_transform = False #Default
+		if target_platform == 'UNITY':
+			bake_transform = True 
 		
+		# Export selected as FBX
+		scale_options = 'FBX_SCALE_ALL' #Default
 		if target_platform == 'UNREAL':
 			scale_options = 'FBX_SCALE_NONE'
 		elif target_platform == 'UNITY':
 			scale_options = 'FBX_SCALE_ALL'
 
-
-
+		# Export FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 
@@ -147,7 +144,9 @@ def export(self, target_platform):
 			use_mesh_modifiers=True, 
 			mesh_smooth_type='OFF', 
 			batch_mode='OFF', 
-			use_custom_props=False
+			use_custom_props=False,
+
+ 			bake_space_transform = bake_transform
 		)
 
 		bpy.ops.object.delete()
@@ -166,17 +165,3 @@ def export(self, target_platform):
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True
-
-
-
-def transform_target_platform(obj, target_platform):
-	bpy.context.scene.objects.active = obj
-
-	# Skip if object contains animation
-	if objects_organise.get_object_animation(obj):
-		return
-
-	if target_platform == 'UNITY':
-		# Apply -90 degrees rotation offset
-		bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
-		bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)

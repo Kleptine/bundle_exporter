@@ -3,6 +3,7 @@ if "bpy" in locals():
 	import imp
 	imp.reload(gp_draw)
 	imp.reload(objects_organise)
+
 	imp.reload(op_fence_clear)
 	imp.reload(op_fence_draw)
 	imp.reload(op_file_copy_unity_script)
@@ -10,6 +11,7 @@ if "bpy" in locals():
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
+	imp.reload(op_tool_geometry_fix)
 	
 	imp.reload(modifier) 
 	imp.reload(modifier_collider) 
@@ -22,6 +24,7 @@ if "bpy" in locals():
 else:
 	from . import gp_draw
 	from . import objects_organise
+
 	from . import op_fence_clear
 	from . import op_fence_draw
 	from . import op_file_copy_unity_script
@@ -29,6 +32,7 @@ else:
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
+	from . import op_tool_geometry_fix
 
 	from . import modifier
 	from . import modifier_collider
@@ -69,11 +73,6 @@ from bpy.props import (
 )
 
 
-
-
-print("______________________________")
-print("ABC? {}".format(modifier_LOD))
-
 modifiers = list([
 	modifier_merge.Modifier(),
 	modifier_modifiers.Modifier(),
@@ -82,8 +81,6 @@ modifiers = list([
 	modifier_rename.Modifier()
 	
 ])
-print("Modifiers: {} x".format(len(modifiers)))
-
 
 
 class Panel_Preferences(bpy.types.AddonPreferences):
@@ -162,8 +159,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		[	
 			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis'),
 			('UNREAL', 'Unreal ', 'Unreal engine export'),
-			('BLENDER', 'Blender', 'Default Blender export'), 
-			
+			('BLENDER', 'Blender', 'Default Blender export')
 		], 
 		description="Target platform for the FBX exports.",
 		name = "Target Platform", 
@@ -258,6 +254,7 @@ class Panel_LOD(bpy.types.Panel):
 
 
 
+
 class Panel_Tools(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_tools"
 	bl_label = "Tools"
@@ -288,8 +285,6 @@ class Panel_Tools(bpy.types.Panel):
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 
-
-		
 		col.separator()
 
 		row = col.row(align=True)
@@ -297,7 +292,7 @@ class Panel_Tools(bpy.types.Panel):
 
 		col.separator()
 
-		col.operator(op_fix_geometry.bl_idname, text="Fix Geo", icon='MESH_ICOSPHERE')
+		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
 		
 		col.separator()
 
@@ -310,6 +305,8 @@ class Panel_Tools(bpy.types.Panel):
 
 
 
+
+'''
 class Panel_Modifiers(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_modifiers"
 	bl_label = "Modifiers"
@@ -332,19 +329,11 @@ class Panel_Modifiers(bpy.types.Panel):
 			box = col.box()
 			modifier.draw(box)
 			
-
-		
-		
 		# col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
 
 
 		# col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
-
-
-
-
-
-
+'''
 
 
 
@@ -420,51 +409,7 @@ class Panel_Files(bpy.types.Panel):
 
 
 
-class op_fix_geometry(bpy.types.Operator):
-	bl_idname = "fbxbundle.fix_geometry"
-	bl_label = "Fix Geometry"
 
-	def execute(self, context):
-		print ("Fix Geometry")
-
-		bpy.ops.object.mode_set(mode='OBJECT')
-
-		objects = bpy.context.selected_objects
-		for obj in objects:
-
-			bpy.ops.object.mode_set(mode='OBJECT')
-			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
-
-			
-
-			# Clear custom normals data
-			bpy.ops.object.mode_set(mode = 'OBJECT')
-			bpy.ops.mesh.customdata_custom_splitnormals_clear()
-			bpy.context.object.data.auto_smooth_angle = 0.610865 #35 degrees
-
-
-			bpy.ops.object.mode_set(mode='EDIT')
-
-			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-			bpy.ops.mesh.select_all(action='SELECT')
-			bpy.ops.mesh.remove_doubles()
-			bpy.ops.mesh.tris_convert_to_quads()
-
-
-			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-			bpy.ops.mesh.mark_sharp(clear=True)
-
-			bpy.ops.mesh.select_all(action='DESELECT')
-			
-
-		bpy.ops.object.mode_set(mode = 'OBJECT')
-		bpy.ops.object.select_all(action="DESELECT")
-
-		for obj in objects:
-			obj.select = True
-
-		return {'FINISHED'}
 
 
 class op_debug_lines(bpy.types.Operator):
@@ -539,7 +484,6 @@ def icon_register(fileName):
 	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
 
 	
-
 
 # registers
 def register():

@@ -43,17 +43,14 @@ def get_objects_animation(objects):
 
 
 def get_object_animation(obj):
-	print("_____::: ANI? \t{}".format(obj.name))
 	if obj:
 		#Check for animation data on object
 		if obj.animation_data:
-			print("  ... Found Animation Data")
 			return True
 
 		# Check for armature modifiers
 		for mod in obj.modifiers:
 			if mod.type == 'ARMATURE':
-				print("  ... Found Armature ")
 				return True
 
 	# No animation found
