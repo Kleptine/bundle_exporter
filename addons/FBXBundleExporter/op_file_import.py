@@ -46,17 +46,18 @@ def import_files(path):
 		extension = (os.path.splitext(file_path)[1])[1:].lower()
 		print("- {} = {}".format(extension, file_path))
 
-		# https://docs.blender.org/api/2.78a/bpy.ops.import_scene.html
-		if extension == 'fbx':
-			if hasattr(bpy.types, bpy.ops.import_scene.fbx.idname()):
-				bpy.ops.import_scene.fbx(filepath = file_path)
+		try:
+			# https://docs.blender.org/api/2.78a/bpy.ops.import_scene.html
+			if extension == 'fbx':
+				if hasattr(bpy.types, bpy.ops.import_scene.fbx.idname()):
+					bpy.ops.import_scene.fbx(filepath = file_path)
 
-		elif extension == 'obj':
-			if hasattr(bpy.types, bpy.ops.import_scene.obj.idname()):
-				bpy.ops.import_scene.obj(filepath = file_path)
-				
-		elif extension == '3ds':
-			if hasattr(bpy.types, bpy.ops.import_scene.autodesk_3ds.idname()):
-				bpy.ops.import_scene.autodesk_3ds(filepath = file_path)
-
-
+			elif extension == 'obj':
+				if hasattr(bpy.types, bpy.ops.import_scene.obj.idname()):
+					bpy.ops.import_scene.obj(filepath = file_path)
+					
+			elif extension == '3ds':
+				if hasattr(bpy.types, bpy.ops.import_scene.autodesk_3ds.idname()):
+					bpy.ops.import_scene.autodesk_3ds(filepath = file_path)
+		except RuntimeError:
+			print("Error importing {}".format(file_path))
