@@ -97,14 +97,21 @@ def export(self, target_platform):
 		for obj in copies:
 			obj.select = True
 
-
+		# Merge objects into single item
 		if merge and not objects_organise.get_objects_animation(copies):
-			# Merge objects into single item
-
 			bpy.ops.object.join()
 			bpy.context.object.name = name
 			bpy.context.space_data.cursor_location = Vector((0,0,0))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+
+			bpy.context.scene.objects.active = obj
+
+			if target_platform == 'UNITY':
+				print("_____Rotate offset!!")
+				# Apply -90 degrees rotation offset
+				# bpy.ops.transform.rotate(value = (-math.pi / 2.0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+				# bpy.ops.transform.rotate(value = (0), axis = (1, 0, 0), constraint_axis = (True, False, False), constraint_orientation = 'GLOBAL')
+				bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
 			copies = [bpy.context.object]
 
@@ -120,14 +127,23 @@ def export(self, target_platform):
 		if target_platform == 'UNITY':
 			bake_transform = True 
 		
-		# Export selected as FBX
+		# Scale options
 		scale_options = 'FBX_SCALE_ALL' #Default
 		if target_platform == 'UNREAL':
 			scale_options = 'FBX_SCALE_NONE'
 		elif target_platform == 'UNITY':
 			scale_options = 'FBX_SCALE_ALL'
 
-		# Export FBX
+		# Smooth type
+		smooth_type = 'OFF' #Default
+		if target_platform == 'UNREAL':
+			smooth_type = 'OFF'
+		elif target_platform == 'UNITY':
+			smooth_type = 'FACE'
+
+
+
+		# Export selected as FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 
@@ -142,7 +158,7 @@ def export(self, target_platform):
 			apply_unit_scale=True,
 
 			use_mesh_modifiers=True, 
-			mesh_smooth_type='OFF', 
+			mesh_smooth_type = smooth_type, 
 			batch_mode='OFF', 
 			use_custom_props=False,
 
