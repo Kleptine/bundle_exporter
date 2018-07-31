@@ -120,25 +120,20 @@ def export(self, target_platform):
 		if target_platform == 'UNITY':
 			axis_forward = '-Z'
 			axis_up = 'Y'
-		if target_platform == 'UNITY_EXPERIMENTAL':
-			axis_forward = '-Z'
-			axis_up = 'Y'
 
-                # Space transform baking
-		bake_space_transform = False
-		if target_platform == 'UNITY_EXPERIMENTAL':
-			bake_space_transform = True
+        # Space transform baking. Info: https://docs.blender.org/api/blender_python_api_2_70_5/bpy.ops.export_scene.html
+		bake_transform = False #Default
+		if target_platform == 'UNITY':
+			bake_transform = True 
 
 		# Export selected as FBX
-		scale_options = 'FBX_SCALE_ALL'
-		
+		scale_options = 'FBX_SCALE_ALL' #Default
 		if target_platform == 'UNREAL':
 			scale_options = 'FBX_SCALE_NONE'
 		elif target_platform == 'UNITY':
 			scale_options = 'FBX_SCALE_ALL'
 
-
-
+		# Export FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
 			use_selection=True, 
@@ -157,7 +152,7 @@ def export(self, target_platform):
 			batch_mode='OFF', 
 			use_custom_props=False,
 
- 			bake_space_transform = bake_space_transform
+ 			bake_space_transform = bake_transform
 		)
 
 		bpy.ops.object.delete()
