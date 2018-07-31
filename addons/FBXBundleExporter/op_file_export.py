@@ -120,6 +120,14 @@ def export(self, target_platform):
 		if target_platform == 'UNITY':
 			axis_forward = '-Z'
 			axis_up = 'Y'
+		if target_platform == 'UNITY_EXPERIMENTAL':
+			axis_forward = '-Z'
+			axis_up = 'Y'
+
+                # Space transform baking
+		bake_space_transform = False
+		if target_platform == 'UNITY_EXPERIMENTAL':
+			bake_space_transform = True
 
 		# Export selected as FBX
 		scale_options = 'FBX_SCALE_ALL'
@@ -147,7 +155,9 @@ def export(self, target_platform):
 			use_mesh_modifiers=True, 
 			mesh_smooth_type='OFF', 
 			batch_mode='OFF', 
-			use_custom_props=False
+			use_custom_props=False,
+
+ 			bake_space_transform = bake_space_transform
 		)
 
 		bpy.ops.object.delete()
