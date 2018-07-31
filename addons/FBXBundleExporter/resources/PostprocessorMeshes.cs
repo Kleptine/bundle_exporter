@@ -14,25 +14,10 @@ public class PostprocessorMeshes : AssetPostprocessor {
 		if (ModelImporter.assetPath.Contains("Resources")) {
 		}
 		ModelImporter.importMaterials = false;
-		ModelImporter.importBlendShapes = false;
-		//ModelImporter.importAnimation = false;
 
 		ModelImporter.useFileScale = false;
 		ModelImporter.globalScale = 1.0f;
 		ModelImporter.swapUVChannels = false;
-	}
-
-	private void OnPostprocessModel(GameObject gameObject) {
-		//Collect all render components and offset their X- rotation by 90
-		Renderer[] renders = gameObject.GetComponentsInChildren<Renderer>(true);
-		foreach (Renderer render in renders) {
-			render.transform.localEulerAngles += Vector3.right * 90f;
-
-			//Snap to 0 if close to 0
-			if (Mathf.Abs(render.transform.localEulerAngles.x) <= 0.02) {
-				render.transform.localEulerAngles = new Vector3(0f, render.transform.localEulerAngles.y, render.transform.localEulerAngles.z);
-			}
-		}
 	}
 
 	public Material OnAssignMaterialModel(Material material, Renderer renderer) {
@@ -56,7 +41,6 @@ public class PostprocessorMeshes : AssetPostprocessor {
 		}
 
 		//Crate Empty material?
-
 		return null;
 	}
 }

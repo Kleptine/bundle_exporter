@@ -3,6 +3,7 @@ if "bpy" in locals():
 	import imp
 	imp.reload(gp_draw)
 	imp.reload(objects_organise)
+
 	imp.reload(op_fence_clear)
 	imp.reload(op_fence_draw)
 	imp.reload(op_file_copy_unity_script)
@@ -10,6 +11,7 @@ if "bpy" in locals():
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
+	imp.reload(op_tool_geometry_fix)
 	
 	imp.reload(modifier) 
 	imp.reload(modifier_collider) 
@@ -22,6 +24,7 @@ if "bpy" in locals():
 else:
 	from . import gp_draw
 	from . import objects_organise
+
 	from . import op_fence_clear
 	from . import op_fence_draw
 	from . import op_file_copy_unity_script
@@ -29,6 +32,7 @@ else:
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
+	from . import op_tool_geometry_fix
 
 	from . import modifier
 	from . import modifier_collider
@@ -288,7 +292,7 @@ class Panel_Tools(bpy.types.Panel):
 
 		col.separator()
 
-		col.operator(op_fix_geometry.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
+		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
 		
 		col.separator()
 
@@ -405,44 +409,6 @@ class Panel_Files(bpy.types.Panel):
 
 
 
-class op_fix_geometry(bpy.types.Operator):
-	bl_idname = "fbxbundle.fix_geometry"
-	bl_label = "Fix Geometry"
-	bl_description = "Remove custom splitnormals & fix UV outside >8 units"
-
-	def execute(self, context):
-		print ("Fix Geometry")
-
-		bpy.ops.object.mode_set(mode='OBJECT')
-
-		objects = bpy.context.selected_objects
-		for obj in objects:
-			if obj.type == 'MESH':
-				# Select object
-				bpy.ops.object.mode_set(mode='OBJECT')
-				bpy.ops.object.select_all(action="DESELECT")
-				obj.select = True
-
-				# Clear custom normals data
-				bpy.ops.mesh.customdata_custom_splitnormals_clear()
-
-				bpy.ops.object.mode_set(mode='EDIT')
-				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-				bpy.ops.mesh.select_all(action='SELECT')
-				bpy.ops.mesh.remove_doubles()
-
-				# bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-				# bpy.ops.mesh.mark_sharp(clear=True)
-
-				bpy.ops.mesh.select_all(action='DESELECT')
-			
-		# Restore selection
-		bpy.ops.object.mode_set(mode = 'OBJECT')
-		bpy.ops.object.select_all(action="DESELECT")
-		for obj in objects:
-			obj.select = True
-
-		return {'FINISHED'}
 
 
 
