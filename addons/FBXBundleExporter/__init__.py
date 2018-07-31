@@ -287,12 +287,18 @@ class Panel_Tools(bpy.types.Panel):
 		row = col.row(align=True)
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
+
+
 		
 		col.separator()
 
 		row = col.row(align=True)
 		row.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
 
+		col.separator()
+
+		col.operator(op_fix_geometry.bl_idname, text="Fix Geo", icon='MESH_ICOSPHERE')
+		
 		col.separator()
 
 		if bpy.app.debug_value != 0:
@@ -414,7 +420,51 @@ class Panel_Files(bpy.types.Panel):
 
 
 
+class op_fix_geometry(bpy.types.Operator):
+	bl_idname = "fbxbundle.fix_geometry"
+	bl_label = "Fix Geometry"
 
+	def execute(self, context):
+		print ("Fix Geometry")
+
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+		objects = bpy.context.selected_objects
+		for obj in objects:
+
+			bpy.ops.object.mode_set(mode='OBJECT')
+			bpy.ops.object.select_all(action="DESELECT")
+			obj.select = True
+
+			
+
+			# Clear custom normals data
+			bpy.ops.object.mode_set(mode = 'OBJECT')
+			bpy.ops.mesh.customdata_custom_splitnormals_clear()
+			bpy.context.object.data.auto_smooth_angle = 0.610865 #35 degrees
+
+
+			bpy.ops.object.mode_set(mode='EDIT')
+
+			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+			bpy.ops.mesh.select_all(action='SELECT')
+			bpy.ops.mesh.remove_doubles()
+			bpy.ops.mesh.tris_convert_to_quads()
+
+
+			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+			bpy.ops.mesh.mark_sharp(clear=True)
+
+			bpy.ops.mesh.select_all(action='DESELECT')
+			
+
+		bpy.ops.object.mode_set(mode = 'OBJECT')
+		bpy.ops.object.select_all(action="DESELECT")
+
+		for obj in objects:
+			obj.select = True
+
+		return {'FINISHED'}
 
 
 class op_debug_lines(bpy.types.Operator):

@@ -59,5 +59,6 @@ def import_files(path):
 			elif extension == '3ds':
 				if hasattr(bpy.types, bpy.ops.import_scene.autodesk_3ds.idname()):
 					bpy.ops.import_scene.autodesk_3ds(filepath = file_path)
+					
 		except RuntimeError:
 			print("Error importing {}".format(file_path))
