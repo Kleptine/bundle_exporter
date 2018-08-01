@@ -134,7 +134,7 @@ def export(self, target_platform):
 		# Smooth type
 		smooth_type = 'OFF' #Default
 		if target_platform == 'UNREAL':
-			smooth_type = 'OFF'
+			smooth_type = 'FACE'
 		elif target_platform == 'UNITY':
 			smooth_type = 'FACE'
 

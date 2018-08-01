@@ -54,7 +54,7 @@ bl_info = {
 	"description": "Export object selections in FBX bundles",
 	"author": "renderhjs",
 	"blender": (2, 7, 9),
-	"version": (1, 1, 0),
+	"version": (1, 2, 0),
 	"category": "3D View",
 	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
@@ -95,8 +95,8 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 		row.label(text="Unity Editor script")
 		row.operator(op_file_copy_unity_script.op.bl_idname, icon='SAVE_COPY')
 		col = box.column(align=True)
-		col.label(text="Copies a Unity Editor script to automatically reset")
-		col.label(text="rotations on the x-axis and assign materials by name")
+		col.label(text="Copies a Unity Editor script to automatically assign")
+		col.label(text="existing materials by name matching names in Blender")
 		
 
 
@@ -476,7 +476,6 @@ class op_remove(bpy.types.Operator):
 
 
 def icon_get(name):
-	# if preview_icons not None:
 	return preview_icons[name].icon_id
 
 
@@ -487,31 +486,21 @@ def icon_register(fileName):
 	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
 
 def icons_unregister():
-	# ...
-	# import bpy.utils.previews
 	global preview_icons
 	bpy.utils.previews.remove(preview_icons)
 	preview_icons = None
 	
 
-
-
-
 # registers
 def register():
-	# https://blender.stackexchange.com/questions/32335/how-to-implement-custom-icons-for-my-script-addon
-	# import bpy.utils
 	bpy.utils.register_module(__name__)
 
 	# Register scene settings
-	# import bpy.types
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
 
 	# Register Icons
 	global preview_icons
-	# import bpy.utils.previews
 	preview_icons = bpy.utils.previews.new()
-
 
 	icons = [
 		"unity.png", 
