@@ -1,7 +1,6 @@
 
 
-
-![](https://farm1.staticflickr.com/806/27771131538_8a727b6ca8_o.png)
+![](https://farm2.staticflickr.com/1837/42874087285_8986bf1488_o.png)
 
 # FBX Bundle Addon #
 
@@ -9,7 +8,16 @@ The **FBX Bundle** Addon is a **Blender 2.79** addon that simplifies the process
 
 ## Download ##
 
+* [FBX_Bundle_1.2.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.2.0.zip)
 * [FBX_Bundle_1.1.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.1.0.zip)
+* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.0.0.zip)
+
+## v2.2 Improvements ##
+* New pivot mode: parent pivot
+* improved Unreal & Unity export & smoothing groups
+* fixed scale for Unreal export
+* install / uninstall errors fixed
+* New mesh fix tool: clean up smoothing, uv & topology issues on selected objects
 
 
 ## Features ##
@@ -142,13 +150,14 @@ Use the pivot of the first object sorted by name.
 Bottom center of the bounds of the group.
 ### Scene Origin ###
 The Scene center 0,0,0
-
+### Parent Pivot ###
+Uses the pivot location of the parent object
 
 ---
 
 # Working with Unity #
 
-The addon comes with an Unity Editor script which automatically resets the -90 degree rotations and assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project. This script is completely optional and not mandatory at all.
+The addon comes with an Unity Editor script which automatically assigns existing materials automatially if the name assigned in blender matches any material name in your Unity project. This script is completely optional and not mandatory at all.
 
 ![](https://farm1.staticflickr.com/925/39763685890_aa1801d581_o.png)
 
