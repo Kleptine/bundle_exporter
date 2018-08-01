@@ -12,6 +12,7 @@ if "bpy" in locals():
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
 	imp.reload(op_tool_geometry_fix)
+	imp.reload(op_tool_pack_bundles)
 	
 	imp.reload(modifier) 
 	imp.reload(modifier_collider) 
@@ -33,6 +34,7 @@ else:
 	from . import op_file_open_folder
 	from . import op_pivot_ground
 	from . import op_tool_geometry_fix
+	from . import op_tool_pack_bundles
 
 	from . import modifier
 	from . import modifier_collider
@@ -226,35 +228,6 @@ class Panel_Core(bpy.types.Panel):
 
 		
 
-'''
-class Panel_LOD(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel_LOD"
-	bl_label = "LOD"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "FBX Bundle"
-	bl_context = "objectmode"
-	bl_options = {'DEFAULT_CLOSED'}
-
-	def draw(self, context):
-		layout = self.layout
-		col = layout.column()
-
-	# def draw_header(self, _):
-	# 	layout = self.layout
-	# 	row = layout.row(align=True)
-	# 	# row.operator("wm.url_open", text="", icon='INFO').url = "http://renderhjs.net/textools/blender/index.html#uvlayout"
-	# 	row.label(text ="Unwrap")
-	def draw(self, context):
-		layout = self.layout
-		col = layout.column()
-		col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
-		if context.scene.FBXBundleSettings.LOD_enable:
-			col.prop(context.scene.FBXBundleSettings, "LOD_levels", text="Levels", expand=True)
-'''
-
-
-
 
 class Panel_Tools(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_tools"
@@ -296,6 +269,11 @@ class Panel_Tools(bpy.types.Panel):
 		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
 		
 		col.separator()
+
+		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack Bundles", icon='UGLYPACKAGE')
+		
+
+
 
 		if bpy.app.debug_value != 0:
 			row = layout.row(align=True)
