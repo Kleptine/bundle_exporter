@@ -474,24 +474,45 @@ class op_remove(bpy.types.Operator):
 
 
 
+
 def icon_get(name):
+	# if preview_icons not None:
 	return preview_icons[name].icon_id
 
 
-preview_icons = bpy.utils.previews.new()
+preview_icons = None
 def icon_register(fileName):
 	name = fileName.split('.')[0]   # Don't include file extension
 	icons_dir = os.path.join(os.path.dirname(__file__), "icons")
 	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
 
+def icons_unregister():
+	# ...
+	# import bpy.utils.previews
+	global preview_icons
+	bpy.utils.previews.remove(preview_icons)
+	preview_icons = None
 	
+
+
+
 
 # registers
 def register():
+	# https://blender.stackexchange.com/questions/32335/how-to-implement-custom-icons-for-my-script-addon
+	# import bpy.utils
 	bpy.utils.register_module(__name__)
+
+	# Register scene settings
+	# import bpy.types
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
 
 	# Register Icons
+	global preview_icons
+	# import bpy.utils.previews
+	preview_icons = bpy.utils.previews.new()
+
+
 	icons = [
 		"unity.png", 
 		"unreal.png", 
@@ -500,14 +521,17 @@ def register():
 	for icon in icons:
 		icon_register(icon)
 
+
 def unregister():
-	bpy.utils.unregister_class(FBXBundlePanel)
+	bpy.utils.unregister_module(__name__)
+
+	#Unregister Settings
 	del bpy.types.Scene.FBXBundleSettings
+
+	# Remove icons
+	icons_unregister()
 
 
 if __name__ == "__main__":
 	register()
-
-	
-
 

@@ -109,8 +109,7 @@ def export(self, target_platform):
 			# Apply rotation
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 			
-
-
+			# Re-assign array
 			copies = [bpy.context.object]
 
 
