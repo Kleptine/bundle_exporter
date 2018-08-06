@@ -122,6 +122,13 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		default=False,
 		description="Merge objects in a bundle into a single mesh when exporting"
 	)
+	collapseBundles = bpy.props.BoolProperty (
+		name="Collapse",
+		default=False,
+		description="Collapse Bundle list view"
+	)
+
+
 	copyModifier = bpy.props.BoolProperty (
 		name="Merge",
 		default=False,
@@ -250,7 +257,6 @@ class Panel_Tools(bpy.types.Panel):
 		bundles = objects_organise.get_bundles()
 
 
-
 		# col = layout.column(align=True)
 
 		# col.separator()
@@ -335,6 +341,10 @@ class Panel_Files(bpy.types.Panel):
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 
 		col = layout.column(align=True)	
+
+
+		
+
 		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		row = col.row(align=True)
@@ -342,6 +352,10 @@ class Panel_Files(bpy.types.Panel):
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 		
 		layout.separator()
+
+		col.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Collapse View", expand=True)
+
+
 		
 		# merge = 
 		if(len(bundles) > 0):
@@ -351,6 +365,7 @@ class Panel_Files(bpy.types.Panel):
 				layout.label(text = "1x Bundle")
 			else:
 				layout.label(text = "{}x Bundles".format(len(bundles)))
+
 
 			# Display bundles
 			for fileName,objects in bundles.items():
@@ -369,9 +384,12 @@ class Panel_Files(bpy.types.Panel):
 				if objects_organise.get_objects_animation(objects):
 					icon = 'RENDER_ANIMATION';
 
+				# Show label for FBX bundle
+				label = "{}.fbx".format(fileName);
+				if(len(objects) > 1):
+					label = "{}.fbx  {}x".format(fileName, len(objects));
 
-
-				row.operator(op_select.bl_idname,icon=icon, emboss=False, text="{}.fbx".format(fileName)).key = fileName
+				row.operator(op_select.bl_idname,icon=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
@@ -381,10 +399,11 @@ class Panel_Files(bpy.types.Panel):
 				# col.label(text="{}x".format(len(objects)))
 
 				# col = box.column(align=True)
-				for i in range(0,len(objects)):
-					row = column.row(align=True)
-					row.active = not bpy.context.scene.FBXBundleSettings.merge
-					row.label(text=objects[i].name)
+				if not context.scene.FBXBundleSettings.collapseBundles:
+					for i in range(0,len(objects)):
+						row = column.row(align=True)
+						row.active = not bpy.context.scene.FBXBundleSettings.merge
+						row.label(text=objects[i].name)
 
 
 
