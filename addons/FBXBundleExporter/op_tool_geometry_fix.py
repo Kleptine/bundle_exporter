@@ -17,15 +17,16 @@ class op(bpy.types.Operator):
 	def execute(self, context):
 		print ("Fix Geometry")
 
-		bpy.ops.object.mode_set(mode='OBJECT')
 
 		objects = bpy.context.selected_objects
 		for obj in objects:
 			if obj.type == 'MESH':
 				# Select object
 				bpy.ops.object.mode_set(mode='OBJECT')
+				bpy.context.scene.objects.active = obj
 				bpy.ops.object.select_all(action="DESELECT")
 				obj.select = True
+				
 
 				# Clear custom normals data
 				bpy.ops.mesh.customdata_custom_splitnormals_clear()

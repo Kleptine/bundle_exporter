@@ -112,7 +112,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 	padding = bpy.props.FloatProperty (
 		name="Padding",
-		default=0.5,
+		default=0.15,
 		min = 0,
 		description="Padding for fences or space bundling",
 		subtype='DISTANCE'

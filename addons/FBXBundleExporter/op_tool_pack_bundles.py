@@ -31,7 +31,7 @@ def pack_bundles():
 	previous_active = bpy.context.scene.objects.active
 	
 
-	blocks = []
+	
 	min_corner = None
 
 	bundle_bbox = {}
@@ -54,7 +54,7 @@ def pack_bundles():
 			min_corner.z = min(bbox.min.z, min_corner.z)
 
 
-
+	blocks = []
 	for key,objects in bundles.items():
 		
 		# Block for packing
@@ -64,11 +64,6 @@ def pack_bundles():
 
 		print("Pack {} at {:.2f} x {:.2f}".format(key, bbox.size.x, bbox.size.y))
 
-
-	# bounds_objects = {}
-	# for o in objects:
-	# 	bounds_objects[o] = objects_organise.ObjectBounds(o)
-
 	# Start packing
 	sortBlocks(blocks, 'maxside')
 	binPacking = BinPacking(blocks)
@@ -76,71 +71,21 @@ def pack_bundles():
 	for block in blocks:
 		key = block.key
 		print("Block {} = {} , {}".format(key, block.bin.x, block.bin.y))
-
-
-		
-
 		
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in bundles[key]:
-			move_x = block.bin.x - (bundle_bbox[key].min.x) # + obj.location.x
-			move_y = block.bin.y - (bundle_bbox[key].min.y ) #+ obj.location.y
+			move_x = min_corner.x + block.bin.x - (bundle_bbox[key].min.x) # + obj.location.x
+			move_y = min_corner.y + block.bin.y - (bundle_bbox[key].min.y ) #+ obj.location.y
 			obj.select = True
 			bpy.ops.transform.translate(value=(move_x , move_y, 0), constraint_axis=(True, True, False), constraint_orientation='GLOBAL', proportional='DISABLED')
 
+	print("First {}".format(blocks[0].key))
 
 	# Restore previous settings
 	bpy.context.scene.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True
-
-
-# if __name__ == '__main__':
-# 	blocks = genBlocks(100, 10, 100, 10, 100)
-# 	sortBlocks(blocks, 'maxside')
-# 	binPacking = BinPacking(blocks)
-
-# 	from Tkinter import *
-	
-# 	(width, height) = binPacking.boxSize()
-# 	print width, height  
-# 	master = Tk()  
-  
-# 	w = Canvas(master, width = width, height = height, bg = 'red')
-
-# 	for block in blocks:
-# 		bin = block.bin
-# 		x, y, width, height = bin.x, bin.y, bin.width, bin.height
-# 		w.create_rectangle(x, y, x + width, y + height, fill="blue")  
-  
-# 	w.pack()
-	# mainloop()  
-
-# def genBlocks(num, minWidth, maxWidth, minHeight, maxHeight):
-# 	assert num > 0
-# 	assert maxWidth > minWidth
-# 	assert maxHeight > minHeight
-
-# 	blocks = []
-# 	for i in xrange(num):
-# 		width = random.randint(minWidth, maxWidth)
-# 		height = random.randint(minHeight, maxHeight)
-# 		block = Block(width, height)
-# 		blocks.append(block)
-
-# 	return blocks
-
-
-
-
-
-
-
-
-
-
-
 
 
 class Block(object):
@@ -183,6 +128,8 @@ class BinPacking:
 		block = blocks[0]
 
 		self._root = Bin(0, 0, block.width, block.height)
+		# block.bin = self._root
+
 		self._blocks = blocks
 
 		self._pack()
