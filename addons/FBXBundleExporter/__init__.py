@@ -169,7 +169,8 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		[	
 			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis'),
 			('UNREAL', 'Unreal ', 'Unreal engine export'),
-			('BLENDER', 'Blender', 'Default Blender export')
+			('BLENDER', 'Blender', 'Default Blender export'),
+			('GLTF', 'glTF', 'GL Transmission Format')
 		], 
 		description="Target platform for the FBX exports.",
 		name = "Target Platform", 
@@ -177,6 +178,19 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 
 
+class Mode:
+	extension = 'fbx'
+
+	def __init__(self, extension):
+		self.extension = extension
+
+
+modes = {
+	'UNITY' : Mode( extension='fbx'),
+	'UNREAL' : Mode( extension='fbx'),
+	'BLENDER' : Mode( extension='fbx'),
+	'GLTF' : Mode( extension='gltf')
+}
 
 
 
@@ -355,7 +369,7 @@ class Panel_Files(bpy.types.Panel):
 
 		col.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Collapse View", expand=True)
 
-
+		mode = bpy.context.scene.FBXBundleSettings.target_platform
 		
 		# merge = 
 		if(len(bundles) > 0):
@@ -387,7 +401,7 @@ class Panel_Files(bpy.types.Panel):
 				# Show label for FBX bundle
 				label = "{}.fbx".format(fileName);
 				if(len(objects) > 1):
-					label = "{}.fbx  {}x".format(fileName, len(objects));
+					label = "{}.{}  {}x".format(fileName, modes[mode].extension, len(objects));
 
 				row.operator(op_select.bl_idname,icon=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)
@@ -473,6 +487,8 @@ class op_remove(bpy.types.Operator):
 
 
 def icon_get(name):
+	if name not in preview_icons:
+		print("Icon '{}' not found ".format(name))
 	return preview_icons[name].icon_id
 
 
@@ -502,7 +518,8 @@ def register():
 	icons = [
 		"unity.png", 
 		"unreal.png", 
-		"blender.png"
+		"blender.png",
+		"gltf.png"
 	]
 	for icon in icons:
 		icon_register(icon)
