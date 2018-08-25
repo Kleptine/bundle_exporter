@@ -14,13 +14,8 @@ if "bpy" in locals():
 	imp.reload(op_tool_geometry_fix)
 	imp.reload(op_tool_pack_bundles)
 	
-	imp.reload(modifier_collider) 
-	imp.reload(modifier_LOD) 
-	imp.reload(modifier_merge) 
-	imp.reload(modifier_modifiers) 
-	imp.reload(modifier_rename) 
-	
-	imp.reload(platform)
+	imp.reload(modifiers) 
+	imp.reload(platforms)
 
 
 else:
@@ -37,13 +32,8 @@ else:
 	from . import op_tool_geometry_fix
 	from . import op_tool_pack_bundles
 
-	from . import modifier_collider
-	from . import modifier_LOD
-	from . import modifier_merge
-	from . import modifier_modifiers
-	from . import modifier_rename
-
-	from . import platform
+	from . import modifiers
+	from . import platforms
 
 
 import bpy, bmesh
@@ -52,7 +42,6 @@ import mathutils
 from mathutils import Vector
 import math
 import bpy.utils.previews
-import addon_utils
 
 
 bl_info = {
@@ -77,16 +66,6 @@ from bpy.props import (
 	EnumProperty,
 	PointerProperty,
 )
-
-
-modifiers = list([
-	modifier_merge.Modifier(),
-	modifier_modifiers.Modifier(),
-	modifier_LOD.Modifier(),
-	modifier_collider.Modifier(),
-	modifier_rename.Modifier()
-	
-])
 
 
 
@@ -253,9 +232,13 @@ class Panel_Core(bpy.types.Panel):
 			box = col.box()
 			box.label(text="Scene units not in meters", icon='ERROR')
 
-		elif mode not in op_file_export.platforms:
+		elif mode not in platforms.platforms:
 			box = col.box()
 			box.label(text="Platform not implemented", icon='ERROR')
+
+		elif not platforms.platforms[mode].is_valid()[0]:
+			box = col.box()
+			box.label(text=platforms.platforms[mode].is_valid()[1], icon='ERROR')			
 
 		
 		
@@ -316,7 +299,7 @@ class Panel_Tools(bpy.types.Panel):
 
 
 
-'''
+
 class Panel_Modifiers(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_modifiers"
 	bl_label = "Modifiers"
@@ -331,11 +314,11 @@ class Panel_Modifiers(bpy.types.Panel):
 		col = layout.column()
 
 
-		global modifiers
-		mods = modifiers
+		# global modifiers
+		# mods = modifiers
 
-		col.label(text="Modifiers {}x".format(len(modifiers)))	
-		for modifier in mods:
+		# col.label(text="Modifiers {}x".format(len(modifiers)))	
+		for modifier in modifiers.modifiers:
 			box = col.box()
 			modifier.draw(box)
 			
@@ -343,7 +326,7 @@ class Panel_Modifiers(bpy.types.Panel):
 
 
 		# col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
-'''
+
 
 
 
@@ -378,25 +361,21 @@ class Panel_Files(bpy.types.Panel):
 		
 		layout.separator()
 
-		col.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Collapse View", expand=True)
-
-		mode = bpy.context.scene.FBXBundleSettings.target_platform
 		
-		if mode not in op_file_export.platforms:
-			box = col.box()
-			box.label(text="No path defined", icon='ERROR')
-			return
+		mode = bpy.context.scene.FBXBundleSettings.target_platform
 
-
-
-		# merge = 
+		
 		if(len(bundles) > 0):
 			# box_files = layout.box()
 			# box_files.active = False
+			row = layout.row()
 			if len(bundles) == 1:
-				layout.label(text = "1x Bundle")
+				row.label(text = "1x Bundle")
 			else:
-				layout.label(text = "{}x Bundles".format(len(bundles)))
+				row.label(text = "{}x Bundles".format(len(bundles)))
+
+			row.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Compact", expand=True)
+
 
 
 			# Display bundles
@@ -417,9 +396,11 @@ class Panel_Files(bpy.types.Panel):
 					icon = 'RENDER_ANIMATION';
 
 				# Show label for FBX bundle
-				label = "{}.fbx".format(fileName);
+				label = fileName
+				if mode in platforms.platforms:
+					label = platforms.platforms[mode].get_filename(fileName)
 				if(len(objects) > 1):
-					label = "{}.{}  {}x".format(fileName, modes[mode].extension, len(objects));
+					label = "{}  {}x".format(label, len(objects));
 
 				row.operator(op_select.bl_idname,icon=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)

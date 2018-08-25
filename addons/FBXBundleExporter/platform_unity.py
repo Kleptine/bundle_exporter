@@ -6,12 +6,19 @@ import mathutils
 from . import platform
 
 class Platform(platform.Platform):
-	label = "Unity"
 	extension = 'fbx'
+
 
 	def __init__(self):
 		super().__init__()
 		
+
+	def is_valid(self):
+		if bpy.context.scene.unit_settings.system != 'METRIC':
+			return False, "Unity: Scene units not metric"
+
+		return True, ""
+
 
 	# def file_export(self, path):
 	# 	print("export {}".format(path))

@@ -6,15 +6,10 @@ from mathutils import Vector
 
 from . import objects_organise
 
-from . import platform_unity
-from . import platform_gltf
 
-platforms = {
-	'UNITY' : platform_unity.Platform(),
-	'GLTF' : platform_gltf.Platform()
-}
-
-
+from . import platforms
+import imp
+imp.reload(platforms)
 
 
 class op(bpy.types.Operator):
@@ -59,10 +54,16 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
 
+	# Is Mode available?
 	mode = bpy.context.scene.FBXBundleSettings.target_platform
-	if mode not in platforms:
+	if mode not in platforms.platforms:
 		self.report({'ERROR_INVALID_INPUT'}, "Platform '{}' not supported".format(mode) )
-		return		
+		return
+
+	# Does the platform throw errors?
+	if not platforms.platforms[mode].is_valid()[0]:
+		self.report({'ERROR_INVALID_INPUT'}, platforms.platforms[mode].is_valid()[1] )
+		return			
 
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -83,7 +84,7 @@ def export(self, target_platform):
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()
 
-		path = os.path.join(path_folder, name)+"."+platforms[mode].extension
+		path = os.path.join(path_folder, name)+"."+platforms.platforms[mode].extension
 
 		print("Export {}x = {}".format(len(objects),path))
 
@@ -132,7 +133,7 @@ def export(self, target_platform):
 
 
 
-		platforms[mode].file_export(path)
+		platforms.platforms[mode].file_export(path)
 		print("Mode to export '{}'".format(mode))
 
 
