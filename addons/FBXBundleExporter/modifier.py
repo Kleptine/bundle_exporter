@@ -6,25 +6,26 @@ from mathutils import Vector
 
 
 class Modifier:
-	label = "Modifier"
 	mode = 'NONE'
+	label = "Modifier"
+
 
 	def __init__(self):
 		print("Create class modifier")
 		pass
 
-	def execute(self):
-		pass
-
+	
 	def draw(self, layout):
 		layout.label(text="{}".format(self.label), icon='MODIFIER')
+
 
 	def print(self):
 		print("Modifier '{}'' mode: {}".format(label, mode))
 
 
-	def get(key):
+	def process_export(fileName, objects):
 		pass
-	
-	def set(key):
-		pass
+
+
+	def process_filename(fileName):
+		return fileName

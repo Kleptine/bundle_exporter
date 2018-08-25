@@ -131,6 +131,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	# 	max=8,
 	# 	description="LOD levels to generate"
 	# )
+	# modifier_active = bpy.props.BoolVectorProperty()
 
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
@@ -167,15 +168,6 @@ class Mode:
 
 	def __init__(self, extension):
 		self.extension = extension
-
-
-
-modes = {
-	'UNITY' : Mode( extension='fbx'),
-	'UNREAL' : Mode( extension='fbx'),
-	'BLENDER' : Mode( extension='fbx'),
-	'GLTF' : Mode( extension='gltf')
-}
 
 
 

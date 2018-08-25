@@ -15,7 +15,7 @@ class Platform(platform.Platform):
 
 	def is_valid(self):
 		if bpy.context.scene.unit_settings.system != 'METRIC':
-			return False, "Unreal: Scene units not metric"
+			return False, "Scene units not metric"
 
 		return True, ""
 
