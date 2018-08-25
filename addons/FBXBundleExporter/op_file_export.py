@@ -6,6 +6,17 @@ from mathutils import Vector
 
 from . import objects_organise
 
+from . import platform_unity
+from . import platform_gltf
+
+platforms = {
+	'UNITY' : platform_unity.Platform(),
+	'GLTF' : platform_gltf.Platform()
+}
+
+
+
+
 class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.file_export"
 	bl_label = "export"
@@ -48,7 +59,12 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
 
+	mode = bpy.context.scene.FBXBundleSettings.target_platform
+	if mode not in platforms:
+		self.report({'ERROR_INVALID_INPUT'}, "Platform '{}' not supported".format(mode) )
+		return		
 
+	
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 	merge = bpy.context.scene.FBXBundleSettings.merge
@@ -67,7 +83,8 @@ def export(self, target_platform):
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()
 
-		path = os.path.join(path_folder, name)
+		path = os.path.join(path_folder, name)+"."+platforms[mode].extension
+
 		print("Export {}x = {}".format(len(objects),path))
 
 
@@ -113,6 +130,17 @@ def export(self, target_platform):
 			copies = [bpy.context.object]
 
 
+
+
+		platforms[mode].file_export(path)
+		print("Mode to export '{}'".format(mode))
+
+
+		'''
+
+
+
+
 		# Axis vectors for different platforms
 		axis_forward, axis_up = 'Y', 'Z' #Default
 		if target_platform == 'UNITY':
@@ -139,7 +167,6 @@ def export(self, target_platform):
 			smooth_type = 'FACE'
 
 
-
 		# Export selected as FBX
 		bpy.ops.export_scene.fbx(
 			filepath=path + ".fbx", 
@@ -161,13 +188,15 @@ def export(self, target_platform):
 
  			bake_space_transform = bake_transform
 		)
-
+		'''
 		bpy.ops.object.delete()
 		copies.clear()
 		
 		# Restore names
 		for obj in objects:
 			obj.name = obj.name.replace(prefix_copy,"")
+
+		
 
 
 	# Restore previous settings
@@ -178,3 +207,4 @@ def export(self, target_platform):
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True
+	

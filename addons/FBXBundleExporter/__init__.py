@@ -14,12 +14,13 @@ if "bpy" in locals():
 	imp.reload(op_tool_geometry_fix)
 	imp.reload(op_tool_pack_bundles)
 	
-	imp.reload(modifier) 
 	imp.reload(modifier_collider) 
 	imp.reload(modifier_LOD) 
 	imp.reload(modifier_merge) 
 	imp.reload(modifier_modifiers) 
 	imp.reload(modifier_rename) 
+	
+	imp.reload(platform)
 
 
 else:
@@ -36,12 +37,14 @@ else:
 	from . import op_tool_geometry_fix
 	from . import op_tool_pack_bundles
 
-	from . import modifier
 	from . import modifier_collider
 	from . import modifier_LOD
 	from . import modifier_merge
 	from . import modifier_modifiers
 	from . import modifier_rename
+
+	from . import platform
+
 
 import bpy, bmesh
 import os
@@ -49,6 +52,7 @@ import mathutils
 from mathutils import Vector
 import math
 import bpy.utils.previews
+import addon_utils
 
 
 bl_info = {
@@ -83,6 +87,7 @@ modifiers = list([
 	modifier_rename.Modifier()
 	
 ])
+
 
 
 class Panel_Preferences(bpy.types.AddonPreferences):
@@ -185,6 +190,7 @@ class Mode:
 		self.extension = extension
 
 
+
 modes = {
 	'UNITY' : Mode( extension='fbx'),
 	'UNREAL' : Mode( extension='fbx'),
@@ -212,7 +218,7 @@ class Panel_Core(bpy.types.Panel):
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
 		
-
+		mode = bpy.context.scene.FBXBundleSettings.target_platform
 
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
@@ -247,6 +253,11 @@ class Panel_Core(bpy.types.Panel):
 			box = col.box()
 			box.label(text="Scene units not in meters", icon='ERROR')
 
+		elif mode not in op_file_export.platforms:
+			box = col.box()
+			box.label(text="Platform not implemented", icon='ERROR')
+
+		
 		
 
 
@@ -371,6 +382,13 @@ class Panel_Files(bpy.types.Panel):
 
 		mode = bpy.context.scene.FBXBundleSettings.target_platform
 		
+		if mode not in op_file_export.platforms:
+			box = col.box()
+			box.label(text="No path defined", icon='ERROR')
+			return
+
+
+
 		# merge = 
 		if(len(bundles) > 0):
 			# box_files = layout.box()
