@@ -27,7 +27,8 @@ class Modifier(modifier.Modifier):
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
+			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
 			layout.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects")
 			if self.get('source') in bpy.data.objects:
 				count = len(bpy.data.objects[self.get('source')].modifiers)
-				layout.label(text="copy {}x modifiers".format(count))
+				layout.label(text="copyies {}x modifiers".format(count))
