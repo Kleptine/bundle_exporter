@@ -502,6 +502,11 @@ def register():
 	# Register scene settings
 	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
 
+	# Register modifier settings
+	for modifier in modifiers.modifiers:
+		modifier.register()
+
+
 	# Register Icons
 	global preview_icons
 	preview_icons = bpy.utils.previews.new()
@@ -521,6 +526,11 @@ def unregister():
 
 	#Unregister Settings
 	del bpy.types.Scene.FBXBundleSettings
+
+	# Unregister modifier settings
+	for modifier in modifiers.modifiers:
+		modifier.unregister()
+
 
 	# Remove icons
 	icons_unregister()

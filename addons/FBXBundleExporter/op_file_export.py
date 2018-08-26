@@ -115,22 +115,7 @@ def export(self, target_platform):
 		for obj in copies:
 			obj.select = True
 
-		# Merge objects into single item
-		if merge and not objects_organise.get_objects_animation(copies):
-			bpy.ops.object.join()
-			bpy.context.object.name = name
-			bpy.context.space_data.cursor_location = Vector((0,0,0))
-			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-			bpy.context.scene.objects.active = obj
-
-			# Apply rotation
-			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-			
-			# Re-assign array
-			copies = [bpy.context.object]
-
-
+		# ...apply modifiers
 
 
 		platforms.platforms[mode].file_export(path)

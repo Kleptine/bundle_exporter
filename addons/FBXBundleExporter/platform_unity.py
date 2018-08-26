@@ -11,12 +11,11 @@ class Platform(platform.Platform):
 
 	def __init__(self):
 		super().__init__()
-		
+
 
 	def is_valid(self):
 		if bpy.context.scene.unit_settings.system != 'METRIC':
 			return False, "Scene units not metric"
-
 		return True, ""
 
 
