@@ -4,16 +4,17 @@ from . import modifier
 imp.reload(modifier) 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
-		name="Active",
-		default=False
-	)
+	pass
+	# active = bpy.props.BoolProperty (
+	# 	name="Active",
+	# 	default=False
+	# )
 
 
 class Modifier(modifier.Modifier):
 	mode = 'MERGE'
 	label = "Merge"
-	settings_id = 'xx'
+	id = 'merge'
 	
 
 	def __init__(self):

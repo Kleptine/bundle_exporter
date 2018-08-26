@@ -14,39 +14,43 @@ class Settings(bpy.types.PropertyGroup):
 class Modifier:
 	mode = 'NONE'
 	label = "Modifier"
-	settings_id = 'modifier'
+	id = 'modifier'
 
 	def __init__(self):
 		print("Create class modifier")
 		pass
 
-
+	#region Description
+	
 	def settings_path(self):
-		return "FBXBundle_modifier_{}".format(self.settings_id)
+		return "FBXBundle_modifier_{}".format(self.id)
 
 
 	def register(self):
-		# bpy.utils.register_class(Settings)
-		# exec("bpy.utils.register_class(Settings)")
 		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
 
 
 	def unregister(self):
 		exec("del "+"bpy.types.Scene."+self.settings_path() )
-		# bpy.types.Scene.FBXBundle_modifier_merge = bpy.props.PointerProperty(type=Settings)
+
+
+	def get(self, key):
+		return eval("bpy.context.scene.{}.{}".format(self.settings_path(), key))
 	
 
-	
 	def draw(self, layout):
 		# row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
 		
 		# print("Set: {}".format(self.settings))
 		# exec("layout.prop( "+self.settings_path()+", 'active', text='Active')" )
 
+		row = layout.row(align=True)
+		row.prop( eval("bpy.context.scene."+self.settings_path()) , "active", text="")
+		row.label(text="{}".format(self.label), icon='MODIFIER')
 
-		layout.prop( eval("bpy.context.scene."+self.settings_path()) , "active", text="Active")
-
-
+		if(self.get("active")):
+			layout.label(text="ACTIVE !!!!", icon='MODIFIER')
+		
 		# layout.prop( bpy.types.Scene.FBXBundle_modifier_merge , "active", text="Active")
 		# layout.prop( exec("context.scene."+self.settings_path()) , "active", text="Active")
 
@@ -56,7 +60,7 @@ class Modifier:
 
 
 
-		layout.label(text="{}".format(self.label), icon='MODIFIER')
+		
 
 
 	def print(self):
