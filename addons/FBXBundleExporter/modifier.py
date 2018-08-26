@@ -39,37 +39,18 @@ class Modifier:
 	
 
 	def draw(self, layout):
-		# row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
-		
-		# print("Set: {}".format(self.settings))
-		# exec("layout.prop( "+self.settings_path()+", 'active', text='Active')" )
-
 		row = layout.row(align=True)
 		row.prop( eval("bpy.context.scene."+self.settings_path()) , "active", text="")
 		row.label(text="{}".format(self.label), icon='MODIFIER')
-
-		if(self.get("active")):
-			layout.label(text="ACTIVE !!!!", icon='MODIFIER')
-		
-		# layout.prop( bpy.types.Scene.FBXBundle_modifier_merge , "active", text="Active")
-		# layout.prop( exec("context.scene."+self.settings_path()) , "active", text="Active")
-
-
-		# layout.prop( exec( self.settings_path() ) , "active", text="Active")
-
-
-
-
-		
 
 
 	def print(self):
 		print("Modifier '{}'' mode: {}".format(label, mode))
 
 
-	def process_export(fileName, objects):
-		pass
+	def process_objects(self, name, objects):
+		return objects
 
 
-	def process_filename(fileName):
-		return fileName
+	def process_name(self, name):
+		return name

@@ -1,5 +1,8 @@
 import bpy, bmesh
 import imp
+from mathutils import Vector
+from . import objects_organise
+
 from . import modifier
 imp.reload(modifier) 
 
@@ -13,7 +16,7 @@ class Settings(modifier.Settings):
 
 class Modifier(modifier.Modifier):
 	mode = 'MERGE'
-	label = "Merge"
+	label = "Merge Meshes"
 	id = 'merge'
 	
 
@@ -21,29 +24,29 @@ class Modifier(modifier.Modifier):
 		super().__init__()
 
 
-	# def register(self):
-
-		# eval(self.settings_path()) = bpy.props.PointerProperty(type=Settings)
-		# bpy.types.Scene.FBXBundle_modifier_merge = bpy.props.PointerProperty(type=Settings)
-
-
-	def process_export(fileName, objects):
+	# def draw(self, layout):
+	# 	super().draw(layout)
+	# 	if(self.get("active")):
+	# 		layout.label(text="ACTIVE Merge!! !!!!", icon='MODIFIER')
 
 
+	def process_objects(self, name, objects):
+
+		print("Process modifier merge with {} objects".format(len(objects)))
 		# Merge objects into single item
-		# if merge and not objects_organise.get_objects_animation(copies):
-		# 	bpy.ops.object.join()
-		# 	bpy.context.object.name = name
-		# 	bpy.context.space_data.cursor_location = Vector((0,0,0))
-		# 	bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+		if not objects_organise.get_objects_animation(objects):
+			bpy.ops.object.join()
+			bpy.context.object.name = name #assign bundle name
+			bpy.context.space_data.cursor_location = Vector((0,0,0))
+			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-		# 	bpy.context.scene.objects.active = obj
+			bpy.context.scene.objects.active = objects[-1]
 
-		# 	# Apply rotation
-		# 	bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+			# Apply rotation
+			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 			
-		# 	# Re-assign array
-		# 	copies = [bpy.context.object]
+			# Re-assign array
+			objects = [bpy.context.object]
 
 
-		pass
+		return objects

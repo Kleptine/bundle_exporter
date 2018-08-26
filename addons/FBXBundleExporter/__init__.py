@@ -101,37 +101,12 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		description="Padding for fences or space bundling",
 		subtype='DISTANCE'
 	)
-	merge = bpy.props.BoolProperty (
-		name="Merge",
-		default=False,
-		description="Merge objects in a bundle into a single mesh when exporting"
-	)
 	collapseBundles = bpy.props.BoolProperty (
 		name="Collapse",
 		default=False,
-		description="Collapse Bundle list view"
+		description="Compact list view"
 	)
 
-
-	copyModifier = bpy.props.BoolProperty (
-		name="Merge",
-		default=False,
-		description="Merge objects in a bundle into a single mesh when exporting"
-	)
-
-	# LOD_enable = bpy.props.BoolProperty (
-	# 	name="Merge",
-	# 	default=False,
-	# 	description=""
-	# )
-	# LOD_levels = bpy.props.IntProperty (
-	# 	name="LOD Levels",
-	# 	default=0,
-	# 	min=0,
-	# 	max=8,
-	# 	description="LOD levels to generate"
-	# )
-	# modifier_active = bpy.props.BoolVectorProperty()
 
 	mode_bundle = bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
@@ -213,7 +188,6 @@ class Panel_Core(bpy.types.Panel):
 		
 
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
-		col.prop(context.scene.FBXBundleSettings, "merge", text="Merge Meshes", expand=True)
 
 		# Warnings
 		if context.scene.FBXBundleSettings.path == "":
@@ -407,7 +381,6 @@ class Panel_Files(bpy.types.Panel):
 				if not context.scene.FBXBundleSettings.collapseBundles:
 					for i in range(0,len(objects)):
 						row = column.row(align=True)
-						row.active = not bpy.context.scene.FBXBundleSettings.merge
 						row.label(text=objects[i].name)
 
 

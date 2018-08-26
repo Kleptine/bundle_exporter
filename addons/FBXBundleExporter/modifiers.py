@@ -19,7 +19,7 @@ imp.reload(modifier_rename)
 
 modifiers = list([
 	modifier_merge.Modifier(),
-	# modifier_modifiers.Modifier(),
+	modifier_modifiers.Modifier(),
 	# modifier_LOD.Modifier(),
 	# modifier_collider.Modifier(),
 	# modifier_rename.Modifier()
