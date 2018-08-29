@@ -25,7 +25,6 @@ class Settings(modifier.Settings):
 
 
 class Modifier(modifier.Modifier):
-	mode = 'MERGE'
 	label = "Merge Meshes"
 	id = 'merge'
 	

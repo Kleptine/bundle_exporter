@@ -21,7 +21,6 @@ class Settings(bpy.types.PropertyGroup):
 
 
 class Modifier:
-	mode = 'NONE'
 	label = "Modifier"
 	id = 'modifier'
 
@@ -63,7 +62,8 @@ class Modifier:
 
 
 	def print(self):
-		print("Modifier '{}'' mode: {}".format(label, mode))
+		pass
+		# print("Modifier '{}'' mode: {}".format(label, mode))
 
 
 	def process_objects(self, name, objects):
