@@ -45,7 +45,6 @@ class Modifier(modifier.Modifier):
 
 	def process_objects(self, name, objects):
 
-		print("Process modifier merge with {} objects".format(len(objects)))
 		# Merge objects into single item
 		if not objects_organise.get_objects_animation(objects):
 			bpy.ops.object.join()
@@ -66,7 +65,6 @@ class Modifier(modifier.Modifier):
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 				bpy.ops.mesh.select_all(action='SELECT')
 
-				print("Merge mesh verts @ {}".format(self.get("merge_distance") ))
 				bpy.ops.mesh.remove_doubles(threshold = self.get("merge_distance"))
 
 				bpy.ops.mesh.select_all(action='DESELECT')

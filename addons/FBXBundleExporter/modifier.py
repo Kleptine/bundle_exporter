@@ -67,7 +67,6 @@ class Modifier:
 
 
 	def process_objects(self, name, objects):
-		print("Process objects! {}".format(name))
 		return objects
 
 

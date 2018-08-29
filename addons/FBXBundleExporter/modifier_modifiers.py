@@ -30,5 +30,19 @@ class Modifier(modifier.Modifier):
 			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
 			layout.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects")
 			if self.get('source') in bpy.data.objects:
+				row = layout.row()
+				row.enabled = False
 				count = len(bpy.data.objects[self.get('source')].modifiers)
-				layout.label(text="copyies {}x modifiers".format(count))
+				row.label(text="copyies {}x modifiers".format(count))
+
+
+	def process_objects(self, name, objects):
+		if self.get('source') in bpy.data.objects:
+			source = bpy.data.objects[ self.get('source') ]
+			source.select = True
+			bpy.context.scene.objects.active = source
+
+			bpy.ops.object.make_links_data(type='MODIFIERS')
+			source.select = False
+
+		

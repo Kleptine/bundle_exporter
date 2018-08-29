@@ -32,12 +32,8 @@ class op(bpy.types.Operator):
 
 
 	def execute(self, context):
-		print("Execute Apply modifier '{}'".format(self.modifier_index))
 
 		if self.modifier_index < len(modifiers.modifiers):
-			print("Yes index valid")
-
-
 			bundles = objects_organise.get_bundles()
 
 			if(len(bundles) > 0):
@@ -48,7 +44,6 @@ class op(bpy.types.Operator):
 						obj.select = True
 					bpy.context.scene.objects.active = objects[0]
 
-					print("Apply modifier to set {} ".format(fileName))
 					modifiers.modifiers[self.modifier_index].process_objects(fileName, objects)
 
 		return {'FINISHED'}
