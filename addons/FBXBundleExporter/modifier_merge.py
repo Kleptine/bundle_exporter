@@ -7,11 +7,17 @@ from . import modifier
 imp.reload(modifier) 
 
 class Settings(modifier.Settings):
-	pass
-	# active = bpy.props.BoolProperty (
-	# 	name="Active",
-	# 	default=False
-	# )
+	active = bpy.props.BoolProperty (
+		name="Active",
+		default=False
+	)
+	merge_distance = bpy.props.FloatProperty (
+		name="Merge Distance",
+		default=0,
+		min = 0,
+		description="Minimum distance of verts to merge. Set to 0 to disable.",
+		subtype='DISTANCE'
+	)
 
 
 class Modifier(modifier.Modifier):
@@ -19,7 +25,6 @@ class Modifier(modifier.Modifier):
 	label = "Merge Meshes"
 	id = 'merge'
 	
-
 	def __init__(self):
 		super().__init__()
 

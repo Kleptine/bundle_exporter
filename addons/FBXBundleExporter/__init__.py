@@ -190,6 +190,10 @@ class Panel_Core(bpy.types.Panel):
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
 
 		# Warnings
+		if context.active_object and context.active_object.mode != 'OBJECT':
+			box = col.box()
+			box.label(text="Not in object mode.", icon='ERROR')
+
 		if context.scene.FBXBundleSettings.path == "":
 			box = col.box()
 			box.label(text="No path defined", icon='ERROR')
@@ -236,19 +240,22 @@ class Panel_Tools(bpy.types.Panel):
 		# col.separator()
 
 		row = col.row(align=True)
-		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='GREASEPENCIL')
+		row.scale_y = 1.85
+		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='BORDER_RECT')
 		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
 
 		col.separator()
 
-		row = col.row(align=True)
-		row.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
+		col = col.column(align=True)
 
-		col.separator()
+		# row = col.row(align=True)
+		col.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
+
+		# col.separator()
 
 		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
 		
-		col.separator()
+		# col.separator()
 
 		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack Bundles", icon='UGLYPACKAGE')
 		
@@ -477,6 +484,7 @@ def register():
 
 	# Register modifier settings
 	for modifier in modifiers.modifiers:
+		print("loop name: {}".format(modifier.__module__))
 		modifier.register()
 
 

@@ -4,6 +4,11 @@ import operator
 import mathutils
 from mathutils import Vector
 
+import inspect
+
+
+
+
 class Settings(bpy.types.PropertyGroup):
 	active = bpy.props.BoolProperty (
 		name="Active",
@@ -27,7 +32,11 @@ class Modifier:
 
 
 	def register(self):
-		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
+		n = self.__module__.split(".")[-1]
+		# print("Register base class: n:{} ".format(n))
+
+		exec("from . import {}".format(n))
+		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type={}.Settings)".format(n))
 
 
 	def unregister(self):
