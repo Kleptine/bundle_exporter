@@ -4,9 +4,13 @@ import operator
 import mathutils
 from mathutils import Vector
 
-import inspect
+import imp
 
+from . import op_modifier_apply
+imp.reload(op_modifier_apply)
 
+from . import modifiers
+imp.reload(modifiers)
 
 
 class Settings(bpy.types.PropertyGroup):
@@ -52,12 +56,18 @@ class Modifier:
 		row.prop( eval("bpy.context.scene."+self.settings_path()) , "active", text="")
 		row.label(text="{}".format(self.label), icon='MODIFIER')
 
+		r = row.row()
+		r.enabled = self.get("active")
+		r.alignment = 'RIGHT'
+		r.operator( op_modifier_apply.op.bl_idname, icon='FILE_TICK' ).modifier_index = modifiers.modifiers.index(self)
+
 
 	def print(self):
 		print("Modifier '{}'' mode: {}".format(label, mode))
 
 
 	def process_objects(self, name, objects):
+		print("Process objects! {}".format(name))
 		return objects
 
 

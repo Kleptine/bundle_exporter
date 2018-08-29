@@ -113,6 +113,7 @@ def export(self, target_platform):
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in copies:
 			obj.select = True
+		bpy.context.scene.objects.active = copies[0]
 
 		# ...apply modifiers
 		for modifier in modifiers.modifiers:

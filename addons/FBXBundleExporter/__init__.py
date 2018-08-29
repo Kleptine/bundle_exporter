@@ -294,6 +294,10 @@ class Panel_Modifiers(bpy.types.Panel):
 		for modifier in modifiers.modifiers:
 			box = col.box()
 			modifier.draw(box)
+
+		r = col.row()
+		r.enabled = False
+		r.label(text="Modifiers are applied upon export")
 			
 		# 
 
