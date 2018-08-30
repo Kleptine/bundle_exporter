@@ -1,6 +1,10 @@
 import bpy, bmesh
 import math
+import imp
+
 from . import modifier
+imp.reload(modifier) 
+
 
 
 
@@ -10,14 +14,13 @@ class Settings(modifier.Settings):
 		default=False
 	)
 	levels = bpy.props.IntProperty (
-		default=2,
-		min=1,
-		max=5,
+		default=3,
+		min=2,
+		max=6,
 		subtype='FACTOR'
 	)
 	quality = bpy.props.FloatProperty (
-		name="Merge Verts",
-		default=0.3,
+		default=0.05,
 		min = 0.01,
 		max = 1,
 		description="Maximum quality ratio.",
@@ -26,7 +29,7 @@ class Settings(modifier.Settings):
 
 
 def get_quality(index, count, max_quality):
-	return 1 - (index+1)/count * (1 - max_quality)
+	return 1 - (index)/(count-1) * (1 - max_quality)
 
 
 class Modifier(modifier.Modifier):
@@ -49,7 +52,8 @@ class Modifier(modifier.Modifier):
 			for i in range(0, self.get("levels")):
 				r = col.row()
 				r.enabled = False
-				r.label(text="LOD{}".format(i+1))
+				icon = 'MESH_UVSPHERE' if i==0 else 'MESH_ICOSPHERE'
+				r.label(text="LOD{}".format(i), icon=icon)
 				r = r.row()
 				r.enabled = False
 				r.alignment = 'RIGHT'
@@ -63,4 +67,27 @@ class Modifier(modifier.Modifier):
 		# UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html
 		# UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
 		# 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
-		pass
+
+		new_objects = []
+		for obj in objects:
+			prefix = obj.name
+
+			obj.name = "{}_LOD{}".format(prefix, 0)
+			new_objects.append(obj)
+
+			for i in range(1, self.get("levels")):
+
+				# Select
+				bpy.ops.object.select_all(action="DESELECT")
+				obj.select = True
+				bpy.context.scene.objects.active = obj
+
+				# Copy & Decimate modifier
+				bpy.ops.object.duplicate()
+				bpy.context.object.name = "{}_LOD{}".format(prefix, i)
+				bpy.ops.object.modifier_add(type='DECIMATE')
+				bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.get("levels"), self.get("quality"))
+
+				new_objects.append(bpy.context.object)
+
+		return new_objects

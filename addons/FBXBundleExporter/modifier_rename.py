@@ -1,9 +1,12 @@
 import bpy, bmesh
+import imp
+
 from . import modifier
+imp.reload(modifier) 
 
 class Modifier(modifier.Modifier):
 	label = "Rename"
-	mode = 'RENAME'
+	id = 'rename'
 
 	def __init__(self):
 		super().__init__()

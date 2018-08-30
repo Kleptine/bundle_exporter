@@ -1,5 +1,8 @@
 import bpy, bmesh
+import imp
+
 from . import modifier
+imp.reload(modifier) 
 
 
 class Settings(modifier.Settings):
@@ -13,7 +16,7 @@ class Settings(modifier.Settings):
 
 class Modifier(modifier.Modifier):
 	label = "Copy Modifiers"
-	mode = 'MODIFIERS'
+	id = 'copy_modifiers'
 
 	def __init__(self):
 		super().__init__()

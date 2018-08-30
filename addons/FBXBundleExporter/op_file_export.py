@@ -120,9 +120,16 @@ def export(self, target_platform):
 			if modifier.get("active"):
 				copies = modifier.process_objects(name, copies)
 
+		# Select all copies
+		bpy.ops.object.select_all(action="DESELECT")
+		for obj in copies:
+			obj.select = True
 
+		# Export per platform (Unreal, Unity, ...)
 		platforms.platforms[mode].file_export(path)
 
+		# Delete copies
+		
 		bpy.ops.object.delete()
 		copies.clear()
 		

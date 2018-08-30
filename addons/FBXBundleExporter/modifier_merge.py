@@ -36,6 +36,8 @@ class Modifier(modifier.Modifier):
 		super().draw(layout)
 		if(self.get("active")):
 			row = layout.row()
+			row.separator()
+			row.separator()
 			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_active", text="", icon='AUTOMERGE_ON')
 			row_freeze = row.row()
 			row_freeze.enabled = self.get("merge_active")
