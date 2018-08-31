@@ -55,6 +55,10 @@ class Modifier(modifier.Modifier):
 
 			# bpy.context.scene.objects.active = objects[-1]
 
+			# Convert to mesh
+			bpy.ops.object.convert(target='MESH')
+
+
 			# Apply rotation
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 			
@@ -67,6 +71,8 @@ class Modifier(modifier.Modifier):
 				bpy.ops.mesh.select_all(action='SELECT')
 
 				bpy.ops.mesh.remove_doubles(threshold = self.get("merge_distance"))
+
+				bpy.ops.mesh.quads_convert_to_tris()
 
 				bpy.ops.mesh.select_all(action='DESELECT')
 				bpy.ops.object.mode_set(mode='OBJECT')

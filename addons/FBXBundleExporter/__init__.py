@@ -106,6 +106,11 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		default=False,
 		description="Compact list view"
 	)
+	includeChildren = bpy.props.BoolProperty (
+		name="Incl. Children",
+		default=False,
+		description="Include children in bundles"
+	)
 
 
 	mode_bundle = bpy.props.EnumProperty(items= 
@@ -188,6 +193,7 @@ class Panel_Core(bpy.types.Panel):
 		
 
 		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
+		col.prop(context.scene.FBXBundleSettings, "includeChildren", text="Include all children", expand=True)
 
 		# Warnings
 		if context.active_object and context.active_object.mode != 'OBJECT':
