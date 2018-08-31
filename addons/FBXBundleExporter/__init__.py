@@ -259,7 +259,7 @@ class Panel_Tools(bpy.types.Panel):
 
 		# col.separator()
 
-		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
+		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Imported Geometry", icon='MESH_ICOSPHERE')
 		
 		# col.separator()
 

@@ -8,11 +8,9 @@ import re
 import operator
 
 
-
-
 def is_object_valid(obj):
+	# Objects to include in a bundle as 'export-able'
 	return obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE'
-
 
 
 def get_objects():
@@ -21,12 +19,12 @@ def get_objects():
 		if is_object_valid(obj):
 			objects.append(obj)
 
-
 	# Include all children?
 	if len(objects) > 0 and bpy.context.scene.FBXBundleSettings.include_children:
+		
 		if bpy.context.scene.FBXBundleSettings.mode_bundle == 'PARENT':
-			# 1. Get root, then all nested children
-			limit = 100
+			# Collect parent and children objects
+			limit = 100 # max
 			roots = []
 
 			# Collect roots from input selection
@@ -41,48 +39,33 @@ def get_objects():
 					roots.append(root)
 
 			def collect_recursive(obj, depth):
-
 				if obj not in objects and is_object_valid(root):
 					objects.append(obj)
 				
-				if depth < limit:
+				if depth < limit:#Don't exceed limit on traversal depth
 					for child in obj.children:
 						collect_recursive(child, depth+1)
 
+			# Traverse loops and its nested elements
 			for root in roots:
 				collect_recursive(root, 0)
 
 		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'GROUP':
-			pass
+			# Collect group objects
+			groups = []
 
-	'''
+			# Collect groups from input selection
+			for obj in objects:
+				for group in obj.users_group:
+					if group.name not in groups:
+						groups.append(group.name)
 
-	elif mode_bundle == 'PARENT':
-		# Use group name
-		if obj.parent:
-			limit = 100
-			obj_parent = obj.parent
-			for i in range(limit):
-				if obj_parent.parent:
-					obj_parent = obj_parent.parent
-				else:
-					break
-			return obj_parent.name
-		else:
-			return obj.name
-
-	elif mode_bundle == 'GROUP':
-		# Use group name
-		if len(obj.users_group) >= 1:
-			return obj.users_group[0].name
-
-	'''
-
-
-
-
-
-
+			# Collect objects of groups
+			for name in groups:
+				if name in bpy.data.groups:
+					for obj in bpy.data.groups[name].objects:
+						if obj not in objects and is_object_valid(obj):
+							objects.append(obj)
 
 	return sort_objects_name(objects)
 

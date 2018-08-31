@@ -11,17 +11,22 @@ class Settings(modifier.Settings):
 		name="Active",
 		default=False
 	)
-	merge_active = bpy.props.BoolProperty (
+	merge_verts = bpy.props.BoolProperty (
 		name="Merge",
 		default=False
 	)
 	merge_distance = bpy.props.FloatProperty (
-		name="Merge Verts",
+		name="Dist.",
 		default=0,
 		min = 0,
 		description="Minimum distance of verts to merge. Set to 0 to disable.",
 		subtype='DISTANCE'
 	)
+	consistent_normals = bpy.props.BoolProperty (
+		name="Make consistent Normals",
+		default=True
+	)
+
 
 
 class Modifier(modifier.Modifier):
@@ -35,13 +40,22 @@ class Modifier(modifier.Modifier):
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
-			row = layout.row()
+			col = layout.column(align=True)
+
+			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_active", text="", icon='AUTOMERGE_ON')
+			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_verts", text="Merge Verts")
 			row_freeze = row.row()
-			row_freeze.enabled = self.get("merge_active")
+			row_freeze.enabled = self.get("merge_verts")
 			row_freeze.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_distance")
+
+			row = col.row(align=True)
+			row.separator()
+			row.separator()
+			row.prop( eval("bpy.context.scene."+self.settings_path()) , "consistent_normals", text="Consistent Normals")
+			
+			
 
 
 	def process_objects(self, name, objects):
@@ -64,7 +78,7 @@ class Modifier(modifier.Modifier):
 			
 
 			# Merge Vertices?
-			if(self.get("merge_active") and self.get("merge_distance") > 0):
+			if self.get("merge_verts") and self.get("merge_distance") > 0:
 
 				bpy.ops.object.mode_set(mode='EDIT')
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
@@ -76,6 +90,18 @@ class Modifier(modifier.Modifier):
 
 				bpy.ops.mesh.select_all(action='DESELECT')
 				bpy.ops.object.mode_set(mode='OBJECT')
+
+			
+			if self.get("consistent_normals") :
+				bpy.ops.object.mode_set(mode='EDIT')
+				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+				bpy.ops.mesh.select_all(action='SELECT')
+
+				bpy.ops.mesh.normals_make_consistent(inside=False)
+
+				bpy.ops.mesh.select_all(action='DESELECT')
+				bpy.ops.object.mode_set(mode='OBJECT')
+
 
 			# Re-assign array
 			objects = [bpy.context.object]

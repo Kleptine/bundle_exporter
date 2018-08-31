@@ -11,7 +11,7 @@ from . import gp_draw
 
 class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.fix_geometry"
-	bl_label = "Fix Geometry"
+	bl_label = "Fix Imported Geometry"
 	bl_description = "Remove custom splitnormals, consistent normals, fix exceeding > 8 UV coordinates"
 
 	def execute(self, context):
