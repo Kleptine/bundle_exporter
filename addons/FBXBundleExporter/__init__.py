@@ -109,7 +109,7 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	include_children = bpy.props.BoolProperty (
 		name="Incl. Children",
 		default=False,
-		description="Include children in bundles"
+		description="Include nested children in bundles, e.g parent or group."
 	)
 
 
@@ -191,9 +191,9 @@ class Panel_Core(bpy.types.Panel):
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
 		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
-
-		col.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
-		col.prop(context.scene.FBXBundleSettings, "include_children", text="Include all children", expand=True)
+		row = col.row(align=True)
+		row.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
+		row.prop(context.scene.FBXBundleSettings, "include_children", text="Include children", expand=True)
 
 		# Warnings
 		if context.active_object and context.active_object.mode != 'OBJECT':
@@ -211,6 +211,10 @@ class Panel_Core(bpy.types.Panel):
 		elif mode not in platforms.platforms:
 			box = col.box()
 			box.label(text="Platform not implemented", icon='ERROR')
+		
+		elif context.scene.FBXBundleSettings.mode_bundle == 'GROUP' and len(bpy.data.groups) == 0:
+			box = col.box()
+			box.label(text="No groups available", icon='ERROR')
 
 		elif not platforms.platforms[mode].is_valid()[0]:
 			box = col.box()
@@ -263,7 +267,7 @@ class Panel_Tools(bpy.types.Panel):
 		
 		# col.separator()
 
-		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack Bundles", icon='UGLYPACKAGE')
+		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
 		
 
 
@@ -374,9 +378,9 @@ class Panel_Files(bpy.types.Panel):
 					row.alert = True
 				
 				# Icon type
-				icon = 'MESH_CUBE';
-				if objects_organise.get_objects_animation(objects):
-					icon = 'RENDER_ANIMATION';
+				# icon_item = icon;
+				# if objects_organise.get_objects_animation(objects):
+				# 	icon_item = 'RENDER_ANIMATION';
 
 				# Show label for FBX bundle
 				label = fileName
@@ -385,7 +389,7 @@ class Panel_Files(bpy.types.Panel):
 				if(len(objects) > 1):
 					label = "{}  {}x".format(label, len(objects));
 
-				row.operator(op_select.bl_idname,icon=icon, emboss=False, text=label).key = fileName
+				row.operator(op_select.bl_idname,icon_value=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName

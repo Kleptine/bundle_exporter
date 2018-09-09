@@ -31,7 +31,7 @@ class Settings(modifier.Settings):
 
 
 class Modifier(modifier.Modifier):
-	label = "Collider"
+	label = "Collider Mesh"
 	id = 'collider'
 
 
