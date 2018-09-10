@@ -7,6 +7,10 @@ import random
 import re
 import operator
 import json
+import imp
+
+from . import platforms
+imp.reload(platforms)
 
 
 def is_object_valid(obj):
@@ -125,13 +129,22 @@ def recent_store(bundles):
 	bpy.context.scene.FBXBundleSettings.recent = json.dumps(dic).encode().decode()
 
 
+
 def recent_get_label():
 	recent = bpy.context.scene.FBXBundleSettings.recent
-	if len(recent) > 0:
-		dic = json.loads(recent.encode().decode())
-		if 'bundles' in dic and len(dic['bundles']) > 0:
-			return "Re-Export "+",".join(dic['bundles'])
+	mode = bpy.context.scene.FBXBundleSettings.target_platform
+
+	if mode in platforms.platforms:
+		if len(recent) > 0:
+			dic = json.loads(recent.encode().decode())
+			ext = platforms.platforms[mode].extension
+			if 'bundles' in dic and len(dic['bundles']) > 0:
+				names = [name+"."+ext for name in dic['bundles']]
+
+				return "{}x: ".format(len(dic['bundles']))+", ".join(names)
+
 	return "Re-Export"
+
 
 
 def recent_load_objects():

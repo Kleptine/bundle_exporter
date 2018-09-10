@@ -22,8 +22,8 @@ imp.reload(modifier_vertex_ao)
 # imp.reload(modifier_rename) 
 
 modifiers = list([
-	modifier_merge.Modifier(),
 	modifier_copy_modifiers.Modifier(),
+	modifier_merge.Modifier(),
 	modifier_collider.Modifier(),
 	modifier_LOD.Modifier(),
 	modifier_vertex_ao.Modifier(),

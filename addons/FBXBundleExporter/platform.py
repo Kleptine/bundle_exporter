@@ -10,7 +10,8 @@ class Platform:
 	extension = 'fbx'
 
 	def __init__(self):
-		print("Create platform")
+		pass
+		# print("Create platform")
 
 
 	def get_filename(self, filename):

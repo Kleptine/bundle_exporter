@@ -251,11 +251,6 @@ class Panel_Tools(bpy.types.Panel):
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
-
-		# col = layout.column(align=True)
-
-		# col.separator()
-
 		row = col.row(align=True)
 		row.scale_y = 1.85
 		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='BORDER_RECT')
@@ -265,20 +260,10 @@ class Panel_Tools(bpy.types.Panel):
 
 		col = col.column(align=True)
 
-		# row = col.row(align=True)
 		col.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
-
-		# col.separator()
-
 		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Imported Geometry", icon='MESH_ICOSPHERE')
-		
-		# col.separator()
-
 		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
 		
-
-
-
 		if bpy.app.debug_value != 0:
 			row = layout.row(align=True)
 			row.alert =True
@@ -303,11 +288,6 @@ class Panel_Modifiers(bpy.types.Panel):
 		layout = self.layout
 		col = layout.column()
 
-
-		# global modifiers
-		# mods = modifiers
-
-		# col.label(text="Modifiers {}x".format(len(modifiers)))	
 		for modifier in modifiers.modifiers:
 			box = col.box()
 			modifier.draw(box)
@@ -315,13 +295,6 @@ class Panel_Modifiers(bpy.types.Panel):
 		r = col.row()
 		r.enabled = False
 		r.label(text="Modifiers are applied upon export")
-			
-		# 
-
-
-		# col.prop(context.scene.FBXBundleSettings, "LOD_enable", text="LOD", expand=True)
-
-
 
 
 class Panel_Files(bpy.types.Panel):
@@ -354,7 +327,7 @@ class Panel_Files(bpy.types.Panel):
 		if len(bpy.context.scene.FBXBundleSettings.recent) > 0:
 			if len(objects_organise.recent_load_objects()) > 0:
 				row = col.row(align=True)
-				row.scale_y = 1.85
+				row.scale_y = 1.3
 				row.operator(op_file_export_recent.op.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
 
 		layout.separator()

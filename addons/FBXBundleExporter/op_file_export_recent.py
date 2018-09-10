@@ -15,7 +15,7 @@ imp.reload(platforms)
 class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.file_export_recent"
 	bl_label = "export recent"
-	bl_description = "Export recent exported Bundle again."
+	bl_description = "Re-Export recent exported Bundle again."
 
 	@classmethod
 	def poll(cls, context):
