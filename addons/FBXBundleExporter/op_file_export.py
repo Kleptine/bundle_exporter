@@ -80,6 +80,8 @@ def export(self, target_platform):
 	bpy.context.scene.unit_settings.system = 'METRIC'	
 	bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
 
+	objects_organise.recent_store(bundles)
+
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()
 

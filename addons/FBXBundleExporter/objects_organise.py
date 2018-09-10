@@ -6,6 +6,7 @@ import math
 import random
 import re
 import operator
+import json
 
 
 def is_object_valid(obj):
@@ -109,6 +110,42 @@ def get_object_animation(obj):
 
 	# No animation found
 	return False
+
+
+
+def recent_store(bundles):
+	dic = {}
+	dic['selection'] = []
+	dic['bundles'] = []
+	for name,objects in bundles.items():
+		dic['bundles'].append(name)
+		for obj in objects:
+			dic['selection'].append(obj.name)
+
+	bpy.context.scene.FBXBundleSettings.recent = json.dumps(dic).encode().decode()
+
+
+def recent_get_label():
+	recent = bpy.context.scene.FBXBundleSettings.recent
+	if len(recent) > 0:
+		dic = json.loads(recent.encode().decode())
+		if 'bundles' in dic and len(dic['bundles']) > 0:
+			return "Re-Export "+",".join(dic['bundles'])
+	return "Re-Export"
+
+
+def recent_load_objects():
+	recent = bpy.context.scene.FBXBundleSettings.recent
+	if len(recent) > 0:
+		dic = json.loads(recent.encode().decode())
+		if 'selection' in dic and len(dic['selection']) > 0:
+			objects = []
+			for name in dic['selection']:
+				if name in bpy.data.objects:
+					objects.append(bpy.data.objects[name])
+			return objects
+	return []
+	
 
 
 

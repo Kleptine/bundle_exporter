@@ -8,6 +8,7 @@ if "bpy" in locals():
 	imp.reload(op_fence_draw)
 	imp.reload(op_file_copy_unity_script)
 	imp.reload(op_file_export)
+	imp.reload(op_file_export_recent)
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
@@ -26,6 +27,7 @@ else:
 	from . import op_fence_draw
 	from . import op_file_copy_unity_script
 	from . import op_file_export
+	from . import op_file_export_recent
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
@@ -111,6 +113,10 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		default=False,
 		description="Include nested children in bundles, e.g parent or group."
 	)
+	recent = bpy.props.StringProperty (
+		name="Recent export",
+		default=""
+	)
 
 
 	mode_bundle = bpy.props.EnumProperty(items= 
@@ -184,8 +190,9 @@ class Panel_Core(bpy.types.Panel):
 		if context.scene.FBXBundleSettings.path == "":
 			row.alert = True
 		row.prop(context.scene.FBXBundleSettings, "path", text="")
-		row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
-
+		if context.scene.FBXBundleSettings.path != "":
+			row = row.row(align=True)
+			row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
 
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
@@ -336,16 +343,20 @@ class Panel_Files(bpy.types.Panel):
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 
 		col = layout.column(align=True)	
-
-
-		
-
 		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
+		
+		col = layout.column(align=True)	
 		row = col.row(align=True)
 		row.scale_y = 1.85
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 		
+		if len(bpy.context.scene.FBXBundleSettings.recent) > 0:
+			if len(objects_organise.recent_load_objects()) > 0:
+				row = col.row(align=True)
+				row.scale_y = 1.85
+				row.operator(op_file_export_recent.op.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
+
 		layout.separator()
 
 		
