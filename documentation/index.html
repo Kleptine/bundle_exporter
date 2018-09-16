@@ -4,40 +4,70 @@
 <meta charset="UTF-8">
 <title>FBX Bundle</title>
 <link href="style.css" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=News+Cycle" rel="stylesheet">
 </head>
 
 <body>
 <main>
 	<!-- The sidebar -->
-<div class="sidebar"><a href="#home">Download</a> <a class="active" href="#home">Installation</a> <a href="#news">Quick Guide</a> <a href="#contact">Settings</a> <a href="#about">Tools</a> <a href="#about">Modifiers</a> <a href="#about">Bundles Panel</a> </div>
+<div class="sidebar"><img src="images/logo.png"> <a href="#home">Download</a> <a class="active" href="#home">Installation</a> <a href="#news">Quick Guide</a> <a href="#contact">Settings</a> <a href="#about">Tools</a> <a href="#about">Modifiers</a> <a href="#about">Bundles Panel</a> </div>
+
+<panel>
 <h1> FBX Bundle</h1>
 <p>FBX Bundle addon batch exports your object selection into file bundles by a common identifier. To export for game engines such as Unity or Unreal.  It is easy to use and requires just a single click to export or update game assets to your game engine. </p>
 <p>Optional modifiers allow to automate game engine optimisations such as LOD generation, mesh optimisations or creation of collider meshes. </p>
-<h2>Download</h2>
+<subpanel>
+<h3>Download</h3>
 <ul>
-	<li><a href="#">FBX Bundle Version 1.2.0.zip</a></li>
+	<li><a href="http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.3.0.zip">FBX_Bundle_1.3.0.zip</a><a href="#"></a></li>
+	<li><a href="http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.2.0.zip">FBX_Bundle_1.2.0.zip</a></li>
+	<li><a href="http://renderhjs.net/blender/fbx_bundle/FBX_Bundle_1.1.0.zip">FBX_Bundle_1.1.0.zip</a></li>
 </ul>
-<h2>Installation</h2>
+</subpanel>
+
+<subpanel>
+<h3>Installation</h3>
 <ol>
-	<li>Download the latest addon from </li>
 	<li>Open User Preferences in Blender and select the Add-ons tab</li>
 	<li>Press Install Addon and Select the zip file</li>
 	<li> Enable the FBX Bundle Addon</li>
 </ol><p>The FBX Bundle addon can be found the viewport tool panel</p>
-<h2>Quick Guide: Unity</h2>
+</subpanel>
+</panel>
+
+<panel>
+<h1>Quick Guide: Unity</h1>
 <p>....</p>
-<h2>Settings</h2>
-<p>...</p>
+<ol>
+  <li>Setup the export path and point it to your asset folder in Unity. </li>
+  <li>Under the addon preferences for FBX bundle press 'Copy Unity Editor script’ and select your Unity Assets folder. </li>
+  <li>Create a material in Blender and assign it to your object(s). </li>
+  <li>Create a material in Unity with the same name as the material in blender. </li>
+  <li>In Blender enable the Merge Meshes modifier and the LOD modifier </li>
+  <li>Select your object(s) and press 'Export </li>
+</ol>
+</panel>
+
+<panel>
+<h1>Settings</h1>
+<p>All settings are stored per blender scene and allow therefore per scene unique configurations. </p>
+<subpanel>
 <h3>Platform</h3>
 <p>Choose different platforms to export for. Available modes are: </p>
 <ul>
 	<li>Unity: Applies the correct metric scale and fixes the y /z roation issues. An optional Unity editor script allows to automatically assign materials and collider meshes. </li>
 	<li>Unreal: Applies the correct metric scale. </li>
 	<li>Blender: Uses collada files (DAE) to export. </li>
-	<li>glTF: Uses the new glTF file format to export. Requires the glTF addon to be installed. glTF is a promosing format to compete with FBX</li>
+	<li>glTF: Uses the new glTF file format to export. Requires the <a href="https://github.com/KhronosGroup/glTF-Blender-Exporter">glTF addon</a> to be installed. glTF is a promosing format to compete with FBX</li>
 </ul>
+</subpanel>
+
+<subpanel>
 <h3>Path </h3>
 <p>Defines the export or import target path.</p>
+</subpanel>
+
+<subpanel>
 <h3>Bundle Mode </h3>
 <p>Defines the rule as to how to group your object selection into different file bundles. The following modes are available: </p>
 <ul>
@@ -47,6 +77,9 @@
 	<li><strong>Material</strong>: Objects with the same material are bundled together. The name of the material is used for each file name. </li>
 	<li><strong>Scene</strong>: Objects from the same scene are bundled together. The name of the scene is used for each file name.</li>
 </ul>
+</subpanel>
+
+<subpanel>
 <h3>Export Pivot Mode</h3>
 <p> Defines the source of the scene pivot upon exporting. The following modes are available: </p>
 <ul>
@@ -56,28 +89,49 @@
 	<li>Scene 0,0,0: </li>
 	<li>Parent: </li>
 </ul>
+</subpanel>
+
+<subpanel>
 <h3>Padding</h3>
 <p>This padding value is used for various tools but most notable for the &lsquo;Draw Fences&rsquo; feature where it defines a padding used to draw around the bundles.</p>
 <h3>Include children</h3>
 <p>When enabled will automatically include children of parented objects or groups if either bundle mode is active. This means that it often is enough to select just a single object of a bundle instead of all to bundle them for export.</p>
 <br>
-<h2>Tools</h2>
+</subpanel>
+</panel>
+
+<panel>
+<h1>Tools</h1>
+<subpanel>
 <h3>Draw Fences</h3>
 <p>Draw grease pencil fences around the current selected bundles in your scene. A pole with a flag indicates the pivot for each bundle under the current pivot mode.</p>
+</subpanel>
+
+<subpanel>
 <h3>Ground Pivot</h3>
 <p>…</p>
+</subpanel>
+
+<subpanel>
 <h3>Pack &amp; Arrange</h3>
 <p>...</p>
-<br>
-<h2>Modifiers</h2>
+</subpanel>
+</panel>
+
+<panel>
+<h1>Modifiers</h1>
 <p>Modifiers are applied in the export process on a copy of your actual objects. They are used to automate common repetitive tasks that are often associated with preparing assets. Modifiers are executed from top to bottom order.</p>
-<br />
+
+<subpanel>
 <h3>Apply </h3>
 <p>Press the &lsquo;Apply&rsquo; button to apply individual modifiers to your selection during editing in Blender. This is a great way to preview the settings of individual modifiers.</p>
+</subpanel>
+
+<subpanel>
 <h3>Merge Meshes</h3>
 <p>Merges all meshes of a bundle into a single mesh and object. This modifier is ideal for static environment assets.</p>
 <br />
-<p>Options:</p>
+<p><strong>Options</strong>:</p>
 <ul>
 	<li>
 		<p>Merge Verts: Merges vertices within a specified radius. This is identical to removing double vertices in mesh editing.</p>
@@ -86,21 +140,25 @@
 		<p>Consistent Normals: Applies a &lsquo;Consistent Normals&rsquo; operator on all meshes so mesh elements have a consistent and common normal direction.</p>
 	</li>
 </ul>
-<br />
+</subpanel>
+
+<subpanel>
 <h3>Copy Modifiers</h3>
 <p>Copies blender modifiers from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export.</p>
 <br />
-<p>Options:</p>
+<p><strong>Options</strong>:</p>
 <ul>
 	<li>
 		<p>Source Object: The source object in your blend file from which to copy the modifiers.</p>
 	</li>
 </ul>
-<br />
+</subpanel>
+
+<subpanel>
 <h3>Collider Mesh</h3>
 <p>Creates an additional collider mesh for each object in a bundle with a simplified geometry.<br />
 </p>
-<p>Options:</p>
+<p><strong>Options</strong>:</p>
 <ul>
 	<li>
 		<p>Ratio: The quality ratio of the collider mesh, a value of 0.25 means that the collider mesh will aim for a 25% vertex count to the original object.</p>
@@ -109,12 +167,14 @@
 		<p>Angle: The flattening angle of face normals to further compress the collider geometry. The bigger the angle the more blocky the collider.</p>
 	</li>
 </ul>
-<br />
+</subpanel>
+
+<subpanel>
 <h3>LOD</h3>
 <p>Also known as level of detail which is a technique used in game engines to optimize performance. This modifier creates a series of copies of each object in your bundle with a reduced triangle count for each LOD step and a name indicating the LOD level.</p>
 <p>LOD levels are preview in the modifier panel with the compression ratio and LOD level.</p>
 <br />
-<p>Options:</p>
+<p><strong>Options</strong>:</p>
 <ul>
 	<li>
 		<p>Steps: How many LOD steps would you like to have.</p>
@@ -123,14 +183,25 @@
 		<p>Quality: The furthest away LOD compression ratio. A value of 0.05 means that LOD steps will range from 100% down to 5% geometry level.</p>
 	</li>
 </ul>
-<br />
+</subpanel>
+
+<subpanel>
 <h3>Vertex AO</h3>
 <p>This modifier applies vertex color based ambient occlusion to each mesh of a bundle. This is a great way of adding AO depth without the limitation of texture resolution, file or memory size of textures.</p>
+</subpanel>
+
+
+</panel>
+
+<panel>
 <h2>Bundles Panel</h2>
 <p>This panel lists in realtime the current evaluated bundles of your scene selection. As you change your selection in Blender this list will adjust and show you the file names that will be exported.</p>
-<br />
+<subpanel>
 <h3>Import</h3>
 <p>Batch imports all 3D files from the specified path into the scene.</p>
+</subpanel>
+
+<subpanel>
 <h3>Export</h3>
 <p>Batch exports your selected objects into file bundles. Upon each bundle export the following happens:</p>
 <ol>
@@ -150,10 +221,18 @@
 		<p>Copies are removed and previous selections are restored</p>
 	</li>
 </ol>
+</subpanel>
+
+<subpanel>
 <h3>Re-Export</h3>
 <p>Once you exported a model before FBX Bundle will remember the previous bundles you exported. Pressing the re-export button will export the very same objects from last time so you don&rsquo;t have to manually select your objects to export.</p>
-<p>&nbsp;</p>
-	
+</subpanel>
+
+
+	</panel>
+    
+    
+    
 	</main>
 
 </body>
