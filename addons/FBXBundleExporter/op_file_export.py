@@ -54,6 +54,10 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
 
+	if len(bpy.context.selected_objects) == 0 and not bpy.context.scene.objects.active:
+		self.report({'ERROR_INVALID_INPUT'}, "No objects selected" )
+		return
+
 	# Is Mode available?
 	mode = bpy.context.scene.FBXBundleSettings.target_platform
 	if mode not in platforms.platforms:
@@ -65,10 +69,6 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, platforms.platforms[mode].is_valid()[1] )
 		return			
 
-	
-	bpy.ops.object.mode_set(mode='OBJECT')
-
-	bundles = objects_organise.get_bundles()
 
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
@@ -76,6 +76,16 @@ def export(self, target_platform):
 	previous_unit_system = bpy.context.scene.unit_settings.system
 	previous_pivot = bpy.context.space_data.pivot_point
 	previous_cursor = bpy.context.space_data.cursor_location.copy()
+
+	if not bpy.context.scene.objects.active:
+		bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+	bundles = objects_organise.get_bundles()
+
+	
+
+
 
 	bpy.context.scene.unit_settings.system = 'METRIC'	
 	bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
