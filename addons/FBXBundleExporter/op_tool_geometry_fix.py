@@ -3,6 +3,7 @@ import os
 import mathutils
 from mathutils import Vector
 import operator
+import math
 
 from . import objects_organise
 from . import gp_draw
@@ -27,6 +28,10 @@ class op(bpy.types.Operator):
 				bpy.ops.object.select_all(action="DESELECT")
 				obj.select = True
 				
+				# Enable auto smooth
+				bpy.context.object.data.use_auto_smooth = True
+				bpy.context.object.data.auto_smooth_angle = 30 * math.pi / 180
+
 
 				# Clear custom normals data
 				bpy.ops.mesh.customdata_custom_splitnormals_clear()
@@ -37,6 +42,10 @@ class op(bpy.types.Operator):
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 				bpy.ops.mesh.select_all(action='SELECT')
 				bpy.ops.mesh.remove_doubles()
+
+				# Smooth faces
+				bpy.ops.mesh.faces_shade_smooth()
+
 
 				# Recalculate Normals
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
