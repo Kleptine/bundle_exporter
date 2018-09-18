@@ -15,6 +15,11 @@ class Settings(modifier.Settings):
 		name="Merge",
 		default=False
 	)
+	merge_by_material = bpy.props.BoolProperty (
+		name="By Material",
+		default=False
+	)
+
 	merge_distance = bpy.props.FloatProperty (
 		name="Dist.",
 		default=0,
@@ -54,6 +59,13 @@ class Modifier(modifier.Modifier):
 			row.separator()
 			row.separator()
 			row.prop( eval("bpy.context.scene."+self.settings_path()) , "consistent_normals", text="Consistent Normals")
+
+			row = col.row(align=True)
+			row.separator()
+			row.separator()
+			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_by_material", text="Merge by Material")
+
+
 			
 			
 
@@ -102,6 +114,10 @@ class Modifier(modifier.Modifier):
 				bpy.ops.mesh.select_all(action='DESELECT')
 				bpy.ops.object.mode_set(mode='OBJECT')
 
+
+			if self.get("merge_by_material") :
+				# TODO: Split faces by materials
+				pass
 
 			# Re-assign array
 			objects = [bpy.context.object]

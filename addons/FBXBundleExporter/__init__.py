@@ -261,10 +261,13 @@ class Panel_Tools(bpy.types.Panel):
 		col = col.column(align=True)
 
 		col.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
-		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Imported Geometry", icon='MESH_ICOSPHERE')
-		col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
+		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
 		
 		if bpy.app.debug_value != 0:
+			col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
+		
+
+
 			row = layout.row(align=True)
 			row.alert =True
 			row.operator(op_fence_clear.op.bl_idname, text="Pack", icon='IMGDISPLAY')
