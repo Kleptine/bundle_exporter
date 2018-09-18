@@ -13,10 +13,12 @@ class Settings(modifier.Settings):
 	)
 	merge_verts = bpy.props.BoolProperty (
 		name="Merge",
+		description="Split meshes by material after merging.",
 		default=False
 	)
 	merge_by_material = bpy.props.BoolProperty (
 		name="By Material",
+		description="Split meshes by material after merging.",
 		default=False
 	)
 
@@ -27,10 +29,10 @@ class Settings(modifier.Settings):
 		description="Minimum distance of verts to merge. Set to 0 to disable.",
 		subtype='DISTANCE'
 	)
-	consistent_normals = bpy.props.BoolProperty (
-		name="Make consistent Normals",
-		default=True
-	)
+	# consistent_normals = bpy.props.BoolProperty (
+	# 	name="Make consistent Normals",
+	# 	default=True
+	# )
 
 
 
@@ -58,12 +60,7 @@ class Modifier(modifier.Modifier):
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "consistent_normals", text="Consistent Normals")
-
-			row = col.row(align=True)
-			row.separator()
-			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_by_material", text="Merge by Material")
+			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_by_material", text="Split by Material")
 
 
 			
@@ -104,20 +101,40 @@ class Modifier(modifier.Modifier):
 				bpy.ops.object.mode_set(mode='OBJECT')
 
 			
-			if self.get("consistent_normals") :
-				bpy.ops.object.mode_set(mode='EDIT')
-				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-				bpy.ops.mesh.select_all(action='SELECT')
+			# if self.get("consistent_normals") :
+			# 	bpy.ops.object.mode_set(mode='EDIT')
+			# 	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+			# 	bpy.ops.mesh.select_all(action='SELECT')
 
-				bpy.ops.mesh.normals_make_consistent(inside=False)
+			# 	bpy.ops.mesh.normals_make_consistent(inside=False)
 
-				bpy.ops.mesh.select_all(action='DESELECT')
-				bpy.ops.object.mode_set(mode='OBJECT')
+			# 	bpy.ops.mesh.select_all(action='DESELECT')
+			# 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
 			if self.get("merge_by_material") :
 				# TODO: Split faces by materials
-				pass
+
+				bpy.ops.object.mode_set(mode='EDIT')
+				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+				
+
+				mats = []
+				for i in range(0, len(bpy.context.object.material_slots)):
+				# for slot in bpy.context.object.material_slots:
+					slot = bpy.context.object.material_slots[i]
+					if slot.material and slot.material not in mats:
+						mat = slot.material 
+						bpy.ops.mesh.select_all(action='DESELECT')
+						bpy.context.object.active_material_index = i
+						bpy.ops.object.material_slot_select()
+
+
+						mats.append(mat)
+
+				print("Mats: {}x".format( len(mats) ))
+
+				bpy.ops.object.mode_set(mode='OBJECT')
 
 			# Re-assign array
 			objects = [bpy.context.object]

@@ -322,7 +322,7 @@ class Panel_Files(bpy.types.Panel):
 		row = col.row(align=True)
 		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		
-		col = layout.column(align=True)	
+		# col = layout.column(align=True)	
 		row = col.row(align=True)
 		row.scale_y = 1.85
 		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)

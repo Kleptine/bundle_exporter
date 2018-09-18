@@ -149,7 +149,7 @@ def recent_get_label():
 			if 'bundles' in dic and len(dic['bundles']) > 0:
 				names = [name+"."+ext for name in dic['bundles']]
 
-				return "{}x: ".format(len(dic['bundles']))+", ".join(names)
+				return "Re-Export: ".format(len(dic['bundles']))+", ".join(names)
 
 	return "Re-Export"
 
