@@ -73,7 +73,7 @@ def get_objects():
 							objects.append(obj)
 
 		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'SCENE':
-			# Collect groups from input selection
+			# Include all objects of the scene
 			for obj in bpy.context.scene.objects:
 				if obj not in objects and is_object_valid(obj):
 					objects.append(obj)
