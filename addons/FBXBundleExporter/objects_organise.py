@@ -72,6 +72,14 @@ def get_objects():
 						if obj not in objects and is_object_valid(obj):
 							objects.append(obj)
 
+		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'SCENE':
+			# Collect groups from input selection
+			for obj in bpy.context.scene.objects:
+				if obj not in objects and is_object_valid(obj):
+					objects.append(obj)
+
+
+
 	return sort_objects_name(objects)
 
 
