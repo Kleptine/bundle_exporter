@@ -11,7 +11,6 @@ class Platform:
 
 	def __init__(self):
 		pass
-		# print("Create platform")
 
 
 	def get_filename(self, filename):

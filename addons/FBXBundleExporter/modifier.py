@@ -25,7 +25,6 @@ class Modifier:
 	id = 'modifier'
 
 	def __init__(self):
-		print("Create class modifier")
 		pass
 
 	#region Description

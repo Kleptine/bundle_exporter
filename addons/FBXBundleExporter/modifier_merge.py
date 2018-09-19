@@ -1,6 +1,10 @@
 import bpy, bmesh
 import imp
+import string
+import random
 from mathutils import Vector
+
+
 from . import objects_organise
 
 from . import modifier
@@ -71,16 +75,15 @@ class Modifier(modifier.Modifier):
 
 		# Merge objects into single item
 		if not objects_organise.get_objects_animation(objects):
+
+
 			bpy.ops.object.join()
 			bpy.context.object.name = name #assign bundle name
 			bpy.context.space_data.cursor_location = Vector((0,0,0))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-			# bpy.context.scene.objects.active = objects[-1]
-
 			# Convert to mesh
 			bpy.ops.object.convert(target='MESH')
-
 
 			# Apply rotation
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
@@ -118,26 +121,73 @@ class Modifier(modifier.Modifier):
 				bpy.ops.object.mode_set(mode='EDIT')
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
 				
+				# Rename with unique ID
+				prefix = "{}_{}".format( name, id_generator() )
+				
+				
 
-				mats = []
+				mats = {}
 				for i in range(0, len(bpy.context.object.material_slots)):
-				# for slot in bpy.context.object.material_slots:
+
 					slot = bpy.context.object.material_slots[i]
 					if slot.material and slot.material not in mats:
+						# Store prefx by material
+						prefix_mat = "{}_{}".format(prefix, slot.material.name)
+						
+						bpy.context.object.name = prefix_mat
+
 						mat = slot.material 
+						mats[mat] = prefix_mat
+
+
 						bpy.ops.mesh.select_all(action='DESELECT')
 						bpy.context.object.active_material_index = i
 						bpy.ops.object.material_slot_select()
 
+						bpy.ops.mesh.separate(type='SELECTED')
 
-						mats.append(mat)
+				
+				bpy.ops.object.mode_set(mode='OBJECT')
+
+				mat_objs = []
+				for obj in bpy.context.scene.objects:
+					if prefix in obj.name:
+						if len(obj.data.vertices) == 0:
+							bpy.ops.object.select_all(action='DESELECT')
+							obj.select = True
+							bpy.ops.object.delete()
+						else:
+							mat_objs.append(obj)
+
+				# Combine & Rename by materials
+				for mat in mats:
+					prefix_mat = mats[mat]
+					for obj in mat_objs:
+
+						bpy.ops.object.select_all(action='DESELECT')
+						bpy.context.scene.objects.active = obj
+						obj.select = True
+
+						if prefix_mat in obj.name:
+
+							for i in range( len(obj.material_slots)-1 ):
+								bpy.ops.object.material_slot_remove()
+							obj.material_slots[0].material = mat
+
+							obj.name = "{}_{}".format(name, mat.name)
+
+				return mat_objs
 
 				print("Mats: {}x".format( len(mats) ))
 
-				bpy.ops.object.mode_set(mode='OBJECT')
+				
 
 			# Re-assign array
 			objects = [bpy.context.object]
 
 
 		return objects
+
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+	return ''.join(random.choice(chars) for _ in range(size))
