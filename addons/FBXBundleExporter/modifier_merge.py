@@ -176,11 +176,8 @@ class Modifier(modifier.Modifier):
 
 							obj.name = "{}_{}".format(name, mat.name)
 
+				# return material objects
 				return mat_objs
-
-				print("Mats: {}x".format( len(mats) ))
-
-				
 
 			# Re-assign array
 			objects = [bpy.context.object]
