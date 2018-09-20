@@ -297,7 +297,14 @@ class Panel_Modifiers(bpy.types.Panel):
 
 		r = col.row()
 		r.enabled = False
-		r.label(text="Modifiers are applied upon export")
+
+		count = 0
+		for modifier in modifiers.modifiers:
+			if modifier.get("active"):
+				count+=1
+				
+		if count > 0:
+			r.label(text="{}x modifiers are applied upon export".format(count))
 
 
 class Panel_Files(bpy.types.Panel):

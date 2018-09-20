@@ -5,15 +5,17 @@
 	<title>FBX Bundle</title>
 	<link href="style.css" rel="stylesheet" type="text/css">
 	<link href="https://fonts.googleapis.com/css?family=News+Cycle" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:900" rel="stylesheet">
 </head>
 
 <body>
 
 	<div class="sidebar">
 		<img src="images/logo.png"> 
-		<a href="#download"><img src="images/sidebar_download.png" /> Download</a> 
-		<a class="active" href="#installation"><img src="images/sidebar_install.png" /> Installation</a> 
+		<a class="active" href="#download"><img src="images/sidebar_download.png" /> Download</a> 
+		<a href="#installation"><img src="images/sidebar_install.png" /> Installation</a> 
 		<a href="#guide"><img src="images/sidebar_guide.png" /> Quick Guide</a>
+        <hr></hr>
 		<a href="#settings"><img src="images/sidebar_settings.png" /> Settings</a> 
 		<a href="#tools"><img src="images/sidebar_tools.png" />Tools</a> 
 		<a href="#modifiers"><img src="images/sidebar_modifier.png" />Modifiers</a> 
@@ -32,9 +34,9 @@
 				<a id="download"></a>
 				<h2>Download</h2>
 				<ul>
-					<li><a href="http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.3.0.zip"> FBX_Bundle_1.3.0.zip</a> </li>
+				  <li><a href="http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.3.0.zip"> FBX_Bundle_1.3.0.zip</a> </li>
 				</ul>
-				<p>The GIT sourcecode is hosted at <a href="https://bitbucket.org/renderhjs/blender-addon-fbx-bundle">bitbucket.org/renderhjs/blender-addon-fbx-bundle</a></p>
+				<p>The GIT sourcecode is hosted at <a href="https://bitbucket.org/renderhjs/blender-addon-fbx-bundle">bitbucket</a></p>
 			</subpanel>
 
 			<subpanel>
@@ -60,7 +62,7 @@
 							<ol>
 								<li>Select a  path for your export location<br>
 									<img src="images/ui_path.gif" width="224" height="92" alt=""/>				</li>
-									<li>Set the bundle mode to <strong>'Group'</strong> which will bundle selected objects by their parent object</li>
+									<li>Set the bundle mode to <strong>Group</strong> which will bundle selected objects by their parent object</li>
 									<li>Parent child objects to the main object</li>
 									<li>Select your objects </li>
 									<li>Press <strong>Export</strong></li>
@@ -99,10 +101,11 @@
 
 								<subpanel>
 									<h2>Path </h2>
-									<p>Defines the export or import target path. </p>
 									<p><img src="images/ui_path.gif" width="224" height="92" alt=""/></p>
-									<p>When a path is not defined a red warning color will show and you can not export or import bundles.</p>
-								</subpanel>
+								  <p>Defines the export or import target path. When a path is not defined a red warning color will show and you can not export or import bundles.</p>
+								  <p><img src="images/ui_path_open.png" width="50" height="25" alt=""/></p>
+								  <p><strong>Tip</strong>: Press the outside folder button to open the folder location.</p>
+                          </subpanel>
 
 								<subpanel>
 									<h2>Bundle Mode </h2>
@@ -151,14 +154,15 @@
 								<h1>Tools</h1>
 								<subpanel>
 									<h2>Draw Fences</h2>
+									<p><img src="images/ui_draw_fences.png" width="204" height="44" alt=""/></p>
 									<p>Draw grease pencil fences around the current selected bundles in your scene. A pole with a flag indicates the pivot for each bundle under the current pivot mode.</p>
-									<p><img src="images/demo_fence.png" width="416" height="288" alt=""/></p>
+									<p><img src="images/demo_fence.png" width="335" height="237" alt=""/></p>
 								</subpanel>
 
 								<subpanel>
 									<h2>Ground Pivot</h2>
-									<p>…</p>
-									<p><img src="images/demo_ground_pivot.gif" width="434" height="384" alt=""/></p>
+									<p>Sets the pivot points of selected objects to the ground of the bounding box of the bundle.</p>
+									<p><img src="images/demo_ground_pivot.gif" width="329" height="302" alt=""/></p>
 								</subpanel>
 
 								
@@ -167,16 +171,32 @@
 							<panel>
 								<a id="modifiers"></a>
 								<h1>Modifiers</h1>
-								<p>Modifiers are applied in the export process on a copy of your actual objects. They are used to automate common repetitive tasks that are often associated with preparing assets.</p>
+								<p>Modifiers are applied in the <strong>export</strong> process on a copy of your actual objects. They are used to automate common repetitive tasks that are often associated with preparing assets.</p>
 								<p><img src="images/ui_modifiers.png" width="234" height="176" alt=""/></p>
-								<p> Modifiers are executed from top to bottom order.</p>
+								<p> Modifiers are executed from top to bottom order.                                </p>
+								<p><img src="images/ui_modifier_apply.png" width="68" height="27" alt=""/> </p>
+                                <p>Press the <strong>Apply</strong> button to apply individual modifiers to your selection during editing in Blender. This is a great way to <strong>preview</strong> the settings of individual modifiers.</p>
+                                <p>&nbsp;</p>
+                            
+
 
 								<subpanel>
-									<h2>Apply </h2>
-									<p>			    Press the <strong>Apply</strong> button to apply individual modifiers to your selection during editing in Blender. This is a great way to <strong>preview</strong> the settings of individual modifiers.</p>
-									<p><img src="images/ui_modifier_apply.png" width="68" height="27" alt=""/></p>
+									<h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Offset Transform</h2>
+									<p>Copies the transform offset (move, rotate, scale) of a source object to each item in the bundle. </p>
+									<p><img src="images/ui_modifier_copy_transform.png" width="228" height="102" alt=""/></p>
+									<p><strong>Source Object</strong><br>
+									The source object in your blend file from which to copy the transform.</p>
 								</subpanel>
-
+                                
+								<subpanel>
+									<h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Copy Modifiers</h2>
+									<p>Copies blender modifiers from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export.
+									</p>
+									<p><img src="images/ui_modifier_copy_modifiers.png" width="227" height="84" alt=""/></p>
+									<p><strong>Source Object</strong><br>
+									The source object in your blend file from which to copy the modifiers.</p>
+								</subpanel>
+								
 								<subpanel>
 									<h2> <img src="images/icon_modifier.png" width="21" height="21" alt=""/>Merge Meshes</h2>
 									<p>Merges all meshes of a bundle into a single mesh and object. This modifier is ideal for static environment assets.
@@ -191,14 +211,6 @@
 									Merges meshes in groups by material.</p>
 								</subpanel>
 
-								<subpanel>
-									<h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Copy Modifiers</h2>
-									<p>Copies blender modifiers from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export.
-									</p>
-									<p><img src="images/ui_modifier_copy_modifiers.png" width="227" height="84" alt=""/></p>
-									<p><strong>Source Object</strong><br>
-									The source object in your blend file from which to copy the modifiers.</p>
-								</subpanel>
 
 								<subpanel>
 									<h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Collider Mesh</h2>
