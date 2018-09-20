@@ -13,7 +13,8 @@ class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.fence_draw"
 	bl_label = "Draw Fences"
 	bl_description = "Draw fences around selected bundles"
-
+	bl_options = {'REGISTER', 'UNDO'}
+	
 	@classmethod
 	def poll(cls, context):
 		if len(bpy.context.selected_objects) > 0:

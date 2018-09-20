@@ -13,7 +13,8 @@ class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.pack_bundles"
 	bl_label = "Pack Bundles"
 	bl_description = "Pack bundles in a atlas formation"
-
+	bl_options = {'REGISTER', 'UNDO'}
+	
 	def execute(self, context):
 		print ("Fix Geometry")
 

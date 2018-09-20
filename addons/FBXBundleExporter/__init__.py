@@ -149,13 +149,6 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 
 
-class Mode:
-	extension = 'fbx'
-
-	def __init__(self, extension):
-		self.extension = extension
-
-
 
 class Panel_Core(bpy.types.Panel):
 	bl_idname = "FBX_bundle_panel_core"
@@ -175,6 +168,10 @@ class Panel_Core(bpy.types.Panel):
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
 		
+		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle"
+		
+
+
 		mode = bpy.context.scene.FBXBundleSettings.target_platform
 
 		if bpy.app.debug_value != 0:
@@ -195,9 +192,11 @@ class Panel_Core(bpy.types.Panel):
 			row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
 
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="", icon='GROUP')
-		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY', expand=False)
+		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle", icon='GROUP')
+		row = col.row(align=True)
+		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
+		col = box.column(align=True)
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
 		row.prop(context.scene.FBXBundleSettings, "include_children", text="Include children", expand=True)
@@ -302,7 +301,7 @@ class Panel_Modifiers(bpy.types.Panel):
 		for modifier in modifiers.modifiers:
 			if modifier.get("active"):
 				count+=1
-				
+
 		if count > 0:
 			r.label(text="{}x modifiers are applied upon export".format(count))
 

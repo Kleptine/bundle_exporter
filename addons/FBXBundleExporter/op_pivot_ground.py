@@ -9,7 +9,8 @@ class op(bpy.types.Operator):
 	bl_idname = "fbxbundle.pivot_ground"
 	bl_label = "Ground pivot"
 	bl_description = "Aligns the Z-position of the pivot to the bottom of the bundle bounds"
-
+	bl_options = {'REGISTER', 'UNDO'}
+	
 	@classmethod
 	def poll(cls, context):
 		if len(bpy.context.selected_objects) == 0:
