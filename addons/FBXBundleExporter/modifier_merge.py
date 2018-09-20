@@ -139,12 +139,12 @@ class Modifier(modifier.Modifier):
 						mat = slot.material 
 						mats[mat] = prefix_mat
 
-
-						bpy.ops.mesh.select_all(action='DESELECT')
-						bpy.context.object.active_material_index = i
-						bpy.ops.object.material_slot_select()
-
-						bpy.ops.mesh.separate(type='SELECTED')
+						if len(bpy.context.object.data.vertices) > 0:
+							bpy.ops.mesh.select_all(action='DESELECT')
+							bpy.context.object.active_material_index = i
+							bpy.ops.object.material_slot_select()
+							if len( [v for v in bpy.context.active_object.data.vertices if v.select] ) > 0:
+								bpy.ops.mesh.separate(type='SELECTED')
 
 				
 				bpy.ops.object.mode_set(mode='OBJECT')

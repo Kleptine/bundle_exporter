@@ -168,7 +168,7 @@ class Panel_Core(bpy.types.Panel):
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
 		
-		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle"
+		row.operator("wm.url_open", text="", icon='URL').url = "http://renderhjs.net/fbxbundle"
 		
 
 
