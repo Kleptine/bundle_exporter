@@ -317,22 +317,27 @@ class Panel_Files(bpy.types.Panel):
 
 	def draw(self, context):
 		layout = self.layout
-		col = layout.column()
-
+		
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 
+
 		col = layout.column(align=True)	
 		row = col.row(align=True)
-		row.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
+
+		split = row.split(percentage=0.4, align=True)
+
+		c = split.column(align=True)
+		c.scale_y = 1.85
+		c.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
 		
-		# col = layout.column(align=True)	
-		row = col.row(align=True)
-		row.scale_y = 1.85
-		row.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
+		c = split.column(align=True)
+		c.scale_y = 1.85
+		c.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 		
+
 		if len(bpy.context.scene.FBXBundleSettings.recent) > 0:
 			if len(objects_organise.recent_load_objects()) > 0:
 				row = col.row(align=True)

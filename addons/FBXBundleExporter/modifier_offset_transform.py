@@ -41,14 +41,14 @@ class Modifier(modifier.Modifier):
 
 				messages = []
 				if obj.location.magnitude > 0:
-					messages.append("Move {:.1f},{:.1f},{:.1f}".format(obj.location.x, obj.location.y, obj.location.z))
+					messages.append("Move x:{:.1f} y:{:.1f} z:{:.1f}".format(obj.location.x, obj.location.y, obj.location.z))
 				
 				if obj.rotation_euler.x != 0 or obj.rotation_euler.y != 0 or obj.rotation_euler.z != 0:
 					rx,ry,rz = obj.rotation_euler.x * 180/math.pi, obj.rotation_euler.y * 180/math.pi, obj.rotation_euler.z * 180/math.pi
 					messages.append("Rotate x:{:.0f}° y:{:.0f}° z:{:.0f}°".format(rx, ry, rz))
 
 				if obj.scale.x != 1 or obj.scale.y != 1 or obj.scale.z != 1:
-					messages.append("Scale {:.1f},{:.1f},{:.1f}".format(obj.scale.x, obj.scale.y, obj.scale.z))
+					messages.append("Scale x:{:.2f} y:{:.2f} z:{:.2f}".format(obj.scale.x, obj.scale.y, obj.scale.z))
 
 				if len(messages) > 0:
 					col = layout.column(align=True)
