@@ -19,6 +19,10 @@ class op(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
+
+		if context.space_data.local_view:
+			return False
+
 		if bpy.context.scene.FBXBundleSettings.path == "":
 			return False
 
@@ -50,6 +54,9 @@ def export_recent(self):
 
 	bpy.ops.object.select_all(action="DESELECT")
 	for obj in objects:
+		for i in range(len(obj.layers)):
+			if not obj.layers[i]:
+				obj.layers[i] = True
 		obj.select = True
 	
 	bpy.context.scene.objects.active = objects[-1]

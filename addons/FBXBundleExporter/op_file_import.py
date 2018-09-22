@@ -12,6 +12,10 @@ class op(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
+
+		if context.space_data.local_view:
+			return False
+		
 		if bpy.context.scene.FBXBundleSettings.path == "":
 			return False
 			

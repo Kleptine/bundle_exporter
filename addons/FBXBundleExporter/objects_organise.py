@@ -280,6 +280,13 @@ def encode(name):
 		if len(char) > 0:
 			name = name.replace(char,'<{}>'.format(i))
 	
+	# Remove double split elements
+	# split = name.split("<") 
+	# for i in range(len(split)):
+	# 	element = split[i]
+	# 	if i > 0 and element == "":
+
+
 
 	split = name.split("<") 
 	fill = []

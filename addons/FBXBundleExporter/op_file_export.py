@@ -19,6 +19,10 @@ class op(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
+
+		if context.space_data.local_view:
+			return False
+		
 		if len(bpy.context.selected_objects) == 0:
 			return False
 
@@ -27,6 +31,8 @@ class op(bpy.types.Operator):
 
 		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
 			return False
+
+		print("-------------------- poll")
 
 		if len( objects_organise.get_bundles() ) == 0:
 			return False
