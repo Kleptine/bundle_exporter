@@ -21,8 +21,7 @@ def is_object_valid(obj):
 def get_objects():
 	objects = []
 	for obj in bpy.context.selected_objects:
-		if is_object_valid(obj):
-			objects.append(obj)
+		objects.append(obj)
 
 	# Include all children?
 	if len(objects) > 0 and bpy.context.scene.FBXBundleSettings.include_children:
@@ -44,7 +43,7 @@ def get_objects():
 					roots.append(root)
 
 			def collect_recursive(obj, depth):
-				if obj not in objects and is_object_valid(root):
+				if obj not in objects:
 					objects.append(obj)
 				
 				if depth < limit:#Don't exceed limit on traversal depth
@@ -69,18 +68,21 @@ def get_objects():
 			for name in groups:
 				if name in bpy.data.groups:
 					for obj in bpy.data.groups[name].objects:
-						if obj not in objects and is_object_valid(obj):
+						if obj not in objects:
 							objects.append(obj)
 
 		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'SCENE':
 			# Include all objects of the scene
 			for obj in bpy.context.scene.objects:
-				if obj not in objects and is_object_valid(obj):
+				if obj not in objects:
 					objects.append(obj)
 
+	filtered = []
+	for obj in objects:
+		if is_object_valid(obj):
+			filtered.append(obj)
 
-
-	return sort_objects_name(objects)
+	return sort_objects_name(filtered)
 
 
 
@@ -222,8 +224,6 @@ def get_bounds_combined(objects):
 def get_pivot(objects):
 	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
 
-	print("Get pivot {}x : {}".format(len(objects), mode_pivot))
-
 	if len(objects):
 		if mode_pivot == 'OBJECT_FIRST':
 			if len(objects) > 0:
@@ -258,6 +258,13 @@ def get_pivot(objects):
 				else:
 					return objects[0].location
 
+		elif mode_pivot == 'EMPTY':
+			# Empty Gizmo, not part of bundle selection but rather scene selection
+			for obj in bpy.context.selected_objects:
+				if obj.type == 'EMPTY':
+					if obj.empty_draw_type == 'SINGLE_ARROW' or obj.empty_draw_type == 'PLAIN_AXES' or obj.empty_draw_type == 'ARROWS':
+						return obj.location
+
 	# Default
 	return Vector((0,0,0))
 
@@ -280,24 +287,27 @@ def encode(name):
 		if len(char) > 0:
 			name = name.replace(char,'<{}>'.format(i))
 	
-	# Remove double split elements
-	# split = name.split("<") 
-	# for i in range(len(split)):
-	# 	element = split[i]
-	# 	if i > 0 and element == "":
 
-
-
-	split = name.split("<") 
+	split = name.split("<")
 	fill = []
+	elem = []
 	for i in range(len(split)):
 		element = split[i]
-		if i > 0:
-			key = element[0:1]
-			fill.append( split_chars[int(key)] )
-			split[i] = split[i][2:]
 
-	return " ".join(split), fill
+		if i == 0 :
+			elem.append( split[i] )
+
+		elif i > 0:
+			char = split_chars[int(element[0:1])] 
+			e = split[i][2:]
+			# Don't add empty elements (e.g. double split sequences)
+			if e != "":
+				elem.append( e )
+				fill.append( char )
+
+
+	
+	return " ".join(elem), fill
 
 
 def decode(name, fill):

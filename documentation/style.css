@@ -2,10 +2,8 @@
 body {
 	/*font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';*/
 	background-color: #353535;
-	color: #DADADA;
+	color: #BDBDBD;
 	font-size: 11pt;
-	
-	
 	font-family: 'News Cycle', sans-serif;
 }
 p {
@@ -13,7 +11,8 @@ p {
     margin-after: 0.5em;	
 }
 strong{
-	color: #B4C7DB;
+	font-weight: normal;
+	color: #32C747;
 }
 
 
@@ -45,12 +44,16 @@ h1 {
 	font-size: 3em;
 }
 
+h3 {
+	font-size: 1.1em;
+}
+
 a {
 	/*display: block;*/
 	color: #fb0e7d;
 
 	/*padding: 16px;*/
-	text-decoration: none;
+	/*text-decoration: none;*/
 }
 
 

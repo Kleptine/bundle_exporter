@@ -133,7 +133,8 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
 		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
 		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
-		('PARENT', 'Parent', "Pivot from the parent object")
+		('PARENT', 'Parent', "Pivot from the parent object"),
+		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
 	target_platform = bpy.props.EnumProperty(items= 
@@ -192,9 +193,9 @@ class Panel_Core(bpy.types.Panel):
 			row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
 
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle", icon='GROUP')
+		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle by", icon='GROUP')
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot", icon='OUTLINER_DATA_EMPTY', expand=False)
+		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot at", icon='OUTLINER_DATA_EMPTY', expand=False)
 		
 		col = box.column(align=True)
 		row = col.row(align=True)
@@ -259,8 +260,8 @@ class Panel_Tools(bpy.types.Panel):
 
 		col = col.column(align=True)
 
-		col.operator(op_pivot_ground.op.bl_idname, text="Ground Pivot", icon='OUTLINER_DATA_EMPTY')
-		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix Geometry", icon='MESH_ICOSPHERE')
+		col.operator(op_pivot_ground.op.bl_idname, text="Pivot at Ground", icon='OUTLINER_DATA_EMPTY')
+		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix imp. Geometry", icon='MESH_ICOSPHERE')
 		
 		if bpy.app.debug_value != 0:
 			col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
