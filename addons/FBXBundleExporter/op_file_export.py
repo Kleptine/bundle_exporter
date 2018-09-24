@@ -115,7 +115,8 @@ def export(self, target_platform):
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True
 			bpy.context.scene.objects.active = obj
-
+			obj.hide = False
+			
 			# Copy
 			bpy.ops.object.duplicate()
 			bpy.ops.object.convert(target='MESH')

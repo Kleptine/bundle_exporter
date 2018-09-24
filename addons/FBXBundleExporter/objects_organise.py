@@ -15,6 +15,9 @@ imp.reload(platforms)
 
 def is_object_valid(obj):
 	# Objects to include in a bundle as 'export-able'
+	if obj.hide:
+		return False
+		
 	return obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE'
 
 
