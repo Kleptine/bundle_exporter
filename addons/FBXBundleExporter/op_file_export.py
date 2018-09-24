@@ -49,7 +49,6 @@ def export(self, target_platform):
 
 	# Warnings
 	if bpy.context.scene.FBXBundleSettings.path == "":
-		raise Exception("")
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
 

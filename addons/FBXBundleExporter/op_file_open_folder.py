@@ -22,18 +22,27 @@ class op(bpy.types.Operator):
 		return True
 
 	def execute(self, context):
-		path = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+		open_folder(self, bpy.context.scene.FBXBundleSettings.path)
 		
-		# Warnings
-		if not os.path.exists(path):
-			self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
-			return
-
-		# Open Folder
-		os.startfile(path)
-
-
-		print("Open path on system "+path)
-
 		return {'FINISHED'}
+
+
+
+def open_folder(self, path):
+
+	path = os.path.dirname( bpy.path.abspath( path ))
+	
+	# Warnings
+	if not os.path.exists(path):
+		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist." )
+		return
+
+	# Open Folder
+	os.startfile(path)
+
+
+	print("Open path on system "+path)
+
+
+
 
