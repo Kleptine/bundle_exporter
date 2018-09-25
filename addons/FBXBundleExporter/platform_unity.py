@@ -16,6 +16,10 @@ class Platform(platform.Platform):
 	def is_valid(self):
 		if bpy.context.scene.unit_settings.system != 'METRIC':
 			return False, "Scene units not metric"
+
+		elif bpy.context.scene.unit_settings.scale_length != 1.00:
+			return False, "Unit scale is not set to 1.00"
+
 		return True, ""
 
 

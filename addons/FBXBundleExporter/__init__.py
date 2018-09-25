@@ -9,6 +9,7 @@ if "bpy" in locals():
 	imp.reload(op_file_copy_unity_script)
 	imp.reload(op_file_export)
 	imp.reload(op_file_export_recent)
+	imp.reload(op_file_export_recent_clear)
 	imp.reload(op_file_import)
 	imp.reload(op_file_open_folder)
 	imp.reload(op_pivot_ground)
@@ -28,6 +29,7 @@ else:
 	from . import op_file_copy_unity_script
 	from . import op_file_export
 	from . import op_file_export_recent
+	from . import op_file_export_recent_clear
 	from . import op_file_import
 	from . import op_file_open_folder
 	from . import op_pivot_ground
@@ -51,11 +53,11 @@ bl_info = {
 	"description": "Export object selections in FBX bundles",
 	"author": "renderhjs",
 	"blender": (2, 7, 9),
-	"version": (1, 2, 0),
+	"version": (1, 5, 0),
 	"category": "3D View",
 	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
-	"wiki_url": "https://bitbucket.org/renderhjs/blender-addon-fbx-bundle",
+	"wiki_url": "http://renderhjs.net/fbxbundle/",
 	"tracker_url": "",
 }
 
@@ -168,10 +170,6 @@ class Panel_Core(bpy.types.Panel):
 
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
-		
-		row.operator("wm.url_open", text="", icon='URL').url = "http://renderhjs.net/fbxbundle"
-		
-
 
 		mode = bpy.context.scene.FBXBundleSettings.target_platform
 
@@ -203,17 +201,18 @@ class Panel_Core(bpy.types.Panel):
 		row.prop(context.scene.FBXBundleSettings, "include_children", text="Include children", expand=True)
 
 		# Warnings
+
+		if context.space_data.local_view:
+			box = col.box()
+			box.label(text="Can't export in local view mode.", icon='ERROR')
+
 		if context.active_object and context.active_object.mode != 'OBJECT':
 			box = col.box()
-			box.label(text="Not in object mode.", icon='ERROR')
+			box.label(text="Requires object mode to export.", icon='ERROR')
 
 		if context.scene.FBXBundleSettings.path == "":
 			box = col.box()
-			box.label(text="No path defined", icon='ERROR')
-
-		elif bpy.context.scene.unit_settings.scale_length != 1.00:
-			box = col.box()
-			box.label(text="Scene units not in meters", icon='ERROR')
+			box.label(text="No output path defined.", icon='ERROR')
 
 		elif mode not in platforms.platforms:
 			box = col.box()
@@ -343,7 +342,15 @@ class Panel_Files(bpy.types.Panel):
 			if len(objects_organise.recent_load_objects()) > 0:
 				row = col.row(align=True)
 				row.scale_y = 1.3
-				row.operator(op_file_export_recent.op.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
+
+				r = row.row(align=True)
+				r.operator(op_file_export_recent.op.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
+				
+				r = r.row(align=True)
+				# r.alert = True
+				r.operator(op_file_export_recent_clear.op.bl_idname, text="", icon='X')
+
+
 
 		layout.separator()
 

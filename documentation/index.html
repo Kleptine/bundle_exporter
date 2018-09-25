@@ -10,7 +10,7 @@
 
 <body>
 
-	<div class="sidebar">
+<div class="sidebar">
 		<img src="images/logo.png"> 
 		<a class="active" href="#download"><img src="images/sidebar_download.png" /> Download</a> 
 		<a href="#installation"><img src="images/sidebar_install.png" /> Installation</a> 
@@ -50,7 +50,7 @@
       <panel>
 			<a id="installation"></a>
         <h1> Installation</h1>
-        <p>FBX Bundle requires <a href="https://www.blender.org/download/releases/2-79/">Blender 2.79</a></p>
+        <p>FBX Bundle addon requires <a href="https://www.blender.org/download/releases/2-79/">Blender 2.79</a> (2.8 is not yet supported)</p>
         <subpanel>
 		  <h2>Installation</h2>
 		  <ol>
@@ -66,11 +66,18 @@
                         
           <subpanel>
 
-            <h2><strong><img src="images/unity.png" /></strong> Unity Editor Script</h2>
-            <p>This optional Unity Editor script <strong>automatically assigns materials</strong> inside the fbx prefab within Unity based on matching material names between Blender and Unity. It also <strong>assigns collider meshes</strong> when using the Collider Mesh modifier.</p>
-            <p>You can install the script from within the FBX Bundle addon preferences to your Unity Project</p>
-            <p><img src="images/ui_preferences_install_unity_script.png" alt=""/></p>
+            <h2><strong><img src="images/unity.png" /></strong> Optional Unity  Script</h2>
+            <p>This optional <strong>Unity Editor script</strong> that does the following:</p>
+            <ul>
+              <li>Disable mesh scale import settings</li>
+              <li>Disable Unity material generation</li>
+              <li>Automatically <strong>assigns existing materials</strong> inside the fbx prefab. Materials are matched by matching material names between Unity and Blender.</li>
+              <li>Assigns<strong> collider meshes</strong> when it finds meshes named _COLLIDER e.g. via using the Collider Mesh modifier.</li>
+            </ul>
+            <p>You can install the script from within the FBX Bundle <strong>addon preferences</strong> to your Unity Project</p>
+            <p><img src="images/ui_preferences_install_unity_script.png" alt="" width="297" height="104"/></p>
             <p>It wil create an Editor folder with the c# Editor script inside.</p>
+            <p><img src="images/ui_unity_editorscript.png" alt="" width="184" height="81"/></p>
           </subpanel>
                         
 		</panel>
@@ -82,16 +89,19 @@
 					  <subpanel>
 					    
 					    <ol>
-					      <li>Select your export platform e.g. <strong>Unity</strong>, <strong>Unreal</strong>,..</li>
+					      <li>Select your export platform e.g. <strong>Unity</strong>, <strong>Unreal</strong>,..<br>
+				          <img src="images/guide_platform.png" width="193" height="28" alt=""/>					      </li>
 					      <li>Select a  path for your export location<br>
 					        <img src="images/ui_path.gif" width="224" height="92" alt=""/>				</li>
-					      <li>Set the <strong>bundle by</strong> mode to <strong>Parent</strong></li>
-					      <li>Set the <strong>pivot at</strong> mode to <strong>Parent</strong></li>
-					      <li>Enable <strong>Inlcude children</strong> to automatically include objects part of the parent object.</li>
+					      <li>Set the <strong>bundle by</strong> mode to <strong>Parent </strong>and set the <strong>pivot at</strong> mode to <strong>Parent</strong><br>
+				          <img src="images/guide_modes.png" width="218" height="41" alt=""/>					      </li>
+					      <li>Enable <strong>Inlcude children</strong> to automatically include objects part of the parent object.<br>
+				          <img src="images/guide_include_children.png" width="111" height="22" alt=""/>					      </li>
 					      <li>Choose a main object and parent other objects to it</li>
 					      <li>Select your objects </li>
-					      <li>Press <strong>Export</strong></li>
-					      </ol>
+					      <li>Press <strong>Export</strong><br>
+				          <img src="images/ui_export.png" width="122" height="42" alt=""/>					      </li>
+				        </ol>
 					    </subpanel>
 					  <subpanel>
 					    <h2><strong><img src="images/unity.png" /></strong> Unity Tips                              </h2>
@@ -111,10 +121,11 @@
 						    <h2>Platform</h2>
 						    <p>Choose different platforms to export for. </p>
 						    <p><img src="images/ui_platform.png" width="221" height="109" alt=""/></p>
+						    <hr>
 						    <h3> Unity</h3>
-						    <p> Applies the correct metric scale and fixes the y /z roation issues. An optional Unity editor script allows to automatically assign materials and collider meshes. </p>
+						    <p> Uses the FBX format and applies the correct metric scale and fixes the y /z roation issues. An optional Unity<strong> editor script</strong> allows to automatically assign materials and collider meshes. </p>
 						    <h3> Unreal</h3>
-						    <p>								Applies the correct metric scale. </p>
+						    <p>								Uses the FBX format and applies the correct metric scale and FBX export settings. </p>
 						    <h3> Blender</h3>
 						    <p>								Uses collada files (DAE) to export. </p>
 						    <h3> glTF</h3>
@@ -126,12 +137,14 @@
 						    <p><img src="images/ui_path.gif" width="224" height="92" alt=""/></p>
 						    <p>Defines the export or import target path. When a path is not defined a red warning color will show and you can not export or import bundles.</p>
 						    <p><img src="images/ui_path_open.png" width="50" height="25" alt=""/></p>
-						    <p>Press the outside folder button to open the folder location.</p>
+						    <p>Press the outside folder button to <strong>open</strong> the folder location.</p>
+						    <p><img src="images/ui_path_open_folder.png" width="278" height="130" alt=""/></p>
 						    </subpanel>
 						  
 						  <subpanel>
 						    <h2>Bundle by </h2>
 						    <p>Defines the rule as to how to group your object selection into different file bundles. The following modes are available: </p>
+						    <hr>
 						    <h3>Name</h3>
 						    <p>									Bundles objects by a common object name element. The name is split into elements seperated by <strong>spaces</strong>, ‘<strong>.</strong>’, ‘<strong>_</strong>’ or <strong>cameCase</strong> writing. </p>
 						    <h3>Parent</h3>
@@ -147,6 +160,7 @@
 						  <subpanel>
 						    <h2> Pivot at</h2>
 						    <p> Defines the source of the scene pivot upon exporting. The following modes are available: </p>
+						    <hr>
 						    <h3>First name</h3>
 						    <p> Uses the pivot of the object that appears alphabetically first in the bundle. </p>
 						    <h3>Lowest object</h3>
@@ -170,7 +184,9 @@
 						    </subpanel>
 						  <subpanel>
 						    <h2>Include children</h2>
-						    <p>When enabled will <strong>automatically include</strong> children of parented objects, all objects of a group or objects of a scene if either bundle mode is active. This means that it often is enough to select just a single object of a bundle instead of all to bundle them for export.</p>
+						    <p>When enabled will <strong>automatically include</strong> children of parented objects, all objects of a group or objects of a scene if either bundle mode is active.</p>
+						    <p><img src="images/ui_settings_select_children.gif" width="234" height="284" alt=""/></p>
+						    <p> This means that it often is enough to select just a single object of a bundle instead of all to bundle them for export.</p>
 						    <br>
 						    </subpanel>
 						  </panel>
@@ -282,19 +298,23 @@
 							  
 							  <subpanel>
 							    <h2>Import</h2>
-							    <p>Batch imports all 3D files from the specified path into the scene. The following file types are supported: <strong>fbx</strong>, <strong>3ds</strong>, <strong>obj</strong></p>
-</subpanel>
+							    <p><img src="images/ui_import.png" width="83" height="41" alt=""/></p>
+							    <p>Batch imports all 3D files from the specified path into the scene. Imported objects are placed at their default import location.</p>
+							    <p>The following file types are supported: <strong>fbx</strong>, <strong>3ds</strong>, <strong>obj</strong></p>
+                              </subpanel>
 							  
 							  <subpanel>
 							    <h2>Export</h2>
+							    <p><img src="images/ui_export.png" width="122" height="42" alt=""/></p>
 							    <p><strong>Batch exports</strong> your selected bundles to the specified <strong>path</strong>. Upon each bundle export your objects are copied so your original objects are notaltered. Active modifiers are applied and finally the original object selection restored.</p>
 							    
 							    </subpanel>
 							  
 							  <subpanel>
 							    <h2>Re-Export</h2>
+							    <p><img src="images/ui_re-export.png" width="198" height="26" alt=""/></p>
 							    <p>Once you exported a model before FBX Bundle will remember the previous bundles you exported. Pressing the<strong> re-export</strong> button will export the very same objects <strong>from last time</strong> so you don&rsquo;t have to manually select your objects to export.</p>
-							    </subpanel>
+Press the <strong>X</strong> to clear the previous bundle selection.</subpanel>
 							  
 							  
 							  </panel>

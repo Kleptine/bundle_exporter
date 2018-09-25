@@ -45,8 +45,14 @@ h1 {
 }
 
 h3 {
-	font-size: 1.1em;
+	font-family: 'News Cycle', sans-serif;
+	font-size: 1.2em;
+	font-weight:lighter;
+	/*margin-bottom: 0px;
+	padding-bottom:0px;*/
+	margin-block-end: -1em;
 }
+
 
 a {
 	/*display: block;*/
@@ -91,7 +97,7 @@ subpanel {
 
 }
 
-.sidebar hr {
+hr {
 	border: none;
 	height: 1px;
 	background-color: #434343;

@@ -52,6 +52,17 @@ def export_recent(self):
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
+	# Store previous settings
+	previous_selection = bpy.context.selected_objects.copy()
+	previous_active = bpy.context.scene.objects.active
+	previous_unit_system = bpy.context.scene.unit_settings.system
+	previous_pivot = bpy.context.space_data.pivot_point
+	previous_cursor = bpy.context.space_data.cursor_location.copy()
+
+
+
+	
+
 	bpy.ops.object.select_all(action="DESELECT")
 	for obj in objects:
 		for i in range(len(obj.layers)):
@@ -61,4 +72,15 @@ def export_recent(self):
 	
 	bpy.context.scene.objects.active = objects[-1]
 	bpy.ops.fbxbundle.file_export()
+
+
+
+	# Restore previous settings
+	bpy.context.scene.unit_settings.system = previous_unit_system
+	bpy.context.space_data.pivot_point = previous_pivot
+	bpy.context.space_data.cursor_location = previous_cursor
+	bpy.context.scene.objects.active = previous_active
+	bpy.ops.object.select_all(action='DESELECT')
+	for obj in previous_selection:
+		obj.select = True
 	

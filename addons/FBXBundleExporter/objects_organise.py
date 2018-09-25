@@ -152,7 +152,8 @@ def recent_get_label():
 			dic = json.loads(recent.encode().decode())
 			ext = platforms.platforms[mode].extension
 			if 'bundles' in dic and len(dic['bundles']) > 0:
-				names = [name+"."+ext for name in dic['bundles']]
+				# names = [name+"."+ext for name in dic['bundles']]
+				names = [name for name in dic['bundles']]
 
 				return "Re-Export: ".format(len(dic['bundles']))+", ".join(names)
 
