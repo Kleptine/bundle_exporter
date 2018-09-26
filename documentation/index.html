@@ -222,10 +222,17 @@
 							  <p>Press the <strong>Apply</strong> button to apply individual modifiers to your selection during editing in Blender. This is a great way to <strong>preview</strong> the settings of individual modifiers.</p>
 							  <p>&nbsp;</p>
 							  
-							  
+							  <subpanel>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Rename</h2>
+							    <p>Copies the tran...</p>
+							    <h3>Path Rename</h3>
+                                <p> .. Keys:{path}, {bundle}, {scene}, </p>
+                                <h3>Object Name Rename</h3>
+                                <p> ....							  Keys: {bundle}, {scene}, {ext}</p>
+							  </subpanel>
 							  
 							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Offset Transform</h2>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Offset Transform</h2>
 							    <p>Copies the transform offset (<strong>move</strong>, <strong>rotate</strong>, <strong>scale</strong>) of a source object to each item in the bundle. </p>
 							    <p><img src="images/ui_modifier_copy_transform.png" width="228" height="102" alt=""/></p>
 							    <h3>Source Object</h3>
@@ -233,7 +240,7 @@
 							    </subpanel>
 							  
 							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Copy Modifiers</h2>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Copy Modifiers</h2>
 							    <p>Copies <strong>blender modifiers</strong> from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export. </p>
 							    <p><img src="images/ui_modifier_copy_modifiers.png" width="227" height="84" alt=""/></p>
 							    <h3>Source Object</h3>
@@ -241,7 +248,7 @@
 							    </subpanel>
 							  
 							  <subpanel>
-							    <h2> <img src="images/icon_modifier.png" width="21" height="21" alt=""/>Merge Meshes</h2>
+							    <h2> <img src="images/icon_modifier.png" width="21" height="21" alt=""/> Merge Meshes</h2>
 							    <p>Merges all meshes of a bundle into a single mesh and object. This modifier is ideal for static environment assets.
 							      </p>
 							    <p><img src="images/ui_modifier_merge.png" alt=""/></p>
@@ -253,7 +260,7 @@
 							  
 							  
 							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Collider Mesh</h2>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Collider Mesh</h2>
 							    <p>Creates an <strong>additional collider</strong> mesh for each object in a bundle with a simplified geometry.</p>
 							    <p><img src="images/ui_modifier_collider.png" width="226" height="56" alt=""/></p>
 							    <h3>Ratio</h3>
@@ -263,7 +270,7 @@
 							    </subpanel>
 							  
 							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>LOD</h2>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> LOD</h2>
 							    <p>Also known as level of detail which is a technique used in game engines to optimize performance. This modifier creates a series of copies of each object in your bundle with a reduced triangle count for each LOD step and a name indicating the LOD level.</p>
 							    <p><img src="images/ui_modifier_LOD.png" width="225" height="138" alt=""/></p>
 							    <p>LOD levels are previewed in the modifier panel with the compression ratio and LOD level.</p>
@@ -274,7 +281,7 @@
 							    </subpanel>
 							  
 							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/>Vertex AO</h2>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Vertex AO</h2>
 							    <p>This modifier applies <strong>vertex color</strong> based <strong>ambient occlusion</strong> to each mesh of a bundle. This is a great way of adding AO depth without the limitation of texture resolution, file or memory size of textures.</p>
 							    <p><img src="images/ui_modifier_vertexAO.png" width="229" height="31" alt=""/></p>
 							    <p>Vertex colors require shaders to fully utilize them.</p>
