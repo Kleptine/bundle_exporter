@@ -25,18 +25,28 @@ class Modifier(modifier.Modifier):
 	def register(self):
 		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
 
-
+		
 
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
 			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-			layout.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
+			
+			row = layout.row(align=True)
+			row.separator()
+			row.separator()
+
+
+			row.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
+
 			if self.get('source') in bpy.data.objects:
 				row = layout.row()
 				row.enabled = False
+
+				row.separator()
 				count = len(bpy.data.objects[self.get('source')].modifiers)
 				row.label(text="copyies {}x modifiers".format(count))
+
 
 
 	def process_objects(self, name, objects):

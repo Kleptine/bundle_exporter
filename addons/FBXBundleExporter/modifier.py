@@ -72,5 +72,6 @@ class Modifier:
 	def process_name(self, name):
 		return name
 
+
 	def process_path(self, name, path):
 		return name

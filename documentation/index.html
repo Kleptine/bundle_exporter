@@ -224,13 +224,21 @@
 							  
 							  <subpanel>
 							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Rename</h2>
-							    <p>Copies the tran...</p>
+							    <p>Allows to rename the target path or bundle file name. These fields support <strong>dynamic variables</strong>, dynamic variables are written inside curly brackets { } . The following variables are available:</p>
+                                <ul>
+                                  <li><strong>{path}</strong> the original output path</li>
+                                  <li><strong>{bundle}</strong> the bundle name of each file</li>
+                                  <li> <strong>{scene}</strong> the current scene name</li>
+                                  <li><strong>{object}</strong> the object name </li>
+                                </ul>
+                                <p>Previews of the final path and file name are previewed at the bottom of the rename modifier UI.</p>
 							    <h3>Path Rename</h3>
-                                <p> .. Keys:{path}, {bundle}, {scene}, </p>
+                                <p> Template field for renaming the path of each bundle.  </p>
                                 <h3>Object Name Rename</h3>
-                                <p> ....							  Keys: {bundle}, {scene}, {ext}</p>
+                                <p> Template field for renaming the file name excluding the file extension.</p>
 							  </subpanel>
 							  
+							 
 							  <subpanel>
 							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Offset Transform</h2>
 							    <p>Copies the transform offset (<strong>move</strong>, <strong>rotate</strong>, <strong>scale</strong>) of a source object to each item in the bundle. </p>

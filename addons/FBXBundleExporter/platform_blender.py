@@ -14,7 +14,7 @@ class Platform(platform.Platform):
 		
 
 	def file_export(self, path):
-
+		# bpy.ops.export_scene.selected(exporter_str="BLEND", use_file_browser=True)
 		bpy.ops.wm.collada_export(
 			filepath		= path,
 			selected 		= True,

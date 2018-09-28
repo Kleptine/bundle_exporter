@@ -204,27 +204,27 @@ class Panel_Core(bpy.types.Panel):
 
 		if context.space_data.local_view:
 			box = col.box()
-			box.label(text="Can't export in local view mode.", icon='ERROR')
+			box.label(text="Can't export in local view mode.", icon='CANCEL')
 
 		if context.active_object and context.active_object.mode != 'OBJECT':
 			box = col.box()
-			box.label(text="Requires object mode to export.", icon='ERROR')
+			box.label(text="Requires object mode to export.", icon='CANCEL')
 
 		if context.scene.FBXBundleSettings.path == "":
 			box = col.box()
-			box.label(text="No output path defined.", icon='ERROR')
+			box.label(text="No output path defined.", icon='CANCEL')
 
 		elif mode not in platforms.platforms:
 			box = col.box()
-			box.label(text="Platform not implemented", icon='ERROR')
+			box.label(text="Platform not implemented", icon='CANCEL')
 		
 		elif context.scene.FBXBundleSettings.mode_bundle == 'GROUP' and len(bpy.data.groups) == 0:
 			box = col.box()
-			box.label(text="No groups available", icon='ERROR')
+			box.label(text="No groups available", icon='CANCEL')
 
 		elif not platforms.platforms[mode].is_valid()[0]:
 			box = col.box()
-			box.label(text=platforms.platforms[mode].is_valid()[1], icon='ERROR')			
+			box.label(text=platforms.platforms[mode].is_valid()[1], icon='CANCEL')			
 
 		
 		

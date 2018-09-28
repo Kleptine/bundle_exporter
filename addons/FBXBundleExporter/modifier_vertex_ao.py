@@ -13,6 +13,13 @@ class Settings(modifier.Settings):
 		name="Active",
 		default=False
 	)
+	contrast = bpy.props.FloatProperty (
+		default=0.5,
+		min = 0,
+		max = 1,
+		description="Contrast ratio, 0 is identical to plain 'dirty colors'",
+		subtype='FACTOR'
+	)
 
 
 class Modifier(modifier.Modifier):
@@ -23,8 +30,23 @@ class Modifier(modifier.Modifier):
 	def __init__(self):
 		super().__init__()
 
+	def draw(self, layout):
+		super().draw(layout)
+		if(self.get("active")):
+			col = layout.column(align=True)
+
+			row = col.row(align=True)
+			row.separator()
+			row.separator()
+			row.prop( eval("bpy.context.scene."+self.settings_path()) , "contrast", text="Contrast")
+
+
+
 	def process_objects(self, name, objects):
 		
+
+		contrast = self.get('contrast')
+
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select = True
@@ -32,8 +54,10 @@ class Modifier(modifier.Modifier):
 
 			# Set AO vertex colors
 			bpy.ops.object.mode_set(mode='VERTEX_PAINT')
+			
+			bpy.context.tool_settings.vertex_paint.brush.color = (1, 1, 1)
 			bpy.ops.paint.vertex_color_set()
-			bpy.ops.paint.vertex_color_dirt()
+			bpy.ops.paint.vertex_color_dirt(blur_strength=1, blur_iterations=1, clean_angle= math.pi - (1-contrast) * math.pi/2 , dirt_angle=contrast * math.pi/2)
 
 			# Back to object mode
 			bpy.ops.object.mode_set(mode='OBJECT')
