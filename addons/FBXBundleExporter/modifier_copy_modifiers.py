@@ -17,6 +17,7 @@ class Settings(modifier.Settings):
 class Modifier(modifier.Modifier):
 	label = "Copy Modifiers"
 	id = 'copy_modifiers'
+	url = "http://renderhjs.net/fbxbundle/#modifier_modifiers"
 
 	def __init__(self):
 		super().__init__()

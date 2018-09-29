@@ -23,6 +23,7 @@ class Settings(bpy.types.PropertyGroup):
 class Modifier:
 	label = "Modifier"
 	id = 'modifier'
+	url = ""
 
 	def __init__(self):
 		pass
@@ -54,10 +55,15 @@ class Modifier:
 		row.prop( eval("bpy.context.scene."+self.settings_path()) , "active", text="")
 		row.label(text="{}".format(self.label), icon='MODIFIER')
 
-		r = row.row()
+		r = row.row(align=True)
 		r.enabled = self.get("active")
 		r.alignment = 'RIGHT'
 		r.operator( op_modifier_apply.op.bl_idname, icon='FILE_TICK' ).modifier_index = modifiers.modifiers.index(self)
+
+		r = row.row(align=True)
+		r.alignment = 'RIGHT'
+		r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
+		
 
 
 	def print(self):
@@ -74,4 +80,4 @@ class Modifier:
 
 
 	def process_path(self, name, path):
-		return name
+		return path

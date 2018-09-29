@@ -3,8 +3,15 @@ import math
 import imp
 import os
 from . import objects_organise
+
 from . import modifier
 imp.reload(modifier) 
+
+from . import modifiers
+imp.reload(modifiers)
+
+from . import platforms
+imp.reload(platforms)
 
 
 
@@ -24,6 +31,7 @@ class Settings(modifier.Settings):
 class Modifier(modifier.Modifier):
 	label = "Rename"
 	id = 'rename'
+	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
 
 
 	def __init__(self):
@@ -42,25 +50,42 @@ class Modifier(modifier.Modifier):
 
 
 			bundles = objects_organise.get_bundles()
-			col = layout.column(align=True)
-			col.enabled = False
+			mode = bpy.context.scene.FBXBundleSettings.target_platform
 
-			max_obj = 2
-			max_file = 2
+			if mode in platforms.platforms:
+				# label = 
+				col = layout.column(align=True)
+				col.enabled = False
 
-			path = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
-			for name,objects in bundles.items():
-				full = self.process_path("name", path)+" / "+self.process_name(name) +" .ext"
-				
+				max_obj = 2
+				max_file = 2
 
-				col.label(text= full )
-				for obj in objects:
-					row = col.row(align=True)
-					row.separator()
-					row.separator()
-					row.label(text= self.format_object_name(name, obj.name) )
-					break
+				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+				for name,objects in bundles.items():
+					full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  
+					
 
+					col.label(text= full )
+					for obj in objects:
+						row = col.row(align=True)
+						row.separator()
+						row.separator()
+						row.label(text= self.format_object_name(name, obj.name) )
+						break
+
+
+
+	def remove_illegal_characters(self, value):
+		# Fix wrong path seperators
+		chars = '\/'
+		for c in chars:
+			value = value.replace(c,os.path.sep)
+
+		# Remove illegal characters (windows, osx, linux)
+		chars = '*?"<>|'
+		for c in chars:
+			value = value.replace(c,'')
+		return value
 
 
 
@@ -69,13 +94,13 @@ class Modifier(modifier.Modifier):
 		val = val.replace("{object}", name)
 		val = val.replace("{bundle}", bundle)
 		val = val.replace("{scene}", bpy.context.scene.name)
-		return val
+		return self.remove_illegal_characters(val)
 
 
 
 	def process_objects(self, name, objects):
 		for obj in objects:
-			obj.name = self.format_object_name(name, obj.name)
+			obj.name = self.remove_illegal_characters( self.format_object_name(name, obj.name) )
 
 		return objects
 
@@ -85,7 +110,8 @@ class Modifier(modifier.Modifier):
 		val = self.get("file")
 		val = val.replace("{bundle}", name)
 		val = val.replace("{scene}", bpy.context.scene.name)
-		return val
+		return self.remove_illegal_characters( val )
+
 
 
 	def process_path(self, name, path):
@@ -93,4 +119,4 @@ class Modifier(modifier.Modifier):
 		val = val.replace("{path}", path)
 		val = val.replace("{bundle}", name)
 		val = val.replace("{scene}", bpy.context.scene.name)
-		return val
+		return self.remove_illegal_characters( val )

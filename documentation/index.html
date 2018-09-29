@@ -16,11 +16,13 @@
 		<a href="#installation"><img src="images/sidebar_install.png" /> Installation</a> 
 		<a href="#guide"><img src="images/sidebar_guide.png" /> Quick Guide</a>
         <hr></hr>
-		<a href="#settings"><img src="images/sidebar_settings.png" /> Settings</a> 
-		<a href="#tools"><img src="images/sidebar_tools.png" />Tools</a> 
+        <a href="#settings"><img src="images/sidebar_settings.png" /> Settings</a> 
 		<a href="#modifiers"><img src="images/sidebar_modifier.png" />Modifiers</a> 
+		
+        <a href="#tools"><img src="images/sidebar_tools.png" />Tools</a> 
+		
          <hr></hr>
-	  <a href="#bundles"><img src="images/sidebar_bundles.png" />Bundles</a> 
+	  	<a href="#bundles"><img src="images/sidebar_bundles.png" />Bundles</a> 
 	</div>
 
 	<main>
@@ -191,7 +193,109 @@
 						    </subpanel>
 						  </panel>
 
+							
+
 							<panel>
+							  <a id="modifiers"></a>
+							  <h1>Modifiers</h1>
+							  <p>Modifiers are applied in the <strong>export</strong> process on a copy of your actual objects. They are used to automate common repetitive tasks that are often associated with preparing assets.</p>
+							  <p><img src="images/ui_modifiers.png" alt=""/></p>
+							  <p> Modifiers are executed from top to bottom order. </p>
+							  <h3>Apply Button</h3>
+							  <p><img src="images/ui_modifier_apply.png" width="68" height="27" alt=""/> </p>
+							  <p>Press the <strong>Apply</strong> button to apply individual modifiers to your selection during editing in Blender. This is a great way to <strong>preview</strong> the settings of individual modifiers.</p>
+							  <p>&nbsp;</p>
+							  
+							  <subpanel>
+                              	 <a id="modifier_rename"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Rename</h2>
+							    <p>Allows to rename the target path or bundle file name. These fields support <strong>dynamic variables</strong>, dynamic variables are written inside curly brackets { } .</p>
+							    <p><img src="images/ui_modifier_rename.png" alt=""/></p>
+							    <p>The following variables are available:</p>
+                                <ul>
+                                  <li><strong>{path}</strong> the original output path</li>
+                                  <li><strong>{bundle}</strong> the bundle name of each file</li>
+                                  <li> <strong>{scene}</strong> the current scene name</li>
+                                  <li><strong>{object}</strong> the object name </li>
+                                </ul>
+                                <p>Previews of the final path and file name are previewed at the bottom of the rename modifier UI.</p>
+							    <h3>Path Rename</h3>
+                                <p> Template field for renaming the path of each bundle.  </p>
+                                <h3>File Rename</h3>
+                                <p> Template field for renaming the file name excluding the file extension.</p>
+                                <h3>Object  Rename</h3>
+                                <p> Template field for renaming the object name</p>
+                                <p>&nbsp;</p>
+							  </subpanel>
+							  
+							 
+							  <subpanel>
+                               <a id="modifier_offset"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Offset Transform</h2>
+							    <p>Copies the transform offset (<strong>move</strong>, <strong>rotate</strong>, <strong>scale</strong>) of a source object to each item in the bundle. </p>
+							    <p><img src="images/ui_modifier_copy_transform.png" width="228" height="102" alt=""/></p>
+							    <h3>Source Object</h3>
+							    <p>							      The source object in your blend file from which to copy the transform.</p>
+							    </subpanel>
+							  
+							  <subpanel>
+                              	<a id="modifier_modifiers"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Copy Modifiers</h2>
+							    <p>Copies <strong>blender modifiers</strong> from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export. </p>
+							    <p><img src="images/ui_modifier_copy_modifiers.png" width="227" height="84" alt=""/></p>
+							    <h3>Source Object</h3>
+							    <p>							      The source object in your blend file from which to copy the modifiers.</p>
+							    </subpanel>
+							  
+							  <subpanel>
+                              	<a id="modifier_merge"></a>
+							    <h2> <img src="images/icon_modifier.png" width="21" height="21" alt=""/> Merge Meshes</h2>
+							    <p>Merges all meshes of a bundle into a single mesh and object. This modifier is ideal for static environment assets.
+							      </p>
+							    <p><img src="images/ui_modifier_merge.png" alt=""/></p>
+							    <h3>Merge Verts</h3>
+							    <p>							      Merges vertices within a specified <strong>distance</strong>. This is identical to removing double vertices in mesh editing. </p>
+							    <h3>Split by Material</h3>
+							    <p>	<strong>Splits</strong> the	mesh	by	material	so	that each mesh contains only 1 material. </p>
+							    </subpanel>
+							  
+							  
+							  <subpanel>
+                              	<a id="modifier_collider"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Collider Mesh</h2>
+							    <p>Creates an <strong>additional collider</strong> mesh for each object in a bundle with a simplified geometry.</p>
+							    <p><img src="images/ui_modifier_collider.png" width="226" height="56" alt=""/></p>
+							    <h3>Ratio</h3>
+							    <p>							      The quality ratio of the collider mesh, a value of 0.25 means that the collider mesh will aim for a 25% vertex count to the original object.</p>
+							    <h3>Angle</h3>
+							    <p>							      The <strong>flattening angle</strong> (degrees) of face normals to further compress the collider geometry. The bigger the angle the more blocky the collider.</p>
+							    </subpanel>
+							  
+							  <subpanel>
+                              	<a id="modifier_lod"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> LOD</h2>
+							    <p>Also known as level of detail which is a technique used in game engines to optimize performance. This modifier creates a series of copies of each object in your bundle with a reduced triangle count for each LOD step and a name indicating the LOD level.</p>
+							    <p><img src="images/ui_modifier_LOD.png" width="225" height="138" alt=""/></p>
+							    <p>LOD levels are previewed in the modifier panel with the compression ratio and LOD level.</p>
+							    <h3>Steps</h3>
+							    <p>							      How many LOD steps to include.</p>
+							    <h3>Quality</h3>
+							    <p>							      The lowest LOD <strong>compression ratio</strong>. A value of 0.05 means that LOD steps will range from 100% down to 5% geometry level.</p>
+							    </subpanel>
+							  
+							  <subpanel>
+                              	<a id="modifier_ao"></a>
+							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Vertex AO</h2>
+							    <p>This modifier applies <strong>vertex color</strong> based <strong>ambient occlusion</strong> to each mesh of a bundle. This is a great way of adding AO depth without the limitation of texture resolution, file or memory size of textures.</p>
+							    <p><img src="images/ui_modifier_vertexAO.png" width="229" height="31" alt=""/></p>
+							    <p>Vertex colors require shaders to fully utilize them.</p>
+							    <p><img src="images/demo_vertexAO.png" alt=""/></p>
+							    </subpanel>
+							  
+							  
+							  </panel>
+                              
+                              <panel>
 							  <a id="tools"></a>
 							  <h1>Tools</h1>
 							  <subpanel>
@@ -206,94 +310,6 @@
 							    <h2>Ground Pivot</h2>
 							    <p>Sets the pivot points of selected objects<strong> to the ground</strong> of the bounding box of the bundle.</p>
 							    <p><img src="images/demo_ground_pivot.gif" width="329" height="302" alt=""/></p>
-							    </subpanel>
-							  
-							  
-							  </panel>
-
-							<panel>
-							  <a id="modifiers"></a>
-							  <h1>Modifiers</h1>
-							  <p>Modifiers are applied in the <strong>export</strong> process on a copy of your actual objects. They are used to automate common repetitive tasks that are often associated with preparing assets.</p>
-							  <p><img src="images/ui_modifiers.png" alt=""/></p>
-							  <p> Modifiers are executed from top to bottom order. </p>
-							  <h3>Apply Button</h3>
-							  <p><img src="images/ui_modifier_apply.png" width="68" height="27" alt=""/> </p>
-							  <p>Press the <strong>Apply</strong> button to apply individual modifiers to your selection during editing in Blender. This is a great way to <strong>preview</strong> the settings of individual modifiers.</p>
-							  <p>&nbsp;</p>
-							  
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Rename</h2>
-							    <p>Allows to rename the target path or bundle file name. These fields support <strong>dynamic variables</strong>, dynamic variables are written inside curly brackets { } . The following variables are available:</p>
-                                <ul>
-                                  <li><strong>{path}</strong> the original output path</li>
-                                  <li><strong>{bundle}</strong> the bundle name of each file</li>
-                                  <li> <strong>{scene}</strong> the current scene name</li>
-                                  <li><strong>{object}</strong> the object name </li>
-                                </ul>
-                                <p>Previews of the final path and file name are previewed at the bottom of the rename modifier UI.</p>
-							    <h3>Path Rename</h3>
-                                <p> Template field for renaming the path of each bundle.  </p>
-                                <h3>Object Name Rename</h3>
-                                <p> Template field for renaming the file name excluding the file extension.</p>
-							  </subpanel>
-							  
-							 
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Offset Transform</h2>
-							    <p>Copies the transform offset (<strong>move</strong>, <strong>rotate</strong>, <strong>scale</strong>) of a source object to each item in the bundle. </p>
-							    <p><img src="images/ui_modifier_copy_transform.png" width="228" height="102" alt=""/></p>
-							    <h3>Source Object</h3>
-							    <p>							      The source object in your blend file from which to copy the transform.</p>
-							    </subpanel>
-							  
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Copy Modifiers</h2>
-							    <p>Copies <strong>blender modifiers</strong> from a source object to all exported objects. For example your source object could contain a triangulate or edge split modifier which would be applied on each object upon export. </p>
-							    <p><img src="images/ui_modifier_copy_modifiers.png" width="227" height="84" alt=""/></p>
-							    <h3>Source Object</h3>
-							    <p>							      The source object in your blend file from which to copy the modifiers.</p>
-							    </subpanel>
-							  
-							  <subpanel>
-							    <h2> <img src="images/icon_modifier.png" width="21" height="21" alt=""/> Merge Meshes</h2>
-							    <p>Merges all meshes of a bundle into a single mesh and object. This modifier is ideal for static environment assets.
-							      </p>
-							    <p><img src="images/ui_modifier_merge.png" alt=""/></p>
-							    <h3>Merge Verts</h3>
-							    <p>							      Merges vertices within a specified <strong>distance</strong>. This is identical to removing double vertices in mesh editing. </p>
-							    <h3>Split by Material</h3>
-							    <p>	<strong>Splits</strong> the	mesh	by	material	so	that each mesh contains only 1 material. </p>
-							    </subpanel>
-							  
-							  
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Collider Mesh</h2>
-							    <p>Creates an <strong>additional collider</strong> mesh for each object in a bundle with a simplified geometry.</p>
-							    <p><img src="images/ui_modifier_collider.png" width="226" height="56" alt=""/></p>
-							    <h3>Ratio</h3>
-							    <p>							      The quality ratio of the collider mesh, a value of 0.25 means that the collider mesh will aim for a 25% vertex count to the original object.</p>
-							    <h3>Angle</h3>
-							    <p>							      The <strong>flattening angle</strong> (degrees) of face normals to further compress the collider geometry. The bigger the angle the more blocky the collider.</p>
-							    </subpanel>
-							  
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> LOD</h2>
-							    <p>Also known as level of detail which is a technique used in game engines to optimize performance. This modifier creates a series of copies of each object in your bundle with a reduced triangle count for each LOD step and a name indicating the LOD level.</p>
-							    <p><img src="images/ui_modifier_LOD.png" width="225" height="138" alt=""/></p>
-							    <p>LOD levels are previewed in the modifier panel with the compression ratio and LOD level.</p>
-							    <h3>Steps</h3>
-							    <p>							      How many LOD steps to include.</p>
-							    <h3>Quality</h3>
-							    <p>							      The lowest LOD <strong>compression ratio</strong>. A value of 0.05 means that LOD steps will range from 100% down to 5% geometry level.</p>
-							    </subpanel>
-							  
-							  <subpanel>
-							    <h2><img src="images/icon_modifier.png" width="21" height="21" alt=""/> Vertex AO</h2>
-							    <p>This modifier applies <strong>vertex color</strong> based <strong>ambient occlusion</strong> to each mesh of a bundle. This is a great way of adding AO depth without the limitation of texture resolution, file or memory size of textures.</p>
-							    <p><img src="images/ui_modifier_vertexAO.png" width="229" height="31" alt=""/></p>
-							    <p>Vertex colors require shaders to fully utilize them.</p>
-							    <p><img src="images/demo_vertexAO.png" alt=""/></p>
 							    </subpanel>
 							  
 							  

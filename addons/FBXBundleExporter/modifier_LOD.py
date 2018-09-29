@@ -35,7 +35,7 @@ def get_quality(index, count, max_quality):
 class Modifier(modifier.Modifier):
 	label = "LOD"
 	id = 'lod'
-
+	url = "http://renderhjs.net/fbxbundle/#modifier_lod"
 
 	def __init__(self):
 		super().__init__()

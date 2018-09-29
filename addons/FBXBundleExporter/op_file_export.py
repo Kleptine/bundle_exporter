@@ -3,6 +3,8 @@ import os
 import mathutils
 import math
 import imp
+import pathlib
+
 from . import objects_organise
 
 from . import modifiers
@@ -52,8 +54,8 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
 
-	path_folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
-	if not os.path.exists(path_folder):
+	folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+	if not os.path.exists(folder):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
 
@@ -98,11 +100,6 @@ def export(self, target_platform):
 	for name,objects in bundles.items():
 		pivot = objects_organise.get_pivot(objects).copy()
 
-		path = os.path.join(path_folder, name)+"."+platforms.platforms[mode].extension
-
-		print("Export {}x = {}".format(len(objects),path))
-
-
 		# Detect if animation export...
 		use_animation = objects_organise.get_objects_animation(objects)
 
@@ -131,10 +128,24 @@ def export(self, target_platform):
 			obj.select = True
 		bpy.context.scene.objects.active = copies[0]
 
-		# ...apply modifiers
+
+		# Apply modifiers
+
+		# full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  		
+		 # os.path.join(folder, name)+"."+platforms.platforms[mode].extension
+		path_folder = folder
+		path_name = name
 		for modifier in modifiers.modifiers:
 			if modifier.get("active"):
 				copies = modifier.process_objects(name, copies)
+				path_folder = modifier.process_path(path_name, path_folder)
+				path_name = modifier.process_name(path_name)
+
+		path_full = os.path.join(path_folder, path_name)+"."+platforms.platforms[mode].extension
+		directory = os.path.dirname(path_full)
+
+		# Create path if not yet available
+		pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
 		# Select all copies
 		bpy.ops.object.select_all(action="DESELECT")
@@ -142,7 +153,8 @@ def export(self, target_platform):
 			obj.select = True
 
 		# Export per platform (Unreal, Unity, ...)
-		platforms.platforms[mode].file_export(path)
+		print("Export {}x = {}".format(len(objects),path_full))
+		platforms.platforms[mode].file_export(path_full)
 
 		# Delete copies
 		
