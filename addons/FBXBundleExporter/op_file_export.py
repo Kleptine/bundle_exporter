@@ -142,9 +142,9 @@ def export(self, target_platform):
 				path_name = modifier.process_name(path_name)
 
 		path_full = os.path.join(path_folder, path_name)+"."+platforms.platforms[mode].extension
-		directory = os.path.dirname(path_full)
-
+		
 		# Create path if not yet available
+		directory = os.path.dirname(path_full)
 		pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
 		# Select all copies
@@ -157,7 +157,6 @@ def export(self, target_platform):
 		platforms.platforms[mode].file_export(path_full)
 
 		# Delete copies
-		
 		bpy.ops.object.delete()
 		copies.clear()
 		

@@ -370,6 +370,7 @@ class Panel_Files(bpy.types.Panel):
 			row.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Compact", expand=True)
 
 
+			folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
 
 			# Display bundles
 			for fileName,objects in bundles.items():
@@ -382,16 +383,20 @@ class Panel_Files(bpy.types.Panel):
 				row = column.row(align=True)
 				if(fileName == "unknown"):
 					row.alert = True
-				
-				# Icon type
-				# icon_item = icon;
-				# if objects_organise.get_objects_animation(objects):
-				# 	icon_item = 'RENDER_ANIMATION';
 
+				# Process object name via modifiers
+				path_folder = folder
+				path_name = fileName
+				for modifier in modifiers.modifiers:
+					if modifier.get("active"):
+						path_folder = modifier.process_path(path_name, path_folder)
+						path_name = modifier.process_name(path_name)
+	
 				# Show label for FBX bundle
 				label = fileName
 				if mode in platforms.platforms:
-					label = platforms.platforms[mode].get_filename(fileName)
+					label = platforms.platforms[mode].get_filename(path_name)
+
 				if(len(objects) > 1):
 					label = "{}  {}x".format(label, len(objects));
 
@@ -400,11 +405,7 @@ class Panel_Files(bpy.types.Panel):
 				r.alert = True
 				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
 
-				# col = row.column(align=True)
-				# col.alignment = 'LEFT'
-				# col.label(text="{}x".format(len(objects)))
 
-				# col = box.column(align=True)
 				if not context.scene.FBXBundleSettings.collapseBundles:
 					for i in range(0,len(objects)):
 						row = column.row(align=True)

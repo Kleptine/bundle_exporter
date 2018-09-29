@@ -57,9 +57,6 @@ class Modifier(modifier.Modifier):
 				col = layout.column(align=True)
 				col.enabled = False
 
-				max_obj = 2
-				max_file = 2
-
 				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
 				for name,objects in bundles.items():
 					full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  
@@ -72,6 +69,7 @@ class Modifier(modifier.Modifier):
 						row.separator()
 						row.label(text= self.format_object_name(name, obj.name) )
 						break
+					break
 
 
 
