@@ -147,9 +147,9 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 	)
 	target_platform = bpy.props.EnumProperty(items= 
 		[	
-			('UNITY', 'Unity ', 'Unity engine export, objects are rotated -90° x axis'),
+			('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
 			('UNREAL', 'Unreal ', 'Unreal engine export'),
-			('BLENDER', 'Blender', 'Default Blender export'),
+			('BLENDER', 'Collada', 'Default Blender *.DAE export'),
 			('GLTF', 'glTF', 'GL Transmission Format')
 		], 
 		description="Target platform for the FBX exports.",
