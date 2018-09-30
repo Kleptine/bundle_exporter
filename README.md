@@ -15,7 +15,7 @@ You can find documentation and the latest release on the official website
 
 ## FBX Bundle 1.5.0 ##
 Download 
-* [FBX_Bundle_1.5.0.zip](http://renderhjs.net/fbxbundle/releases/FBX_Bundle_1.5.0.zip)
+* [FBX_Bundle_1.5.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.5.0.zip)
 Changes
 * New modifiers: Rename, Offset transform, copy modifiers, merge meshes, collider meshe, LOD, vertex AO
 * New platform system: Unity, Unreal, Collada, glTF
@@ -26,7 +26,7 @@ Changes
 
 ## FBX Bundle 1.2.0 ##
 Download
-* [FBX_Bundle_1.2.0.zip](http://renderhjs.net/fbxbundle/releases/FBX_Bundle_1.2.0.zip)
+* [FBX_Bundle_1.2.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.2.0.zip)
 Changes
 * New pivot mode: parent pivot
 * improved Unreal & Unity export & smoothing groups
@@ -36,7 +36,7 @@ Changes
 
 ## FBX Bundle 1.1.0 ##
 Download
-* [FBX_Bundle_1.1.0.zip](http://renderhjs.net/fbxbundle/releases/FBX_Bundle_1.1.0.zip)
+* [FBX_Bundle_1.1.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.1.0.zip)
 Changes
 * Rotate meshes x -90 to counter rotation issues in Unity
 * New pivot mode: lowest object
@@ -46,7 +46,7 @@ Changes
 
 ## FBX Bundle 1.0.0 ##
 Download
-* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/fbxbundle/releases/FBX_Bundle_1.0.0.zip)
+* [FBX_Bundle_1.0.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.0.0.zip)
 Changes
 * initial release
 * export & import from a set folder
