@@ -87,7 +87,13 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 		col = box.column(align=True)
 		col.label(text="Copies a Unity Editor script to automatically assign")
 		col.label(text="existing materials by name matching names in Blender")
-		
+
+		box = layout.box()
+		row = box.row()
+		row.label(text="Keyboard shortcuts")
+		col = box.column(align=True)
+		col.label(text="Ctrl + E = Export selected")
+		col.label(text="Ctrl + Shift + E = Export recent")
 
 
 
@@ -165,11 +171,13 @@ class Panel_Core(bpy.types.Panel):
 		layout = self.layout
 		box = layout.box()
 
-		row = box.row()
+		row = box.row(align=True)
 		row.label(text='Settings', icon='PREFERENCES')
 
 		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
 		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
+		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_platform"
+
 
 		mode = bpy.context.scene.FBXBundleSettings.target_platform
 
@@ -192,9 +200,14 @@ class Panel_Core(bpy.types.Panel):
 
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle by", icon='GROUP')
+		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_bundle"
+
+
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot at", icon='OUTLINER_DATA_EMPTY', expand=False)
-		
+		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_pivot"
+
+
 		col = box.column(align=True)
 		row = col.row(align=True)
 		row.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
@@ -496,7 +509,9 @@ def icons_unregister():
 	preview_icons = None
 	
 
-# registers
+
+addon_keymaps = []
+
 def register():
 	bpy.utils.register_module(__name__)
 
@@ -507,7 +522,6 @@ def register():
 	for modifier in modifiers.modifiers:
 		print("loop name: {}".format(modifier.__module__))
 		modifier.register()
-
 
 	# Register Icons
 	global preview_icons
@@ -522,6 +536,16 @@ def register():
 	for icon in icons:
 		icon_register(icon)
 
+	# handle the keymap
+	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+	kmi = km.keymap_items.new(op_file_export.op.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
+	kmi = km.keymap_items.new(op_file_export_recent.op.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
+	# kmi.properties.total = 4
+	addon_keymaps.append(km)
+
+
+
+
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
@@ -533,9 +557,13 @@ def unregister():
 	for modifier in modifiers.modifiers:
 		modifier.unregister()
 
-
 	# Remove icons
 	icons_unregister()
+
+	# handle the keymap
+	for km in addon_keymaps:
+		bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
+	del addon_keymaps[:]
 
 
 if __name__ == "__main__":

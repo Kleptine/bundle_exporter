@@ -13,9 +13,6 @@ class op(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
-		if len(bpy.context.selected_objects) == 0:
-			return False
-
 		if bpy.context.scene.FBXBundleSettings.path == "":
 			return False
 

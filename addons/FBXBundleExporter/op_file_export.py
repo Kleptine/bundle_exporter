@@ -175,4 +175,19 @@ def export(self, target_platform):
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select = True
+
+	# Show popup
+	
+	def draw(self, context):
+		filenames = []
+		# Get bundle file names
+		for name,objects in bundles.items():
+			for modifier in modifiers.modifiers:
+				if modifier.get("active"):
+					name = modifier.process_name(name)	
+			filenames.append(name+"."+platforms.platforms[mode].extension)
+
+		self.layout.label("Exported {}".format(", ".join(filenames)))
+
+	bpy.context.window_manager.popup_menu(draw, title = "Exported {}x files".format(len(bundles)), icon = 'INFO')
 	
