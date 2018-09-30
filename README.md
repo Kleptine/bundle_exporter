@@ -14,9 +14,13 @@ You can find documentation and the latest release on the official website
 # Release Log #
 
 ## FBX Bundle 1.5.0 ##
-Download 
+
+*Download*
+
 * [FBX_Bundle_1.5.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.5.0.zip)
-Changes
+
+*Changes*
+
 * New modifiers: Rename, Offset transform, copy modifiers, merge meshes, collider meshe, LOD, vertex AO
 * New platform system: Unity, Unreal, Collada, glTF
 * glTF support (requires official glTF addon)
@@ -25,9 +29,13 @@ Changes
 * Re-Export button: Re-Exports previous objects again
 
 ## FBX Bundle 1.2.0 ##
-Download
+
+*Download*
+
 * [FBX_Bundle_1.2.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.2.0.zip)
-Changes
+
+*Changes*
+
 * New pivot mode: parent pivot
 * improved Unreal & Unity export & smoothing groups
 * fixed scale for Unreal export
@@ -35,9 +43,13 @@ Changes
 * New mesh fix tool: clean up smoothing, uv & topology issues on selected objects
 
 ## FBX Bundle 1.1.0 ##
-Download
+
+*Download*
+
 * [FBX_Bundle_1.1.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.1.0.zip)
-Changes
+
+*Changes*
+
 * Rotate meshes x -90 to counter rotation issues in Unity
 * New pivot mode: lowest object
 * Warning if scene units are not metric
@@ -45,9 +57,13 @@ Changes
 * New Unity Editor script to process fbx 
 
 ## FBX Bundle 1.0.0 ##
-Download
+
+*Download*
+
 * [FBX_Bundle_1.0.0.zip](http://renderhjs.net/fbxbundle/download/FBX_Bundle_1.0.0.zip)
-Changes
+
+*Changes*
+
 * initial release
 * export & import from a set folder
 * draw fences tool
