@@ -61,62 +61,64 @@
 			
                         
                        
-					</panel>
+					<img src="images/overview.gif" width="352" height="287" alt=""/></panel>
                     
                     
-      <panel>
-			<a id="installation"></a>
-        <h1> Installation</h1>
-        <p>FBX Bundle addon requires <a href="https://www.blender.org/download/releases/2-79/">Blender 2.79</a> (2.8 is not yet supported)</p>
-        <subpanel>
-		  <h2>Installation</h2>
-		  <ol>
-		    <li>Open <strong>User Preferences</strong> in Blender and select the Add-ons tab<br>
-		      <img src="images/ui_installation_open_preferences.png" width="195" height="25" alt=""/>					</li>
-		    <li>Press <strong>Install Addon</strong> and Select the zip file<br>
-		      <img src="images/ui_installation_install_addon_from_file.png" width="158" height="21" alt=""/>					</li>
-		    <li> <strong>Enable</strong> the FBX Bundle Addon<br>
-		      <img src="images/ui_installation_enable.gif" width="170" height="24" alt=""/>					</li>
-          </ol>
-		  <p>The FBX Bundle addon can be found the viewport tool panel.</p>
+                    
+                    
+	  <panel>
+
+		<a id="installation"></a>
+    <h1> Installation</h1>
+    <p>FBX Bundle addon requires <a href="https://www.blender.org/download/releases/2-79/">Blender 2.79</a> (2.8 is not yet supported)</p>
+    <subpanel>
+	  <h2>Installation</h2>
+	  <ol>
+	    <li>Open <strong>User Preferences</strong> in Blender and select the Add-ons tab<br>
+	      <img src="images/ui_installation_open_preferences.png" width="195" height="25" alt=""/>					</li>
+	    <li>Press <strong>Install Addon</strong> and Select the zip file<br>
+	      <img src="images/ui_installation_install_addon_from_file.png" width="158" height="21" alt=""/>					</li>
+	    <li> <strong>Enable</strong> the FBX Bundle Addon<br>
+	      <img src="images/ui_installation_enable.gif" width="170" height="24" alt=""/>					</li>
+      </ol>
+	  <p>The FBX Bundle addon can be found the viewport tool panel.</p>
 </subpanel>
                  
-         <subpanel>
+     <subpanel>
 
-            <h2>Shortcuts</h2>
-          <p>This addon adds the following shortcuts active in the 3D view</p>
-          <ul>
-              <li><strong>Ctrl + E</strong>: Export selected objects/ bundles</li>
-              <li><strong>Ctrl + Shift + E</strong>: Re-Export last exported bundles (does not require any selection)</li>
-          </ul>
-        </subpanel>
+        <h2>Shortcuts</h2>
+       <p>This addon adds the following shortcuts active in the 3D view</p>
+       <ul>
+           <li><strong>Ctrl + E</strong>: Export selected objects/ bundles</li>
+           <li><strong>Ctrl + Shift + E</strong>: Re-Export last exported bundles (does not require any selection)</li>
+       </ul>
+    </subpanel>
                  
                         
-          <subpanel>
+      <subpanel>
 
-            <h2><strong><img src="images/unity.png" /></strong> Optional Unity  Script</h2>
-            <p>This optional <strong>Unity Editor script</strong>  does the following:</p>
-            <ul>
-              <li>Disable mesh scale import settings, e.g. scale the mesh in unity at 1.0 instead of 0.01</li>
-              <li>Disable Unity material generation</li>
-              <li>Automatically <strong>assigns existing materials</strong> inside the fbx prefab. The Unity Editor script can automatically assign existing materials if the material names between Blender and the Unity project match.</li>
-              <li>Assigns<strong> collider meshes</strong> when it finds meshes named _COLLIDER e.g. via using the Collider Mesh modifier.</li>
-            </ul>
-            <p>You can install the script from within the FBX Bundle <strong>addon preferences</strong> to your Unity Project</p>
-            <p><img src="images/ui_preferences_install_unity_script.png" alt="" width="297" height="104"/></p>
-            <p>It wil create an Editor folder with the c# Editor script inside. Alternatively the C# script can also be found in the addon zip file under <em>"FBXBundleExporter/resources/PostprocessorMeshes.cs"          </em></p>
-          </subpanel>
+        <h2><strong><img src="images/unity.png" /></strong> Optional Unity  Script</h2>
+        <p>This optional <strong>Unity Editor script</strong>  does the following:</p>
+        <ul>
+          <li>Disable mesh scale import settings, e.g. scale the mesh in unity at 1.0 instead of 0.01</li>
+          <li>Disable Unity material generation</li>
+          <li>Automatically <strong>assigns existing materials</strong> inside the fbx prefab. The Unity Editor script can automatically assign existing materials if the material names between Blender and the Unity project match.</li>
+          <li>Assigns<strong> collider meshes</strong> when it finds meshes named _COLLIDER e.g. via using the Collider Mesh modifier.</li>
+        </ul>
+        <p>You can install the script from within the FBX Bundle <strong>addon preferences</strong> to your Unity Project</p>
+        <p><img src="images/ui_preferences_install_unity_script.png" alt="" width="297" height="104"/></p>
+        <p>It wil create an Editor folder with the c# Editor script inside. Alternatively the C# script can also be found in the addon zip file under <em>"FBXBundleExporter/resources/PostprocessorMeshes.cs"          </em></p>
+      </subpanel>
           
        
                         
-		</panel>
+	</panel>
+
 
 					<panel>
-					  <a id="guide"></a>
-					  </panel>
-					<panel>
+                    	 <a id="guide"></a>
 					  <h1>Quick Guide</h1>
-					  <p>Below are common usage examples for Unity and Unreal</p>
+					  <p>Below is a common usage example</p>
 					  <subpanel>
 					    
 					    <ol>
@@ -132,17 +134,19 @@
 					      <li>Select your objects </li>
 					      <li>Press <strong>Export</strong><br>
 					        <img src="images/ui_export.png" width="122" height="42" alt=""/>					      </li>
-					      </ol>
-					    </subpanel>
+				        </ol>
+				      </subpanel>
 					  <subpanel>
 					    <h2><strong><img src="images/unity.png" /></strong> Unity Tips                              </h2>
 					    <h3>&nbsp;</h3>
 					    <h3>Adding Unity Editor script</h3>
 					    <p> Under the addon preferences for FBX bundle press '<strong>Copy Unity Editor script</strong>’ and select your Unity Assets folder. </p>
 					    <h3>Automatically assign Materials</h3>
-					    <p>					      Create a material in Blender and assign it to your object(s). Create a material in Unity with the same name as the material in blender. </p>
-					    </subpanel>
-					  </panel>
+					    <p>					      Create a material in Blender and assign it to your object(s). Create a material in Unity with the same name as the material in blender. Each time unity re-imports your fbx assets materials will be assigned.</p>
+					    <h3>Use the Merge Mesh Modifier</h3>
+					    <p>Use the <a href="#modifier_merge">Merge Meshes</a> modifier to combine all the meshes of each bundle into 1. This can reduce the draw calls at runtime and reduce the amount of objects to select and manage inside Unity.</p>
+				      </subpanel>
+	  </panel>
 
 						<panel>
 						  <a id="settings"></a>
