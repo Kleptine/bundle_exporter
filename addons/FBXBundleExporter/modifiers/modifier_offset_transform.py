@@ -4,15 +4,14 @@ import math
 from mathutils import Vector
 
 from . import modifier
-imp.reload(modifier) 
 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	source = bpy.props.StringProperty()
+	source: bpy.props.StringProperty()
 
 
 
@@ -25,8 +24,8 @@ class Modifier(modifier.Modifier):
 		super().__init__()
 
 
-	def register(self):
-		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
+	#def register(self):
+	#	exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
 
 
 	def draw(self, layout):
@@ -69,11 +68,11 @@ class Modifier(modifier.Modifier):
 			bpy.ops.object.mode_set(mode='OBJECT')
 
 			prev_cursor_mode = bpy.context.space_data.pivot_point
-			prev_cursor_location = bpy.context.space_data.cursor_location
+			prev_cursor_location = bpy.context.scene.cursor.location
 
 			# Export origin
 			bpy.context.space_data.pivot_point = 'CURSOR'
-			bpy.context.space_data.cursor_location = Vector((0,0,0))
+			bpy.context.scene.cursor.location = Vector((0,0,0))
 
 			for obj in objects:
 				if obj != source:
@@ -81,7 +80,7 @@ class Modifier(modifier.Modifier):
 					
 					bpy.ops.object.select_all(action='DESELECT')
 					bpy.context.scene.objects.active = obj
-					obj.select = True
+					obj.select_set(True)
 
 					# Move
 					bpy.ops.transform.translate(value=source.location, constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED')
@@ -96,5 +95,5 @@ class Modifier(modifier.Modifier):
 
 			# Restore pivot & mode
 			bpy.context.space_data.pivot_point = prev_cursor_mode
-			bpy.context.space_data.cursor_location = prev_cursor_location
+			bpy.context.scene.cursor.location = prev_cursor_location
 		

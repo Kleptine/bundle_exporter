@@ -3,10 +3,10 @@ import os
 import mathutils
 from mathutils import Vector
 
-from . import objects_organise
+from .. import objects_organise
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_import"
+class BGE_OT_file_import(bpy.types.Operator):
+	bl_idname = "bge.file_import"
 	bl_label = "Import"
 	bl_description = "Import multiple objects"
 
@@ -16,13 +16,13 @@ class op(bpy.types.Operator):
 		if context.space_data.local_view:
 			return False
 		
-		if bpy.context.scene.FBXBundleSettings.path == "":
+		if bpy.context.scene.BGE_Settings.path == "":
 			return False
 			
 		return True
 
 	def execute(self, context):
-		import_files(bpy.context.scene.FBXBundleSettings.path)
+		import_files(bpy.context.scene.BGE_Settings.path)
 		return {'FINISHED'}
 
 

@@ -2,15 +2,13 @@ import bpy, bmesh
 import imp
 
 from . import modifier
-imp.reload(modifier) 
-
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	source = bpy.props.StringProperty()
+	source: bpy.props.StringProperty()
 
 
 
@@ -23,8 +21,8 @@ class Modifier(modifier.Modifier):
 		super().__init__()
 
 
-	def register(self):
-		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
+	#def register(self):
+	#	exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
 
 		
 
@@ -53,10 +51,10 @@ class Modifier(modifier.Modifier):
 	def process_objects(self, name, objects):
 		if self.get('source') in bpy.data.objects:
 			source = bpy.data.objects[ self.get('source') ]
-			source.select = True
+			source.select_set(True)
 			bpy.context.scene.objects.active = source
 
 			bpy.ops.object.make_links_data(type='MODIFIERS')
-			source.select = False
+			source.select_set(False)
 
 		

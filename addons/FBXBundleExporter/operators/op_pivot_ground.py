@@ -3,10 +3,10 @@ import os
 import mathutils
 from mathutils import Vector
 
-from . import objects_organise
+from .. import objects_organise
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.pivot_ground"
+class BGE_OT_pivot_ground(bpy.types.Operator):
+	bl_idname = "bge.pivot_ground"
 	bl_label = "Ground pivot"
 	bl_description = "Aligns the Z-position of the pivot to the bottom of the bundle bounds"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -34,9 +34,9 @@ def ground_pivot(self):
 	
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
-	previous_active = bpy.context.scene.objects.active
+	previous_active = bpy.context.active_object
 	previous_pivot = bpy.context.space_data.pivot_point
-	previous_cursor = bpy.context.space_data.cursor_location.copy()
+	previous_cursor = bpy.context.scene.cursor.location.copy()
 
 	for name,objects in bundles.items():
 
@@ -46,17 +46,17 @@ def ground_pivot(self):
 
 			# Select object as active
 			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
+			obj.select_set(True)
 			bpy.context.scene.objects.active = obj
 
-			bpy.context.space_data.cursor_location = Vector((obj.location.x,obj.location.y,bounds.min.z))
+			bpy.context.scene.cursor.location = Vector((obj.location.x,obj.location.y,bounds.min.z))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
 
 	# Restore previous settings
 	bpy.context.space_data.pivot_point = previous_pivot
-	bpy.context.space_data.cursor_location = previous_cursor
+	bpy.context.scene.cursor.location = previous_cursor
 	bpy.context.scene.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
-		obj.select = True
+		obj.select_set(True)

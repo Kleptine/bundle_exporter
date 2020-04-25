@@ -1,44 +1,9 @@
+from . import gp_draw
+from . import objects_organise
 
-if "bpy" in locals():
-	import imp
-	imp.reload(gp_draw)
-	imp.reload(objects_organise)
-
-	imp.reload(op_fence_clear)
-	imp.reload(op_fence_draw)
-	imp.reload(op_file_copy_unity_script)
-	imp.reload(op_file_export)
-	imp.reload(op_file_export_recent)
-	imp.reload(op_file_export_recent_clear)
-	imp.reload(op_file_import)
-	imp.reload(op_file_open_folder)
-	imp.reload(op_pivot_ground)
-	imp.reload(op_tool_geometry_fix)
-	imp.reload(op_tool_pack_bundles)
-	
-	imp.reload(modifiers) 
-	imp.reload(platforms)
-
-
-else:
-	from . import gp_draw
-	from . import objects_organise
-
-	from . import op_fence_clear
-	from . import op_fence_draw
-	from . import op_file_copy_unity_script
-	from . import op_file_export
-	from . import op_file_export_recent
-	from . import op_file_export_recent_clear
-	from . import op_file_import
-	from . import op_file_open_folder
-	from . import op_pivot_ground
-	from . import op_tool_geometry_fix
-	from . import op_tool_pack_bundles
-
-	from . import modifiers
-	from . import platforms
-
+from . import modifiers
+from . import platforms
+from . import operators
 
 import bpy, bmesh
 import os
@@ -52,8 +17,8 @@ bl_info = {
 	"name": "FBX Bundle",
 	"description": "Export object selections in FBX bundles",
 	"author": "renderhjs",
-	"blender": (2, 7, 9),
-	"version": (1, 5, 0),
+	"blender": (2, 80, 0),
+	"version": (2, 0, 0),
 	"category": "3D View",
 	"location": "3D View > Tools Panel > FBX Bundle",
 	"warning": "",
@@ -73,7 +38,7 @@ from bpy.props import (
 
 
 
-class Panel_Preferences(bpy.types.AddonPreferences):
+class BGE_preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
 	def draw(self, context):
@@ -83,7 +48,7 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 		box = layout.box()
 		row = box.row()
 		row.label(text="Unity Editor script")
-		row.operator(op_file_copy_unity_script.op.bl_idname, icon='SAVE_COPY')
+		row.operator(operators.BGE_OT_unity_script.bl_idname, icon='SAVE_COPY')
 		col = box.column(align=True)
 		col.label(text="Copies a Unity Editor script to automatically assign")
 		col.label(text="existing materials by name matching names in Blender")
@@ -97,55 +62,57 @@ class Panel_Preferences(bpy.types.AddonPreferences):
 
 
 
-class FBXBundleSettings(bpy.types.PropertyGroup):
-	path = bpy.props.StringProperty (
+class BGE_Settings(bpy.types.PropertyGroup):
+	path: bpy.props.StringProperty (
 		name="Output Path",
 		default="",
 		description="Define the path where to export or import from",
 		subtype='DIR_PATH'
 	)
-	padding = bpy.props.FloatProperty (
+	padding: bpy.props.FloatProperty (
 		name="Padding",
 		default=0.15,
 		min = 0,
 		description="Padding for fences or space bundling",
 		subtype='DISTANCE'
 	)
-	collapseBundles = bpy.props.BoolProperty (
+	collapseBundles: bpy.props.BoolProperty (
 		name="Collapse",
 		default=False,
 		description="Compact list view"
 	)
-	include_children = bpy.props.BoolProperty (
+	include_children: bpy.props.BoolProperty (
 		name="Incl. Children",
 		default=False,
 		description="Include nested children in bundles, e.g parent or group."
 	)
-	recent = bpy.props.StringProperty (
+	recent: bpy.props.StringProperty (
 		name="Recent export",
 		default=""
 	)
 
 
-	mode_bundle = bpy.props.EnumProperty(items= 
+	mode_bundle: bpy.props.EnumProperty(items= 
 		[('NAME', 'Name', "Bundle by matching object names"), 
 		('PARENT', 'Parent', "Bundle by the parent object"), 
 		# ('SPACE', 'Space', "Bundle by shared space"), 
-		('GROUP', 'Group', "Bundle by 'Groups'"),
+		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
 		('MATERIAL', 'Material', "Bundle by matching material names"),
-		('SCENE', 'Scene', "Bundle by current scene")
-		], name = "Bundle Mode", default = 'NAME'
+		('SCENE', 'Scene', "Bundle by current scene")], 
+		name = "Bundle Mode", 
+		default = 'NAME'
 	)
-	mode_pivot = bpy.props.EnumProperty(items=[
+	mode_pivot: bpy.props.EnumProperty(items=[
 		('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
 		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
 		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
 		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
 		('PARENT', 'Parent', "Pivot from the parent object"),
-		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow")
+		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)"),
+        ('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'")
 		], name = "Pivot From", default = 'OBJECT_FIRST'
 	)
-	target_platform = bpy.props.EnumProperty(items= 
+	target_platform: bpy.props.EnumProperty(items= 
 		[	
 			('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
 			('UNREAL', 'Unreal ', 'Unreal engine export'),
@@ -159,12 +126,12 @@ class FBXBundleSettings(bpy.types.PropertyGroup):
 
 
 
-class Panel_Core(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel_core"
+class BGE_PT_core_panel(bpy.types.Panel):
+	bl_idname = "BGE_PT_core_panel"
 	bl_label = " "
 	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "FBX Bundle"
+	bl_region_type = 'UI'
+	bl_category = "Game Exporter"
 	bl_options = {'HIDE_HEADER'}
 
 	def draw(self, context):
@@ -174,12 +141,12 @@ class Panel_Core(bpy.types.Panel):
 		row = box.row(align=True)
 		row.label(text='Settings', icon='PREFERENCES')
 
-		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
-		row.prop(bpy.context.scene.FBXBundleSettings, "target_platform", text="", icon_value=icon)
+		icon = icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
+		row.prop(bpy.context.scene.BGE_Settings, "target_platform", text="", icon_value=icon)
 		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_platform"
 
 
-		mode = bpy.context.scene.FBXBundleSettings.target_platform
+		mode = bpy.context.scene.BGE_Settings.target_platform
 
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
@@ -191,27 +158,27 @@ class Panel_Core(bpy.types.Panel):
 		col = box.column(align=True)
 
 		row = col.row(align=True)
-		if context.scene.FBXBundleSettings.path == "":
+		if context.scene.BGE_Settings.path == "":
 			row.alert = True
-		row.prop(context.scene.FBXBundleSettings, "path", text="")
-		if context.scene.FBXBundleSettings.path != "":
+		row.prop(context.scene.BGE_Settings, "path", text="")
+		if context.scene.BGE_Settings.path != "":
 			row = row.row(align=True)
-			row.operator(op_file_open_folder.op.bl_idname, text="", icon='FILE_FOLDER')
+			row.operator(operators.BGE_OT_file_open_folder.bl_idname, text="", icon='FILE_FOLDER')
 
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_bundle", text="Bundle by", icon='GROUP')
+		row.prop(context.scene.BGE_Settings, "mode_bundle", text="Bundle by", icon='GROUP')
 		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_bundle"
 
 
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "mode_pivot", text="Pivot at", icon='OUTLINER_DATA_EMPTY', expand=False)
+		row.prop(context.scene.BGE_Settings, "mode_pivot", text="Pivot at", icon='OUTLINER_DATA_EMPTY', expand=False)
 		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_pivot"
 
 
 		col = box.column(align=True)
 		row = col.row(align=True)
-		row.prop(context.scene.FBXBundleSettings, "padding", text="Padding", expand=True)
-		row.prop(context.scene.FBXBundleSettings, "include_children", text="Include children", expand=True)
+		row.prop(context.scene.BGE_Settings, "padding", text="Padding", expand=True)
+		row.prop(context.scene.BGE_Settings, "include_children", text="Include children", expand=True)
 
 		# Warnings
 
@@ -223,7 +190,7 @@ class Panel_Core(bpy.types.Panel):
 			box = col.box()
 			box.label(text="Requires object mode to export.", icon='CANCEL')
 
-		if context.scene.FBXBundleSettings.path == "":
+		if context.scene.BGE_Settings.path == "":
 			box = col.box()
 			box.label(text="No output path defined.", icon='CANCEL')
 
@@ -231,71 +198,66 @@ class Panel_Core(bpy.types.Panel):
 			box = col.box()
 			box.label(text="Platform not implemented", icon='CANCEL')
 		
-		elif context.scene.FBXBundleSettings.mode_bundle == 'GROUP' and len(bpy.data.groups) == 0:
+		elif context.scene.BGE_Settings.mode_bundle == 'COLLECTION' and len(bpy.data.collections) == 0:
 			box = col.box()
 			box.label(text="No groups available", icon='CANCEL')
 
 		elif not platforms.platforms[mode].is_valid()[0]:
 			box = col.box()
 			box.label(text=platforms.platforms[mode].is_valid()[1], icon='CANCEL')			
-
 		
 		
 
 
-class Panel_Tools(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel_tools"
+class BGE_PT_tools_panel(bpy.types.Panel):
+	bl_idname = "BGE_PT_tools_panel"
 	bl_label = "Tools"
 	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "FBX Bundle"
+	bl_region_type = 'UI'
+	bl_category = "Game Exporter"
 	bl_context = "objectmode"
 	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
-
-		
-
-
 		
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
 		row = col.row(align=True)
 		row.scale_y = 1.85
-		row.operator(op_fence_draw.op.bl_idname, text="Draw Fences", icon='BORDER_RECT')
-		row.operator(op_fence_clear.op.bl_idname, text="", icon='PANEL_CLOSE')
+		row.operator(operators.BGE_OT_fence_draw.bl_idname, text="Draw Fences", icon='AXIS_TOP')
+		row.operator(operators.BGE_OT_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
 
 		col.separator()
 
 		col = col.column(align=True)
 
-		col.operator(op_pivot_ground.op.bl_idname, text="Pivot at Ground", icon='OUTLINER_DATA_EMPTY')
-		col.operator(op_tool_geometry_fix.op.bl_idname, text="Fix imp. Geometry", icon='MESH_ICOSPHERE')
+		#col.operator(operators.BGE_OT_pivot_ground.bl_idname, text="Pivot at Ground", icon='OUTLINER_DATA_EMPTY')
+		#col.operator(operators.BGE_OT_tool_geometry_fix.bl_idname, text="Fix imp. Geometry", icon='MESH_ICOSPHERE')
 		
 		if bpy.app.debug_value != 0:
-			col.operator(op_tool_pack_bundles.op.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
+			col.operator(operators.BGE_OT_tool_pack_bundles.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
 		
 
 
 			row = layout.row(align=True)
 			row.alert =True
-			row.operator(op_fence_clear.op.bl_idname, text="Pack", icon='IMGDISPLAY')
-			row.operator(op_fence_clear.op.bl_idname, text="Align Z", icon='TRIA_DOWN_BAR')
+			row.operator(operators.BGE_OT_fence_clear.bl_idname, text="Pack", icon='IMGDISPLAY')
+			row.operator(operators.BGE_OT_fence_clear.bl_idname, text="Align Z", icon='TRIA_DOWN_BAR')
 			layout.separator()
 
 
 
 
 
-class Panel_Modifiers(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel_modifiers"
+class BGE_PT_modifiers_panel(bpy.types.Panel):
+	bl_idname = "BGE_PT_modifiers_panel"
 	bl_label = "Modifiers"
 	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "FBX Bundle"
+	bl_region_type = 'UI'
+	bl_category = "Game Exporter"
 	bl_context = "objectmode"
 	bl_options = {'DEFAULT_CLOSED'}
 
@@ -319,12 +281,12 @@ class Panel_Modifiers(bpy.types.Panel):
 			r.label(text="{}x modifiers are applied upon export".format(count))
 
 
-class Panel_Files(bpy.types.Panel):
-	bl_idname = "FBX_bundle_panel_files"
+class BGE_PT_files_panel(bpy.types.Panel):
+	bl_idname = "BGE_PT_files_panel"
 	bl_label = "Bundles"
 	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'TOOLS'
-	bl_category = "FBX Bundle"
+	bl_region_type = 'UI'
+	bl_category = "Game Exporter"
 	bl_context = "objectmode"
 	# bl_options = {'HIDE_HEADER'}
 
@@ -334,41 +296,41 @@ class Panel_Files(bpy.types.Panel):
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
-		icon = icon_get(bpy.context.scene.FBXBundleSettings.target_platform.lower())
+		icon = icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 
 
 		col = layout.column(align=True)	
 		row = col.row(align=True)
 
-		split = row.split(percentage=0.4, align=True)
+		split = row.split(factor=0.4, align=True)
 
 		c = split.column(align=True)
 		c.scale_y = 1.85
-		c.operator(op_file_import.op.bl_idname, text="Import", icon='IMPORT')
+		c.operator(operators.BGE_OT_file_import.bl_idname, text="Import", icon='IMPORT')
 		
 		c = split.column(align=True)
 		c.scale_y = 1.85
-		c.operator(op_file_export.op.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
+		c.operator(operators.BGE_OT_file_export.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 		
 
-		if len(bpy.context.scene.FBXBundleSettings.recent) > 0:
+		if len(bpy.context.scene.BGE_Settings.recent) > 0:
 			if len(objects_organise.recent_load_objects()) > 0:
 				row = col.row(align=True)
 				row.scale_y = 1.3
 
 				r = row.row(align=True)
-				r.operator(op_file_export_recent.op.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
+				r.operator(operators.BGE_OT_export_recent.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
 				
 				r = r.row(align=True)
 				# r.alert = True
-				r.operator(op_file_export_recent_clear.op.bl_idname, text="", icon='X')
+				r.operator(operators.BGE_OT_export_recent_clear.bl_idname, text="", icon='X')
 
 
 
 		layout.separator()
 
 		
-		mode = bpy.context.scene.FBXBundleSettings.target_platform
+		mode = bpy.context.scene.BGE_Settings.target_platform
 
 		
 		if(len(bundles) > 0):
@@ -380,10 +342,10 @@ class Panel_Files(bpy.types.Panel):
 			else:
 				row.label(text = "{}x Bundles".format(len(bundles)))
 
-			row.prop(context.scene.FBXBundleSettings, "collapseBundles", text="Compact", expand=True)
+			row.prop(context.scene.BGE_Settings, "collapseBundles", text="Compact", expand=True)
 
 
-			folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+			folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
 
 			# Display bundles
 			for fileName,objects in bundles.items():
@@ -405,7 +367,6 @@ class Panel_Files(bpy.types.Panel):
 						path_folder = modifier.process_path(path_name, path_folder)
 						path_name = modifier.process_name(path_name)
 	
-				# Show label for FBX bundle
 				label = fileName
 				if mode in platforms.platforms:
 					label = platforms.platforms[mode].get_filename(path_name)
@@ -413,82 +374,16 @@ class Panel_Files(bpy.types.Panel):
 				if(len(objects) > 1):
 					label = "{}  {}x".format(label, len(objects));
 
-				row.operator(op_select.bl_idname,icon_value=icon, emboss=False, text=label).key = fileName
+				row.operator(operators.BGE_OT_select.bl_idname,icon_value=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)
 				r.alert = True
-				r.operator(op_remove.bl_idname,text="", icon='X').key = fileName
+				r.operator(operators.BGE_OT_remove.bl_idname,text="", icon='X').key = fileName
 
 
-				if not context.scene.FBXBundleSettings.collapseBundles:
+				if not context.scene.BGE_Settings.collapseBundles:
 					for i in range(0,len(objects)):
 						row = column.row(align=True)
 						row.label(text=objects[i].name)
-
-
-
-
-
-
-class op_debug_lines(bpy.types.Operator):
-	bl_idname = "fbxbundle.debug_lines"
-	bl_label = "Debug"
-
-	def execute(self, context):
-		print ("Debug Operator")
-
-		gp_draw.draw_debug()
-
-		return {'FINISHED'}
-
-
-class op_debug_setup(bpy.types.Operator):
-	bl_idname = "fbxbundle.debug_setup"
-	bl_label = "Setup"
-
-	def execute(self, context):
-		print ("Debug Setup Operator")
-
-		# Disable grid
-		bpy.context.space_data.show_axis_x = False
-		bpy.context.space_data.show_axis_y = False
-		bpy.context.space_data.show_axis_z = False
-		bpy.context.space_data.grid_lines = 6
-		bpy.context.space_data.grid_subdivisions = 1
-		bpy.context.space_data.grid_scale = 1
-		bpy.context.space_data.show_floor = False
-
-		bpy.context.space_data.show_all_objects_origin = True
-
-
-		return {'FINISHED'}
-
-
-class op_select(bpy.types.Operator):
-	bl_idname = "fbxbundle.select"
-	bl_label = "Select"
-	key = bpy.props.StringProperty (name="Key")
-	def execute(self, context):
-		bundles = objects_organise.get_bundles()
-		if self.key in bundles:
-			bpy.ops.object.select_all(action='DESELECT')
-			for obj in bundles[self.key]:
-				obj.select = True
-		return {'FINISHED'}
-
-
-
-class op_remove(bpy.types.Operator):
-	bl_idname = "fbxbundle.remove"
-	bl_label = "Remove"
-	key = bpy.props.StringProperty (name="Key")
-	def execute(self, context):
-		bundles = objects_organise.get_bundles()
-		if self.key in bundles:
-			for obj in bundles[self.key]:
-				obj.select = False
-		return {'FINISHED'}
-
-
 
 
 def icon_get(name):
@@ -511,51 +406,57 @@ def icons_unregister():
 
 
 addon_keymaps = []
+icons = ["unity.png", "unreal.png", "blender.png","gltf.png"]
+classes = [BGE_preferences, BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
 
 def register():
-	bpy.utils.register_module(__name__)
+	from bpy.utils import register_class
+	for cls in classes:
+		register_class(cls)
 
-	# Register scene settings
-	bpy.types.Scene.FBXBundleSettings = bpy.props.PointerProperty(type=FBXBundleSettings)
+	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
 
 	# Register modifier settings
 	for modifier in modifiers.modifiers:
-		print("loop name: {}".format(modifier.__module__))
+		print("register modifier: {}".format(modifier.__module__))
 		modifier.register()
+
+	for operator in operators.operators:
+		print("register operator: {}".format(operator))
+		register_class(operator)
 
 	# Register Icons
 	global preview_icons
 	preview_icons = bpy.utils.previews.new()
-
-	icons = [
-		"unity.png", 
-		"unreal.png", 
-		"blender.png",
-		"gltf.png"
-	]
+	
 	for icon in icons:
 		icon_register(icon)
 
 	# handle the keymap
 	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-	kmi = km.keymap_items.new(op_file_export.op.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
-	kmi = km.keymap_items.new(op_file_export_recent.op.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
+	kmi = km.keymap_items.new(operators.BGE_OT_file_export.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
+	kmi = km.keymap_items.new(operators.BGE_OT_export_recent.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
 	# kmi.properties.total = 4
 	addon_keymaps.append(km)
 
 
-
-
-
 def unregister():
-	bpy.utils.unregister_module(__name__)
+	from bpy.utils import unregister_class
+	for cls in reversed(classes):
+		try:
+			unregister_class(cls)
+		except:
+			print(cls)
 
 	#Unregister Settings
-	del bpy.types.Scene.FBXBundleSettings
+	del bpy.types.Scene.BGE_Settings
 
 	# Unregister modifier settings
 	for modifier in modifiers.modifiers:
 		modifier.unregister()
+
+	for operator in operators.operators:
+		unregister_class(operator)
 
 	# Remove icons
 	icons_unregister()
@@ -564,8 +465,4 @@ def unregister():
 	for km in addon_keymaps:
 		bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
 	del addon_keymaps[:]
-
-
-if __name__ == "__main__":
-	register()
 

@@ -28,7 +28,7 @@ def clear():
 
 def draw_debug():
 	# test_grease_pencil()
-	padding = bpy.context.scene.FBXBundleSettings.padding
+	padding = bpy.context.scene.BGE_Settings.padding
 
 	draw = get_draw()
 	draw.clear()
@@ -64,6 +64,7 @@ class LineDraw:
 	gp_palette = None
 	gp_color = None
 	gp_frame = None
+	gp_mat = None
 
 
 	def __init__(self, name, color):
@@ -324,13 +325,13 @@ class LineDraw:
 		id_palette = "id_palette"
 
 		# 
-		bpy.context.space_data.show_grease_pencil = True
+		bpy.context.space_data.show_object_viewport_grease_pencil = True
 
 		# gp = scene.grease_pencil
 		# if not gp:
-		# 	gp = bpy.data.grease_pencil.get(gname, None)
+		# 	gp = bpy.data.grease_pencils.get(gname, None)
 		# 	if not gp:
-		# 		gp = bpy.data.grease_pencil.new(gname)
+		# 		gp = bpy.data.grease_pencils.new(gname)
 		# 		print("Created new Grease Pencil", gp.name)
 		# 	scene.grease_pencil = gp
 		# 	print("Added Grease Pencil %s to current scene" % (gp.name) ) 
@@ -339,10 +340,10 @@ class LineDraw:
 		# Grease Pencil
 		self.gp = bpy.context.scene.grease_pencil
 		if not self.gp:
-			if id_grease in bpy.data.grease_pencil:
-				self.gp = bpy.data.grease_pencil.get(id_grease, None)
+			if id_grease in bpy.data.grease_pencils:
+				self.gp = bpy.data.grease_pencils.get(id_grease, None)
 			else:
-				self.gp = bpy.data.grease_pencil.new(id_grease)
+				self.gp = bpy.data.grease_pencils.new(id_grease)
 			bpy.context.scene.grease_pencil = self.gp
 
 		# Layer
@@ -350,20 +351,34 @@ class LineDraw:
 			self.gp_layer = self.gp.layers[id_layer]
 		else:
 			self.gp_layer = self.gp.layers.new(id_layer, set_active=True)
-		self.gp_layer.show_x_ray = False
+		#self.gp_layer.show_x_ray = False
 
 		# Palette
-		if id_palette in self.gp.palettes:
-			self.gp_palette = self.gp.palettes.get(id_palette)
-		else:
-			self.gp_palette = self.gp.palettes.new(id_palette, set_active=True)
+		#if id_palette in self.gp.palettes:
+		#	self.gp_palette = self.gp.palettes.get(id_palette)
+		#else:
+		#	self.gp_palette = self.gp.palettes.new(id_palette, set_active=True)
 
 		# Color
-		if len(self.gp_palette.colors) > 0:
-			self.gp_color = self.gp_palette.colors[0]
-		else:
-			self.gp_color = self.gp_palette.colors.new()
-			self.gp_color.color=(0,0.8,1)
+		#if len(self.gp_palette.colors) > 0:
+		#	self.gp_color = self.gp_palette.colors[0]
+		#else:
+		#	self.gp_color = self.gp_palette.colors.new()
+		#	self.gp_color.color=(0,0.8,1)
+
+		self.gp_layer.color = (0,0.8,1)
+
+		#if "_bundle_id" in bpy.data.materials.keys():
+		#	self.gp_mat = bpy.data.materials["_bundle_id"]
+		#else:
+		#	self.gp_mat = bpy.data.materials.new("_bundle_id")
+
+		#if not self.gp_mat.is_grease_pencil:
+		#	bpy.data.materials.create_gpencil_data(self.gp_mat)
+		#	self.gp_mat.grease_pencil.color = (0,0.8,1)
+
+		#if self.gp_mat.name not in self.gp.materials:
+		#	self.gp.materials.append(self.gp_mat)
 		
 		# Frame
 		if len(self.gp_layer.frames) == 0:
@@ -373,6 +388,8 @@ class LineDraw:
 
 
 	def get_gp_stroke(self, id_grease="fance", id_layer="lines", id_palette="colors"):
-		stroke  = self.gp_frame.strokes.new(colorname=self.gp_color.name)
-		stroke.draw_mode = '3DSPACE'
+		stroke  = self.gp_frame.strokes.new()
+		stroke.display_mode = '3DSPACE'
+		stroke.line_width = 100
+		stroke.material_index = 0
 		return stroke

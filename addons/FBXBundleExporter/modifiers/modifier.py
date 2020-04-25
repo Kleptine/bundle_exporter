@@ -4,21 +4,14 @@ import operator
 import mathutils
 from mathutils import Vector
 
-import imp
-
-from . import op_modifier_apply
-imp.reload(op_modifier_apply)
-
-from . import modifiers
-imp.reload(modifiers)
+modifiers = []
 
 
 class Settings(bpy.types.PropertyGroup):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-
 
 class Modifier:
 	label = "Modifier"
@@ -31,18 +24,23 @@ class Modifier:
 	#region Description
 	
 	def settings_path(self):
-		return "FBXBundle_modifier_{}".format(self.id)
+		return "BGE_modifier_{}".format(self.id)
 
 
 	def register(self):
 		n = self.__module__.split(".")[-1]
 		# print("Register base class: n:{} ".format(n))
-
+		from bpy.utils import register_class
 		exec("from . import {}".format(n))
+		exec("register_class({}.Settings)".format(n))
 		exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type={}.Settings)".format(n))
 
 
 	def unregister(self):
+		n = self.__module__.split(".")[-1]
+		from bpy.utils import unregister_class
+		exec("from . import {}".format(n))
+		exec("unregister_class({}.Settings)".format(n))
 		exec("del "+"bpy.types.Scene."+self.settings_path() )
 
 
@@ -58,7 +56,8 @@ class Modifier:
 		r = row.row(align=True)
 		r.enabled = self.get("active")
 		r.alignment = 'RIGHT'
-		r.operator( op_modifier_apply.op.bl_idname, icon='FILE_TICK' ).modifier_index = modifiers.modifiers.index(self)
+		from ..operators import BGE_OT_modifier_apply
+		r.operator( BGE_OT_modifier_apply.bl_idname, icon='FILE_TICK' ).modifier_index = modifiers.index(self)
 
 		r = row.row(align=True)
 		r.alignment = 'RIGHT'

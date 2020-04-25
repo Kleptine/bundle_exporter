@@ -3,17 +3,15 @@ import math
 import imp
 
 from . import modifier
-imp.reload(modifier) 
-
 
 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	contrast = bpy.props.FloatProperty (
+	contrast: bpy.props.FloatProperty (
 		default=0.5,
 		min = 0,
 		max = 1,
@@ -49,7 +47,7 @@ class Modifier(modifier.Modifier):
 
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
+			obj.select_set(True)
 			bpy.context.scene.objects.active = obj
 
 			# Set AO vertex colors

@@ -1,12 +1,9 @@
-import bpy, bmesh
-import os
-import mathutils
-from mathutils import Vector
+import bpy
 
-from . import gp_draw
+from .. import gp_draw
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.fence_clear"
+class BGE_OT_fence_clear(bpy.types.Operator):
+	bl_idname = "bge.fence_clear"
 	bl_label = "Clear Fences"
 	bl_description = "Clears all drawn fences in the scene"
 	bl_options = {'REGISTER', 'UNDO'}

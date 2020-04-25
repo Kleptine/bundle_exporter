@@ -5,28 +5,27 @@ import random
 from mathutils import Vector
 
 
-from . import objects_organise
+from .. import objects_organise
 
 from . import modifier
-imp.reload(modifier) 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	merge_verts = bpy.props.BoolProperty (
+	merge_verts: bpy.props.BoolProperty (
 		name="Merge",
 		description="Split meshes by material after merging.",
 		default=False
 	)
-	merge_by_material = bpy.props.BoolProperty (
+	merge_by_material: bpy.props.BoolProperty (
 		name="By Material",
 		description="Split meshes by material after merging.",
 		default=False
 	)
 
-	merge_distance = bpy.props.FloatProperty (
+	merge_distance: bpy.props.FloatProperty (
 		name="Dist.",
 		default=0,
 		min = 0,
@@ -80,7 +79,7 @@ class Modifier(modifier.Modifier):
 
 			bpy.ops.object.join()
 			bpy.context.object.name = name #assign bundle name
-			bpy.context.space_data.cursor_location = Vector((0,0,0))
+			bpy.context.scene.cursor.location = Vector((0,0,0))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
 			# Convert to mesh
@@ -155,7 +154,7 @@ class Modifier(modifier.Modifier):
 					if prefix in obj.name:
 						if len(obj.data.vertices) == 0:
 							bpy.ops.object.select_all(action='DESELECT')
-							obj.select = True
+							obj.select_set(True)
 							bpy.ops.object.delete()
 						else:
 							mat_objs.append(obj)
@@ -167,7 +166,7 @@ class Modifier(modifier.Modifier):
 
 						bpy.ops.object.select_all(action='DESELECT')
 						bpy.context.scene.objects.active = obj
-						obj.select = True
+						obj.select_set(True)
 
 						if prefix_mat in obj.name:
 
@@ -181,7 +180,9 @@ class Modifier(modifier.Modifier):
 				return mat_objs
 
 			# Re-assign array
-			objects = [bpy.context.object]
+			new_objects = [x for x in objects if x.type == 'EMPTY']
+			new_objects.append(bpy.context.object)
+			objects = new_objects
 
 
 		return objects

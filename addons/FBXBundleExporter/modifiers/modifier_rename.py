@@ -2,28 +2,20 @@ import bpy, bmesh
 import math
 import imp
 import os
-from . import objects_organise
+from .. import objects_organise
 
 from . import modifier
-imp.reload(modifier) 
-
-from . import modifiers
-imp.reload(modifiers)
-
-from . import platforms
-imp.reload(platforms)
-
-
+from .. import platforms
 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	path = bpy.props.StringProperty(default="{path}")
-	file = bpy.props.StringProperty(default="{bundle}")
-	obj = bpy.props.StringProperty(default="{object}")
+	path: bpy.props.StringProperty(default="{path}")
+	file: bpy.props.StringProperty(default="{bundle}")
+	obj: bpy.props.StringProperty(default="{object}")
 
 
 
@@ -50,14 +42,14 @@ class Modifier(modifier.Modifier):
 
 
 			bundles = objects_organise.get_bundles()
-			mode = bpy.context.scene.FBXBundleSettings.target_platform
+			mode = bpy.context.scene.BGE_Settings.target_platform
 
 			if mode in platforms.platforms:
 				# label = 
 				col = layout.column(align=True)
 				col.enabled = False
 
-				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
 				for name,objects in bundles.items():
 					full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  
 					

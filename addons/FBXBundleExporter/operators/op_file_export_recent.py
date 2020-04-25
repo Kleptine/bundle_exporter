@@ -2,18 +2,12 @@ import bpy, bmesh
 import os
 import mathutils
 import math
-import imp
-from . import objects_organise
 
-from . import modifiers
-from . import platforms
-
-imp.reload(modifiers)
-imp.reload(platforms)
+from .. import objects_organise
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_export_recent"
+class BGE_OT_export_recent(bpy.types.Operator):
+	bl_idname = "bge.export_recent"
 	bl_label = "export recent"
 	bl_description = "Re-Export recent exported Bundle again."
 
@@ -23,10 +17,10 @@ class op(bpy.types.Operator):
 		if context.space_data.local_view:
 			return False
 
-		if bpy.context.scene.FBXBundleSettings.path == "":
+		if bpy.context.scene.BGE_Settings.path == "":
 			return False
 
-		if len(bpy.context.scene.FBXBundleSettings.recent) <= 0:
+		if len(bpy.context.scene.BGE_Settings.recent) <= 0:
 			return False
 
 		if len(objects_organise.recent_load_objects()) <= 0:
@@ -57,7 +51,7 @@ def export_recent(self):
 	previous_active = bpy.context.scene.objects.active
 	previous_unit_system = bpy.context.scene.unit_settings.system
 	previous_pivot = bpy.context.space_data.pivot_point
-	previous_cursor = bpy.context.space_data.cursor_location.copy()
+	previous_cursor = bpy.context.scene.cursor.location.copy()
 
 
 
@@ -68,7 +62,7 @@ def export_recent(self):
 		for i in range(len(obj.layers)):
 			if not obj.layers[i]:
 				obj.layers[i] = True
-		obj.select = True
+		obj.select_set(True)
 	
 	bpy.context.scene.objects.active = objects[-1]
 	bpy.ops.fbxbundle.file_export()
@@ -78,9 +72,9 @@ def export_recent(self):
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
 	bpy.context.space_data.pivot_point = previous_pivot
-	bpy.context.space_data.cursor_location = previous_cursor
+	bpy.context.scene.cursor.location = previous_cursor
 	bpy.context.scene.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
-		obj.select = True
+		obj.select_set(True)
 	

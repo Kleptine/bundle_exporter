@@ -1,24 +1,22 @@
 import bpy, bmesh
 import os
 import mathutils
-import imp
 
-from . import objects_organise
-imp.reload(objects_organise)
 
-from . import modifiers
-imp.reload(modifiers)
+from .. import objects_organise
+
+from .. import modifiers
 
 
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.modifier_apply"
+class BGE_OT_modifier_apply(bpy.types.Operator):
+	bl_idname = "bge.modifier_apply"
 	bl_label = "Apply"
 	bl_description = "Apply this modifier now"
 	bl_options = {'REGISTER', 'UNDO'}
 
-	modifier_index = bpy.props.IntProperty (
+	modifier_index: bpy.props.IntProperty (
 		default=0
 	)
 
@@ -42,7 +40,7 @@ class op(bpy.types.Operator):
 
 					bpy.ops.object.select_all(action="DESELECT")
 					for obj in objects:
-						obj.select = True
+						obj.select_set(True)
 					bpy.context.scene.objects.active = objects[0]
 
 					modifiers.modifiers[self.modifier_index].process_objects(fileName, objects)

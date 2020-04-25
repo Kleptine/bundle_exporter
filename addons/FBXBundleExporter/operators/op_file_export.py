@@ -2,20 +2,18 @@ import bpy, bmesh
 import os
 import mathutils
 import math
-import imp
+
 import pathlib
 
-from . import objects_organise
+from .. import objects_organise
 
-from . import modifiers
-from . import platforms
-
-imp.reload(modifiers)
-imp.reload(platforms)
+from .. import modifiers
+from .. import platforms
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_export"
+
+class BGE_OT_file_export(bpy.types.Operator):
+	bl_idname = "bge.file_export"
 	bl_label = "export"
 	bl_description = "Export selected bundles"
 
@@ -28,10 +26,10 @@ class op(bpy.types.Operator):
 		if len(bpy.context.selected_objects) == 0:
 			return False
 
-		if bpy.context.scene.FBXBundleSettings.path == "":
+		if bpy.context.scene.BGE_Settings.path == "":
 			return False
 
-		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
+		if bpy.context.view_layer.objects.active and bpy.context.view_layer.objects.active.mode != 'OBJECT':
 			return False
 
 		if len( objects_organise.get_bundles() ) == 0:
@@ -41,7 +39,7 @@ class op(bpy.types.Operator):
 		return True
 
 	def execute(self, context):
-		export(self, bpy.context.scene.FBXBundleSettings.target_platform)
+		export(self, bpy.context.scene.BGE_Settings.target_platform)
 		return {'FINISHED'}
 
 
@@ -50,21 +48,21 @@ prefix_copy = "EXPORT_ORG_"
 def export(self, target_platform):
 
 	# Warnings
-	if bpy.context.scene.FBXBundleSettings.path == "":
+	if bpy.context.scene.BGE_Settings.path == "":
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
 
-	folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.FBXBundleSettings.path ))
+	folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
 	if not os.path.exists(folder):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
 
-	if len(bpy.context.selected_objects) == 0 and not bpy.context.scene.objects.active:
+	if len(bpy.context.selected_objects) == 0 and not bpy.context.view_layer.objects.active:
 		self.report({'ERROR_INVALID_INPUT'}, "No objects selected" )
 		return
 
 	# Is Mode available?
-	mode = bpy.context.scene.FBXBundleSettings.target_platform
+	mode = bpy.context.scene.BGE_Settings.target_platform
 	if mode not in platforms.platforms:
 		self.report({'ERROR_INVALID_INPUT'}, "Platform '{}' not supported".format(mode) )
 		return
@@ -77,13 +75,13 @@ def export(self, target_platform):
 
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
-	previous_active = bpy.context.scene.objects.active
+	previous_active = bpy.context.view_layer.objects.active
 	previous_unit_system = bpy.context.scene.unit_settings.system
-	previous_pivot = bpy.context.space_data.pivot_point
-	previous_cursor = bpy.context.space_data.cursor_location.copy()
+	previous_pivot = bpy.context.scene.tool_settings.transform_pivot_point
+	previous_cursor = bpy.context.scene.cursor.location
 
-	if not bpy.context.scene.objects.active:
-		bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+	if not bpy.context.view_layer.objects.active:
+		bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 	bundles = objects_organise.get_bundles()
@@ -93,7 +91,8 @@ def export(self, target_platform):
 
 
 	bpy.context.scene.unit_settings.system = 'METRIC'	
-	bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
+	bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
+
 
 	objects_organise.recent_store(bundles)
 
@@ -110,9 +109,9 @@ def export(self, target_platform):
 			obj.name = prefix_copy+name_original
 
 			bpy.ops.object.select_all(action="DESELECT")
-			obj.select = True
-			bpy.context.scene.objects.active = obj
-			obj.hide = False
+			obj.select_set(True)
+			bpy.context.view_layer.objects.active = obj
+			obj.hide_viewport = False
 			
 			# Copy
 			bpy.ops.object.duplicate()
@@ -125,8 +124,8 @@ def export(self, target_platform):
 
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in copies:
-			obj.select = True
-		bpy.context.scene.objects.active = copies[0]
+			obj.select_set(True)
+		bpy.context.view_layer.objects.active = copies[0]
 
 
 		# Apply modifiers
@@ -150,7 +149,7 @@ def export(self, target_platform):
 		# Select all copies
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in copies:
-			obj.select = True
+			obj.select_set(True)
 
 		# Export per platform (Unreal, Unity, ...)
 		print("Export {}x = {}".format(len(objects),path_full))
@@ -169,12 +168,12 @@ def export(self, target_platform):
 
 	# Restore previous settings
 	bpy.context.scene.unit_settings.system = previous_unit_system
-	bpy.context.space_data.pivot_point = previous_pivot
-	bpy.context.space_data.cursor_location = previous_cursor
-	bpy.context.scene.objects.active = previous_active
+	bpy.context.scene.tool_settings.transform_pivot_point = previous_pivot
+	bpy.context.scene.cursor.location = previous_cursor
+	bpy.context.view_layer.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
-		obj.select = True
+		obj.select_set(True)
 
 	# Show popup
 	
@@ -187,7 +186,11 @@ def export(self, target_platform):
 					name = modifier.process_name(name)	
 			filenames.append(name+"."+platforms.platforms[mode].extension)
 
-		self.layout.label("Exported {}".format(", ".join(filenames)))
+		self.layout.label(text="Exported:")
+		for x in filenames:
+			self.layout.label(text=x)
+
+		self.layout.operator("wm.url_open", text="", icon='QUESTION')
 
 	bpy.context.window_manager.popup_menu(draw, title = "Exported {}x files".format(len(bundles)), icon = 'INFO')
 	

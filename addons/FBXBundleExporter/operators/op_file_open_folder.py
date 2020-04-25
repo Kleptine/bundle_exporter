@@ -4,22 +4,22 @@ import mathutils
 import math
 from mathutils import Vector
 
-from . import objects_organise
+from .. import objects_organise
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_open_folder"
+class BGE_OT_file_open_folder(bpy.types.Operator):
+	bl_idname = "bge.file_open_folder"
 	bl_label = "Open Folder"
 	bl_description = "Open the specified folder"
 
 	@classmethod
 	def poll(cls, context):
-		if bpy.context.scene.FBXBundleSettings.path == "":
+		if bpy.context.scene.BGE_Settings.path == "":
 			return False
 
 		return True
 
 	def execute(self, context):
-		open_folder(self, bpy.context.scene.FBXBundleSettings.path)
+		open_folder(self, bpy.context.scene.BGE_Settings.path)
 		
 		return {'FINISHED'}
 

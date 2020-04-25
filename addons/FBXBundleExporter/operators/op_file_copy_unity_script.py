@@ -1,23 +1,21 @@
-import bpy, bmesh
+import bpy
 import os
 import pathlib
 import shutil
-import mathutils
-from mathutils import Vector
 
-from . import objects_organise
+from .. import objects_organise
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.file_copy_unity_script"
+class BGE_OT_unity_script(bpy.types.Operator):
+	bl_idname = "bge.unity_script"
 	bl_label = "Copy Unity Script"
 	bl_description = "Copy Unity editor script to folder"
 
-	filepath = bpy.props.StringProperty(subtype="FILE_PATH")
+	filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 
 
 	def invoke(self, context, event):
 		if self.filepath == "":
-			self.filepath = bpy.context.scene.FBXBundleSettings.path
+			self.filepath = bpy.context.scene.BGE_Settings.path
 
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}

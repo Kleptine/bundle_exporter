@@ -3,23 +3,20 @@ import math
 import imp
 
 from . import modifier
-imp.reload(modifier) 
-
-
 
 
 class Settings(modifier.Settings):
-	active = bpy.props.BoolProperty (
+	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	levels = bpy.props.IntProperty (
+	levels: bpy.props.IntProperty (
 		default=3,
 		min=2,
 		max=6,
 		subtype='FACTOR'
 	)
-	quality = bpy.props.FloatProperty (
+	quality: bpy.props.FloatProperty (
 		default=0.05,
 		min = 0.01,
 		max = 1,
@@ -79,7 +76,7 @@ class Modifier(modifier.Modifier):
 
 				# Select
 				bpy.ops.object.select_all(action="DESELECT")
-				obj.select = True
+				obj.select_set(True)
 				bpy.context.scene.objects.active = obj
 
 				# Copy & Decimate modifier

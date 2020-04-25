@@ -3,3 +3,4 @@ addons/uv_align_distribute/*
 *__pycache__*
 .vscode/
 .DS_Store
+*.code-workspace

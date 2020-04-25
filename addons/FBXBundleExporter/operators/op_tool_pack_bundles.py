@@ -5,12 +5,12 @@ import math
 from mathutils import Vector
 import operator
 
-from . import objects_organise
+from .. import objects_organise
 
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.pack_bundles"
+class BGE_OT_tool_pack_bundles(bpy.types.Operator):
+	bl_idname = "bge.tool_pack_bundles"
 	bl_label = "Pack Bundles"
 	bl_description = "Pack bundles in a atlas formation"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -24,7 +24,7 @@ class op(bpy.types.Operator):
 
 def pack_bundles():
 
-	padding = bpy.context.scene.FBXBundleSettings.padding
+	padding = bpy.context.scene.BGE_Settings.padding
 	bundles = objects_organise.get_bundles() 
 
 	# Store previous settings
@@ -77,7 +77,7 @@ def pack_bundles():
 		for obj in bundles[key]:
 			move_x = min_corner.x + block.bin.x - (bundle_bbox[key].min.x) # + obj.location.x
 			move_y = min_corner.y + block.bin.y - (bundle_bbox[key].min.y ) #+ obj.location.y
-			obj.select = True
+			obj.select_set(True)
 			bpy.ops.transform.translate(value=(move_x , move_y, 0), constraint_axis=(True, True, False), constraint_orientation='GLOBAL', proportional='DISABLED')
 
 	print("First {}".format(blocks[0].key))
@@ -86,7 +86,7 @@ def pack_bundles():
 	bpy.context.scene.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
-		obj.select = True
+		obj.select_set(True)
 
 
 class Block(object):

@@ -1,16 +1,14 @@
-import bpy, bmesh
-import os
-import mathutils
+import bpy
 from mathutils import Vector
 import operator
 
-from . import objects_organise
-from . import gp_draw
+from .. import objects_organise
+from .. import gp_draw
 
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.fence_draw"
+class BGE_OT_fence_draw(bpy.types.Operator):
+	bl_idname = "bge.fence_draw"
 	bl_label = "Draw Fences"
 	bl_description = "Draw fences around selected bundles"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -43,7 +41,7 @@ class op(bpy.types.Operator):
 def draw_bounds(name, objects, bounds):
 	print("Fence {}".format(name))
 
-	padding = bpy.context.scene.FBXBundleSettings.padding
+	padding = bpy.context.scene.BGE_Settings.padding
 	
 	
 	pos = bounds.center
@@ -99,7 +97,7 @@ def draw_bounds(name, objects, bounds):
 
 def draw_grid(objects, bounds_group):
 	draw = gp_draw.get_draw()
-	padding = bpy.context.scene.FBXBundleSettings.padding
+	padding = bpy.context.scene.BGE_Settings.padding
 
 	bounds_objects = {}
 	for o in objects:

@@ -10,15 +10,14 @@ import json
 import imp
 
 from . import platforms
-imp.reload(platforms)
 
 
 def is_object_valid(obj):
 	# Objects to include in a bundle as 'export-able'
-	if obj.hide:
+	if obj.hide_viewport:
 		return False
 		
-	return obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE'
+	return obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE' or obj.type == 'EMPTY'
 
 
 def get_objects():
@@ -27,9 +26,9 @@ def get_objects():
 		objects.append(obj)
 
 	# Include all children?
-	if len(objects) > 0 and bpy.context.scene.FBXBundleSettings.include_children:
+	if len(objects) > 0 and bpy.context.scene.BGE_Settings.include_children:
 		
-		if bpy.context.scene.FBXBundleSettings.mode_bundle == 'PARENT':
+		if bpy.context.scene.BGE_Settings.mode_bundle == 'PARENT':
 			# Collect parent and children objects
 			limit = 100 # max
 			roots = []
@@ -57,24 +56,24 @@ def get_objects():
 			for root in roots:
 				collect_recursive(root, 0)
 
-		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'GROUP':
+		elif bpy.context.scene.BGE_Settings.mode_bundle == 'COLLECTION':
 			# Collect group objects
-			groups = []
+			collections = []
 
-			# Collect groups from input selection
+			# Collect collections from input selection
 			for obj in objects:
-				for group in obj.users_group:
-					if group.name not in groups:
-						groups.append(group.name)
-
-			# Collect objects of groups
-			for name in groups:
-				if name in bpy.data.groups:
-					for obj in bpy.data.groups[name].objects:
+				for collection in obj.users_collection:
+					if collection.name not in collections and collection is not bpy.context.scene.collection:
+						collections.append(collection.name)
+			objects = []
+			# Collect objects of collections
+			for name in collections:
+				if name in bpy.data.collections:
+					for obj in bpy.data.collections[name].objects:
 						if obj not in objects:
 							objects.append(obj)
 
-		elif bpy.context.scene.FBXBundleSettings.mode_bundle == 'SCENE':
+		elif bpy.context.scene.BGE_Settings.mode_bundle == 'SCENE':
 			# Include all objects of the scene
 			for obj in bpy.context.scene.objects:
 				if obj not in objects:
@@ -139,13 +138,13 @@ def recent_store(bundles):
 		for obj in objects:
 			dic['selection'].append(obj.name)
 
-	bpy.context.scene.FBXBundleSettings.recent = json.dumps(dic).encode().decode()
+	bpy.context.scene.BGE_Settings.recent = json.dumps(dic).encode().decode()
 
 
 
 def recent_get_label():
-	recent = bpy.context.scene.FBXBundleSettings.recent
-	mode = bpy.context.scene.FBXBundleSettings.target_platform
+	recent = bpy.context.scene.BGE_Settings.recent
+	mode = bpy.context.scene.BGE_Settings.target_platform
 
 	if mode in platforms.platforms:
 		if len(recent) > 0:
@@ -162,7 +161,7 @@ def recent_get_label():
 
 
 def recent_load_objects():
-	recent = bpy.context.scene.FBXBundleSettings.recent
+	recent = bpy.context.scene.BGE_Settings.recent
 	if len(recent) > 0:
 		dic = json.loads(recent.encode().decode())
 		if 'selection' in dic and len(dic['selection']) > 0:
@@ -226,7 +225,7 @@ def get_bounds_combined(objects):
 
 
 def get_pivot(objects):
-	mode_pivot = bpy.context.scene.FBXBundleSettings.mode_pivot
+	mode_pivot = bpy.context.scene.BGE_Settings.mode_pivot
 
 	if len(objects):
 		if mode_pivot == 'OBJECT_FIRST':
@@ -266,8 +265,15 @@ def get_pivot(objects):
 			# Empty Gizmo, not part of bundle selection but rather scene selection
 			for obj in bpy.context.selected_objects:
 				if obj.type == 'EMPTY':
-					if obj.empty_draw_type == 'SINGLE_ARROW' or obj.empty_draw_type == 'PLAIN_AXES' or obj.empty_draw_type == 'ARROWS':
+					if obj.empty_display_type == 'SINGLE_ARROW' or obj.empty_display_type == 'PLAIN_AXES' or obj.empty_display_type == 'ARROWS':
 						return obj.location
+
+		elif mode_pivot == 'EMPTY_LOCAL':
+			for obj in objects:
+				if obj.type == 'EMPTY':
+					if obj.empty_display_type == 'SINGLE_ARROW' or obj.empty_display_type == 'PLAIN_AXES' or obj.empty_display_type == 'ARROWS':
+						if obj.name.lower().startswith('pivot'):
+							return obj.location
 
 	# Default
 	return Vector((0,0,0))
@@ -328,7 +334,7 @@ def decode(name, fill):
 
 
 def get_key(obj):
-	mode_bundle = bpy.context.scene.FBXBundleSettings.mode_bundle
+	mode_bundle = bpy.context.scene.BGE_Settings.mode_bundle
 
 	if mode_bundle == 'NAME':
 
@@ -362,10 +368,10 @@ def get_key(obj):
 		else:
 			return obj.name
 
-	elif mode_bundle == 'GROUP':
+	elif mode_bundle == 'COLLECTION':
 		# Use group name
-		if len(obj.users_group) >= 1:
-			return obj.users_group[0].name
+		if len(obj.users_collection) >= 1:
+			return obj.users_collection[0].name
 
 	elif mode_bundle == 'MATERIAL':
 		# Use material name
@@ -421,7 +427,7 @@ class ObjectBounds:
 
 	def __init__(self, obj):
 		self.obj = obj
-		corners = [obj.matrix_world * Vector(corner) for corner in obj.bound_box]
+		corners = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
 
 		self.min = Vector((corners[0].x, corners[0].y, corners[0].z))
 		self.max = Vector((corners[0].x, corners[0].y, corners[0].z))

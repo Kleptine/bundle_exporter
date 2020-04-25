@@ -5,13 +5,13 @@ from mathutils import Vector
 import operator
 import math
 
-from . import objects_organise
-from . import gp_draw
+from .. import objects_organise
+from .. import gp_draw
 
 
 
-class op(bpy.types.Operator):
-	bl_idname = "fbxbundle.fix_geometry"
+class BGE_OT_tool_geometry_fix(bpy.types.Operator):
+	bl_idname = "bge.tool_geometry_fix"
 	bl_label = "Fix Imported Geometry"
 	bl_description = "Remove custom splitnormals, consistent normals, fix exceeding > 8 UV coordinates"
 	bl_options = {'REGISTER', 'UNDO'}
@@ -27,7 +27,7 @@ class op(bpy.types.Operator):
 				bpy.ops.object.mode_set(mode='OBJECT')
 				bpy.context.scene.objects.active = obj
 				bpy.ops.object.select_all(action="DESELECT")
-				obj.select = True
+				obj.select_set(True)
 				
 				# Enable auto smooth
 				bpy.context.object.data.use_auto_smooth = True
@@ -71,7 +71,7 @@ class op(bpy.types.Operator):
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		bpy.ops.object.select_all(action="DESELECT")
 		for obj in objects:
-			obj.select = True
+			obj.select_set(True)
 
 		return {'FINISHED'}
 
