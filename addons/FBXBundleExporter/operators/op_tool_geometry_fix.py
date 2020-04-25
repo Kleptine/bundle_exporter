@@ -25,7 +25,7 @@ class BGE_OT_tool_geometry_fix(bpy.types.Operator):
 			if obj.type == 'MESH':
 				# Select object
 				bpy.ops.object.mode_set(mode='OBJECT')
-				bpy.context.scene.objects.active = obj
+				bpy.context.view_layer.objects.active = obj
 				bpy.ops.object.select_all(action="DESELECT")
 				obj.select_set(True)
 				

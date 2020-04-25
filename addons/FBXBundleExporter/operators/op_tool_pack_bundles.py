@@ -29,14 +29,15 @@ def pack_bundles():
 
 	# Store previous settings
 	previous_selection = bpy.context.selected_objects.copy()
-	previous_active = bpy.context.scene.objects.active
+	previous_active = bpy.context.view_layer.objects.active
 	
 
 	
 	min_corner = None
 
 	bundle_bbox = {}
-	for key,objects in bundles.items():
+	for key,data in bundles.items():
+		objects = data['objects']
 		# bbox
 		bbox = None
 		for obj in objects:
@@ -56,7 +57,8 @@ def pack_bundles():
 
 
 	blocks = []
-	for key,objects in bundles.items():
+	for key,data in bundles.items():
+		objects = data['objects']
 		
 		# Block for packing
 		block = Block(bundle_bbox[key].size.x+padding, bundle_bbox[key].size.y+padding)
@@ -74,16 +76,17 @@ def pack_bundles():
 		print("Block {} = {} , {}".format(key, block.bin.x, block.bin.y))
 		
 		bpy.ops.object.select_all(action="DESELECT")
-		for obj in bundles[key]:
+		all_data = bundles[key]['objects'] + bundles[key]['helpers']
+		for obj in all_data:
 			move_x = min_corner.x + block.bin.x - (bundle_bbox[key].min.x) # + obj.location.x
 			move_y = min_corner.y + block.bin.y - (bundle_bbox[key].min.y ) #+ obj.location.y
 			obj.select_set(True)
-			bpy.ops.transform.translate(value=(move_x , move_y, 0), constraint_axis=(True, True, False), constraint_orientation='GLOBAL', proportional='DISABLED')
+			bpy.ops.transform.translate(value=(move_x , move_y, 0), constraint_axis=(True, True, False), orient_type ='GLOBAL', use_proportional_edit=False)
 
 	print("First {}".format(blocks[0].key))
 
 	# Restore previous settings
-	bpy.context.scene.objects.active = previous_active
+	bpy.context.view_layer.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select_set(True)

@@ -12,15 +12,15 @@ import imp
 from . import platforms
 
 
-def is_object_valid(obj):
+def is_object_valid(obj, types):
 	# Objects to include in a bundle as 'export-able'
 	if obj.hide_viewport:
 		return False
 		
-	return obj.type == 'MESH' or obj.type == 'FONT' or obj.type == 'CURVE' or obj.type == 'EMPTY'
+	return obj.type in types
 
 
-def get_objects():
+def get_objects(types=('MESH','FONT','CURVE')):
 	objects = []
 	for obj in bpy.context.selected_objects:
 		objects.append(obj)
@@ -81,7 +81,7 @@ def get_objects():
 
 	filtered = []
 	for obj in objects:
-		if is_object_valid(obj):
+		if is_object_valid(obj, types):
 			filtered.append(obj)
 
 	return sort_objects_name(filtered)
@@ -133,7 +133,8 @@ def recent_store(bundles):
 	dic = {}
 	dic['selection'] = []
 	dic['bundles'] = []
-	for name,objects in bundles.items():
+	for name,data in bundles.items():
+		objects = data['objects'] + data['helpers']
 		dic['bundles'].append(name)
 		for obj in objects:
 			dic['selection'].append(obj.name)
@@ -172,13 +173,7 @@ def recent_load_objects():
 			return objects
 	return []
 	
-
-
-
-def get_bundles():
-	objects = get_objects()
-
-	# Collect groups by key
+def collect_group_by_key(objects):
 	groups = []
 	for obj in objects:
 		key = get_key(obj)
@@ -194,18 +189,34 @@ def get_bundles():
 					break
 			if not isFound:
 				groups.append([obj])
+	return groups
+
+def get_bundles():
+	objects = get_objects(types=('MESH','FONT','CURVE'))
+	helpers = get_objects(types=('EMPTY'))
+
+	# Collect groups by key
+	object_groups = collect_group_by_key(objects)
+	helper_groups = collect_group_by_key(helpers)
+	
 
 	# Sort keys alphabetically
-	keys = [get_key(group[0]) for group in groups]
+	keys = [get_key(group[0]) for group in object_groups]
 	keys.sort()
+
+	#create bundle
 	bundles = {}
 	for key in keys:
 		if key not in bundles:
-			bundles[key] = []
+			bundles[key] = {'objects':[],'helpers':[]}
 
-		for group in groups:
+		for group in object_groups:
 			if key == get_key(group[0]):
-				bundles[key] = group
+				bundles[key]['objects'] = group
+				break
+		for group in helper_groups:
+			if key == get_key(group[0]):
+				bundles[key]['helpers'] = group
 				break
 
 	if len(bundles) == 1 and 'UNDEFINED' in bundles:

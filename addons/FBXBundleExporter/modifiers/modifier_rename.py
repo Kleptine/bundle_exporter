@@ -50,7 +50,8 @@ class Modifier(modifier.Modifier):
 				col.enabled = False
 
 				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
-				for name,objects in bundles.items():
+				for name,data in bundles.items():
+					objects = data['objects']
 					full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  
 					
 

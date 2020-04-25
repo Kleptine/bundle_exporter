@@ -36,12 +36,13 @@ class BGE_OT_modifier_apply(bpy.types.Operator):
 			bundles = objects_organise.get_bundles()
 
 			if(len(bundles) > 0):
-				for fileName,objects in bundles.items():
+				for fileName,data in bundles.items():
+					objects = data['objects']
 
 					bpy.ops.object.select_all(action="DESELECT")
 					for obj in objects:
 						obj.select_set(True)
-					bpy.context.scene.objects.active = objects[0]
+					bpy.context.view_layer.objects.active = objects[0]
 
 					modifiers.modifiers[self.modifier_index].process_objects(fileName, objects)
 

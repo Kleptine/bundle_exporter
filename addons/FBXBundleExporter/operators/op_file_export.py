@@ -96,15 +96,17 @@ def export(self, target_platform):
 
 	objects_organise.recent_store(bundles)
 
-	for name,objects in bundles.items():
-		pivot = objects_organise.get_pivot(objects).copy()
+	for name,data in bundles.items():
+		objects = data['objects']
+		helpers = data['helpers']
+		all_data = objects + helpers
+
+		pivot = objects_organise.get_pivot(all_data).copy()
 
 		# Detect if animation export...
 		use_animation = objects_organise.get_objects_animation(objects)
 
-
-		copies = []
-		for obj in objects:
+		def copy_object(obj, convert = True):
 			name_original = obj.name
 			obj.name = prefix_copy+name_original
 
@@ -112,14 +114,29 @@ def export(self, target_platform):
 			obj.select_set(True)
 			bpy.context.view_layer.objects.active = obj
 			obj.hide_viewport = False
+			#bpy.context.view_layer.update()
 			
 			# Copy
 			bpy.ops.object.duplicate()
-			bpy.ops.object.convert(target='MESH')
+			if convert:
+				bpy.ops.object.convert(target='MESH')
 			bpy.context.object.name = name_original
-			copies.append(bpy.context.object)
 			
 			bpy.context.object.location-= pivot
+
+			return bpy.context.object
+
+		copies = []
+		for obj in objects:
+			copies.append(copy_object(obj))
+
+		for helper in helpers:
+			copied_helper = copy_object(helper, convert = False)
+			copied_helper.scale[0]*= 0.01
+			copied_helper.scale[1]*= 0.01
+			copied_helper.scale[2]*= 0.01
+
+			copies.append(copied_helper)
 
 
 		bpy.ops.object.select_all(action="DESELECT")
@@ -131,7 +148,7 @@ def export(self, target_platform):
 		# Apply modifiers
 
 		# full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  		
-		 # os.path.join(folder, name)+"."+platforms.platforms[mode].extension
+		# os.path.join(folder, name)+"."+platforms.platforms[mode].extension
 		path_folder = folder
 		path_name = name
 		for modifier in modifiers.modifiers:
@@ -160,7 +177,7 @@ def export(self, target_platform):
 		copies.clear()
 		
 		# Restore names
-		for obj in objects:
+		for obj in all_data:
 			obj.name = obj.name.replace(prefix_copy,"")
 
 		
@@ -180,7 +197,7 @@ def export(self, target_platform):
 	def draw(self, context):
 		filenames = []
 		# Get bundle file names
-		for name,objects in bundles.items():
+		for name,data in bundles.items():
 			for modifier in modifiers.modifiers:
 				if modifier.get("active"):
 					name = modifier.process_name(name)	
@@ -190,7 +207,7 @@ def export(self, target_platform):
 		for x in filenames:
 			self.layout.label(text=x)
 
-		self.layout.operator("wm.url_open", text="", icon='QUESTION')
+		self.layout.operator("wm.url_open", text=folder, icon='FILE_FOLDER').url = folder
 
 	bpy.context.window_manager.popup_menu(draw, title = "Exported {}x files".format(len(bundles)), icon = 'INFO')
 	

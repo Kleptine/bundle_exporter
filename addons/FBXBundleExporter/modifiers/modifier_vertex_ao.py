@@ -48,7 +48,7 @@ class Modifier(modifier.Modifier):
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select_set(True)
-			bpy.context.scene.objects.active = obj
+			bpy.context.view_layer.objects.active = obj
 
 			# Set AO vertex colors
 			bpy.ops.object.mode_set(mode='VERTEX_PAINT')

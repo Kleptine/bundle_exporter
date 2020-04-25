@@ -165,7 +165,7 @@ class Modifier(modifier.Modifier):
 					for obj in mat_objs:
 
 						bpy.ops.object.select_all(action='DESELECT')
-						bpy.context.scene.objects.active = obj
+						bpy.context.view_layer.objects.active = obj
 						obj.select_set(True)
 
 						if prefix_mat in obj.name:

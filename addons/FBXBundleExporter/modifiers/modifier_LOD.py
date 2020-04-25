@@ -77,7 +77,7 @@ class Modifier(modifier.Modifier):
 				# Select
 				bpy.ops.object.select_all(action="DESELECT")
 				obj.select_set(True)
-				bpy.context.scene.objects.active = obj
+				bpy.context.view_layer.objects.active = obj
 
 				# Copy & Decimate modifier
 				bpy.ops.object.duplicate()

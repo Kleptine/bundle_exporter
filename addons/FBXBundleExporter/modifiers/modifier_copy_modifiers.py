@@ -52,7 +52,7 @@ class Modifier(modifier.Modifier):
 		if self.get('source') in bpy.data.objects:
 			source = bpy.data.objects[ self.get('source') ]
 			source.select_set(True)
-			bpy.context.scene.objects.active = source
+			bpy.context.view_layer.objects.active = source
 
 			bpy.ops.object.make_links_data(type='MODIFIERS')
 			source.select_set(False)

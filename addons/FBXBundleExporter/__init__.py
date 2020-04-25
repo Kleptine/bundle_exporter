@@ -14,13 +14,13 @@ import bpy.utils.previews
 
 
 bl_info = {
-	"name": "FBX Bundle",
-	"description": "Export object selections in FBX bundles",
+	"name": "Game Exporter",
+	"description": "Export objects in bundles",
 	"author": "renderhjs",
 	"blender": (2, 80, 0),
 	"version": (2, 0, 0),
 	"category": "3D View",
-	"location": "3D View > Tools Panel > FBX Bundle",
+	"location": "3D View > Tools Panel > Game Exporter",
 	"warning": "",
 	"wiki_url": "http://renderhjs.net/fbxbundle/",
 	"tracker_url": "",
@@ -36,19 +36,47 @@ from bpy.props import (
 	PointerProperty,
 )
 
-
+mode_bundle_types = [('NAME', 'Name', "Bundle by matching object names"), 
+		('PARENT', 'Parent', "Bundle by the parent object"), 
+		# ('SPACE', 'Space', "Bundle by shared space"), 
+		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
+		('MATERIAL', 'Material', "Bundle by matching material names"),
+		('SCENE', 'Scene', "Bundle by current scene")]
+mode_pivot_types = [('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
+		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
+		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
+		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
+		('PARENT', 'Parent', "Pivot from the parent object"),
+		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)"),
+		('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'")]
+target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
+		('UNREAL', 'Unreal ', 'Unreal engine export'),
+		('BLENDER', 'Collada', 'Default Blender *.DAE export'),
+		('GLTF', 'glTF', 'GL Transmission Format')]
 
 class BGE_preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
+	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
+	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
+	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
+
 	def draw(self, context):
 		layout = self.layout
 
+		box = layout.box()
+		row = box.row()
+		row.label(text="Default Preferences")
+		col = box.column(align=True)
+		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
+		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
+		icon = icon_get(self.target_platform.lower())
+		col.prop(self, "target_platform", text="", icon_value=icon)
 
 		box = layout.box()
 		row = box.row()
 		row.label(text="Unity Editor script")
-		row.operator(operators.BGE_OT_unity_script.bl_idname, icon='SAVE_COPY')
+		row.operator(operators.BGE_OT_unity_script.bl_idname, icon='FILE_TICK')
 		col = box.column(align=True)
 		col.label(text="Copies a Unity Editor script to automatically assign")
 		col.label(text="existing materials by name matching names in Blender")
@@ -59,8 +87,6 @@ class BGE_preferences(bpy.types.AddonPreferences):
 		col = box.column(align=True)
 		col.label(text="Ctrl + E = Export selected")
 		col.label(text="Ctrl + Shift + E = Export recent")
-
-
 
 class BGE_Settings(bpy.types.PropertyGroup):
 	path: bpy.props.StringProperty (
@@ -92,37 +118,9 @@ class BGE_Settings(bpy.types.PropertyGroup):
 	)
 
 
-	mode_bundle: bpy.props.EnumProperty(items= 
-		[('NAME', 'Name', "Bundle by matching object names"), 
-		('PARENT', 'Parent', "Bundle by the parent object"), 
-		# ('SPACE', 'Space', "Bundle by shared space"), 
-		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
-		('MATERIAL', 'Material', "Bundle by matching material names"),
-		('SCENE', 'Scene', "Bundle by current scene")], 
-		name = "Bundle Mode", 
-		default = 'NAME'
-	)
-	mode_pivot: bpy.props.EnumProperty(items=[
-		('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
-		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
-		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
-		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
-		('PARENT', 'Parent', "Pivot from the parent object"),
-		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)"),
-        ('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'")
-		], name = "Pivot From", default = 'OBJECT_FIRST'
-	)
-	target_platform: bpy.props.EnumProperty(items= 
-		[	
-			('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
-			('UNREAL', 'Unreal ', 'Unreal engine export'),
-			('BLENDER', 'Collada', 'Default Blender *.DAE export'),
-			('GLTF', 'glTF', 'GL Transmission Format')
-		], 
-		description="Target platform for the FBX exports.",
-		name = "Target Platform", 
-		default = 'UNITY'
-	)
+	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
+	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
+	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
 
 
 
@@ -151,8 +149,8 @@ class BGE_PT_core_panel(bpy.types.Panel):
 		if bpy.app.debug_value != 0:
 			row = box.row(align=True)
 			row.alert = True
-			row.operator(op_debug_setup.bl_idname, text="Setup", icon='COLOR')
-			row.operator(op_debug_lines.bl_idname, text="Draw", icon='GREASEPENCIL')
+			row.operator(operators.BGE_PT_debug_setup.bl_idname, text="Setup", icon='COLOR')
+			row.operator(operators.BGE_PT_debug_lines.bl_idname, text="Draw", icon='GREASEPENCIL')
 
 
 		col = box.column(align=True)
@@ -223,7 +221,7 @@ class BGE_PT_tools_panel(bpy.types.Panel):
 		col = layout.column()
 		
 		# Get bundles
-		bundles = objects_organise.get_bundles()
+		#bundles = objects_organise.get_bundles()
 
 		row = col.row(align=True)
 		row.scale_y = 1.85
@@ -234,8 +232,8 @@ class BGE_PT_tools_panel(bpy.types.Panel):
 
 		col = col.column(align=True)
 
-		#col.operator(operators.BGE_OT_pivot_ground.bl_idname, text="Pivot at Ground", icon='OUTLINER_DATA_EMPTY')
-		#col.operator(operators.BGE_OT_tool_geometry_fix.bl_idname, text="Fix imp. Geometry", icon='MESH_ICOSPHERE')
+		col.operator(operators.BGE_OT_pivot_ground.bl_idname, text="Pivot at Ground", icon='OUTLINER_DATA_EMPTY')
+		col.operator(operators.BGE_OT_tool_geometry_fix.bl_idname, text="Fix imp. Geometry", icon='MESH_ICOSPHERE')
 		
 		if bpy.app.debug_value != 0:
 			col.operator(operators.BGE_OT_tool_pack_bundles.bl_idname, text="Pack & Arrange", icon='UGLYPACKAGE')
@@ -348,7 +346,9 @@ class BGE_PT_files_panel(bpy.types.Panel):
 			folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
 
 			# Display bundles
-			for fileName,objects in bundles.items():
+			for fileName,data in bundles.items():
+				objects = data['objects']
+				helpers = data['helpers']
 
 				# row = layout.row(align=True)
 				box = layout.box()
@@ -379,11 +379,17 @@ class BGE_PT_files_panel(bpy.types.Panel):
 				r.alert = True
 				r.operator(operators.BGE_OT_remove.bl_idname,text="", icon='X').key = fileName
 
-
 				if not context.scene.BGE_Settings.collapseBundles:
+					box = box.box()
 					for i in range(0,len(objects)):
-						row = column.row(align=True)
+						row = box.row(align=True)
 						row.label(text=objects[i].name)
+
+				if helpers and not context.scene.BGE_Settings.collapseBundles:
+					box = box.box()
+					for i in range(0,len(helpers)):
+						row = box.row(align=True)
+						row.label(text=helpers[i].name)
 
 
 def icon_get(name):

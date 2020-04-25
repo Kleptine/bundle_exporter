@@ -4,6 +4,7 @@ import mathutils
 import math
 
 from .. import objects_organise
+from . import op_file_export
 
 
 class BGE_OT_export_recent(bpy.types.Operator):
@@ -46,35 +47,14 @@ def export_recent(self):
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
-	# Store previous settings
-	previous_selection = bpy.context.selected_objects.copy()
-	previous_active = bpy.context.scene.objects.active
-	previous_unit_system = bpy.context.scene.unit_settings.system
-	previous_pivot = bpy.context.space_data.pivot_point
-	previous_cursor = bpy.context.scene.cursor.location.copy()
-
-
-
-	
-
 	bpy.ops.object.select_all(action="DESELECT")
 	for obj in objects:
-		for i in range(len(obj.layers)):
-			if not obj.layers[i]:
-				obj.layers[i] = True
+		obj.hide_viewport = False
+		for i in range(len(obj.users_collection)):
+			if obj.users_collection[i].hide_viewport:
+				obj.users_collection[i].hide_viewport = False
 		obj.select_set(True)
 	
-	bpy.context.scene.objects.active = objects[-1]
-	bpy.ops.fbxbundle.file_export()
+	bpy.context.view_layer.objects.active = objects[-1]
 
-
-
-	# Restore previous settings
-	bpy.context.scene.unit_settings.system = previous_unit_system
-	bpy.context.space_data.pivot_point = previous_pivot
-	bpy.context.scene.cursor.location = previous_cursor
-	bpy.context.scene.objects.active = previous_active
-	bpy.ops.object.select_all(action='DESELECT')
-	for obj in previous_selection:
-		obj.select_set(True)
-	
+	op_file_export.export(self, bpy.context.scene.BGE_Settings.target_platform)

@@ -28,7 +28,8 @@ class BGE_OT_fence_draw(bpy.types.Operator):
 		gp_draw.clear()
 
 		bundles = objects_organise.get_bundles()
-		for name,objects in bundles.items():
+		for name,data in bundles.items():
+			objects = data['objects']
 			if len(objects) > 0:
 				bounds_combined = objects_organise.get_bounds_combined(objects)
 				draw_bounds(name, objects, bounds_combined)

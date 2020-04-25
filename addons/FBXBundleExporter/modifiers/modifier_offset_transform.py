@@ -79,7 +79,7 @@ class Modifier(modifier.Modifier):
 
 					
 					bpy.ops.object.select_all(action='DESELECT')
-					bpy.context.scene.objects.active = obj
+					bpy.context.view_layer.objects.active = obj
 					obj.select_set(True)
 
 					# Move

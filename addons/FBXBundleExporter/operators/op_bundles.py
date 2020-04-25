@@ -11,7 +11,7 @@ class BGE_OT_select(bpy.types.Operator):
 		bundles = objects_organise.get_bundles()
 		if self.key in bundles:
 			bpy.ops.object.select_all(action='DESELECT')
-			for obj in bundles[self.key]:
+			for obj in bundles[self.key]['objects']:
 				obj.select_set(True)
 		return {'FINISHED'}
 
@@ -25,6 +25,6 @@ class BGE_OT_remove(bpy.types.Operator):
 	def execute(self, context):
 		bundles = objects_organise.get_bundles()
 		if self.key in bundles:
-			for obj in bundles[self.key]:
+			for obj in bundles[self.key]['objects']:
 				obj.select_set(False)
 		return {'FINISHED'}

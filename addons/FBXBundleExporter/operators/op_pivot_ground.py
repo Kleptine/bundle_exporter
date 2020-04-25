@@ -38,7 +38,8 @@ def ground_pivot(self):
 	previous_pivot = bpy.context.space_data.pivot_point
 	previous_cursor = bpy.context.scene.cursor.location.copy()
 
-	for name,objects in bundles.items():
+	for name,data in bundles.items():
+		objects = data['objects']
 
 		bounds = objects_organise.get_bounds_combined(objects)
 		for obj in objects:
@@ -47,7 +48,7 @@ def ground_pivot(self):
 			# Select object as active
 			bpy.ops.object.select_all(action="DESELECT")
 			obj.select_set(True)
-			bpy.context.scene.objects.active = obj
+			bpy.context.view_layer.objects.active = obj
 
 			bpy.context.scene.cursor.location = Vector((obj.location.x,obj.location.y,bounds.min.z))
 			bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
@@ -56,7 +57,7 @@ def ground_pivot(self):
 	# Restore previous settings
 	bpy.context.space_data.pivot_point = previous_pivot
 	bpy.context.scene.cursor.location = previous_cursor
-	bpy.context.scene.objects.active = previous_active
+	bpy.context.view_layer.objects.active = previous_active
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in previous_selection:
 		obj.select_set(True)
