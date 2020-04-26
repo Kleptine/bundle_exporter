@@ -12,6 +12,7 @@ from .op_tool_geometry_fix import BGE_OT_tool_geometry_fix
 from .op_tool_pack_bundles import BGE_OT_tool_pack_bundles
 from .op_debug import BGE_PT_debug_lines, BGE_PT_debug_setup
 from .op_bundles import BGE_OT_remove, BGE_OT_select
+from .op_preferences import BGE_OT_save_preferences, BGE_OT_load_preferences
 
 operators = [   BGE_OT_fence_clear, 
 				BGE_OT_fence_draw,
@@ -28,5 +29,7 @@ operators = [   BGE_OT_fence_clear,
 				BGE_PT_debug_lines,
 				BGE_PT_debug_setup,
 				BGE_OT_remove,
-				BGE_OT_select
+				BGE_OT_select,
+				BGE_OT_save_preferences,
+				BGE_OT_load_preferences
 				]

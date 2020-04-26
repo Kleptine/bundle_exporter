@@ -26,19 +26,15 @@ class Modifier(modifier.Modifier):
 	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
 
 
-	def __init__(self):
-		super().__init__()
-
-
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
 			# row = layout.row(align=True)
 
 			col = layout.column(align=True)
-			col.prop( eval("bpy.context.scene."+self.settings_path()) , "path", text="Path")
-			col.prop( eval("bpy.context.scene."+self.settings_path()) , "file", text="File")
-			col.prop( eval("bpy.context.scene."+self.settings_path()) , "obj", text="Object")
+			col.prop( eval(self.settings_path()) , "path", text="Path")
+			col.prop( eval(self.settings_path()) , "file", text="File")
+			col.prop( eval(self.settings_path()) , "obj", text="Object")
 
 
 			bundles = objects_organise.get_bundles()

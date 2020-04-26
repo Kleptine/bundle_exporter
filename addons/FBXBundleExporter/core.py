@@ -39,7 +39,7 @@ def get_path(self):
 	return self.real_path
 
 class BGE_Settings(bpy.types.PropertyGroup):
-	real_path: bpy.props.StringProperty ()
+	real_path: bpy.props.StringProperty (default="")
 	path: bpy.props.StringProperty (
 		name="Output Path",
 		default="",
@@ -62,7 +62,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
 	)
 	include_children: bpy.props.BoolProperty (
 		name="Incl. Children",
-		default=False,
+		default=True,
 		description="Include nested children in bundles, e.g parent or group."
 	)
 	recent: bpy.props.StringProperty (
@@ -89,6 +89,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
 		box = layout.box()
 
 		row = box.row(align=True)
+		row.operator('bge.load_preferences', text='', icon='RECOVER_LAST')
 		row.label(text='Settings', icon='PREFERENCES')
 
 		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
@@ -204,7 +205,19 @@ class BGE_PT_tools_panel(bpy.types.Panel):
 
 class BGE_PT_modifiers_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_modifiers_panel"
-	bl_label = "Modifiers"
+	bl_label = "Mesh Export Options"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'UI'
+	bl_category = "Game Exporter"
+	bl_context = "objectmode"
+	bl_options = {'DEFAULT_CLOSED'}
+
+	def draw(self, context):
+		modifiers.draw(self.layout, context, modifiers.modifiers)
+
+class BGE_PT_armature_options_panel(bpy.types.Panel):
+	bl_idname = "BGE_PT_armature_options_panel"
+	bl_label = "Armature Export Options"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Game Exporter"
@@ -214,22 +227,6 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
-
-		for modifier in modifiers.modifiers:
-			box = col.box()
-			modifier.draw(box)
-
-		r = col.row()
-		r.enabled = False
-
-		count = 0
-		for modifier in modifiers.modifiers:
-			if modifier.get("active"):
-				count+=1
-
-		if count > 0:
-			r.label(text="{}x modifiers are applied upon export".format(count))
-
 
 class BGE_PT_files_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_files_panel"
@@ -346,7 +343,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 
 addon_keymaps = []
-classes = [BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
+classes = [BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_armature_options_panel, BGE_PT_files_panel]
 
 def register():
 	from bpy.utils import register_class
@@ -356,14 +353,7 @@ def register():
 	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
 
 	# Register modifier settings
-	for modifier in modifiers.modifiers:
-		print("register modifier: {}".format(modifier.__module__))
-		modifier.register()
-
-	for operator in operators.operators:
-		print("register operator: {}".format(operator))
-		register_class(operator)
-
+	modifiers.modifier.register_locals()
 
 	# handle the keymap
 	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
@@ -385,11 +375,7 @@ def unregister():
 	del bpy.types.Scene.BGE_Settings
 
 	# Unregister modifier settings
-	for modifier in modifiers.modifiers:
-		modifier.unregister()
-
-	for operator in operators.operators:
-		unregister_class(operator)
+	modifiers.modifier.unregister_locals()
 
 	# handle the keymap
 	for km in addon_keymaps:

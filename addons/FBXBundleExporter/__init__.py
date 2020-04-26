@@ -1,4 +1,5 @@
 from . import operators
+from . import modifiers
 from . import icons
 
 import bpy, bmesh
@@ -46,19 +47,32 @@ target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis ro
 		('BLENDER', 'Collada', 'Default Blender *.DAE export'),
 		('GLTF', 'glTF', 'GL Transmission Format')]
 
-class BGE_preferences(bpy.types.AddonPreferences):
+#https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
+modifier_ids = ["BGE_modifier_"+x.Modifier.id for x in modifiers.modifier_modules]
+modifier_annotations = {}
+for x in modifiers.modifier_modules:
+	modifier_annotations[x.Modifier.settings_name()] = (bpy.props.PointerProperty, {'type': x.Settings})
+
+BGE_preferences_modifiers = type("BGE_preferences_modifiers", (object,), {'__annotations__': modifier_annotations})
+
+global_modifiers = [module.Modifier(use_global_settings=True) for module in modifiers.modifier_modules]
+
+class BGE_preferences(bpy.types.AddonPreferences, BGE_preferences_modifiers):
 	bl_idname = __name__
 
 	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
 
+	#BGE_modifier_collider: bpy.props.PointerProperty(type=modifiers.modifier_collider.Settings)
+	
+
 	def draw(self, context):
 		layout = self.layout
 
 		box = layout.box()
 		row = box.row(align=True)
-		row.label(text='Default Settings', icon='PREFERENCES')
+		row.label(text='Default Settings (manually save preferences after changing values please)', icon='PREFERENCES')
 
 		icon = icons.icon_get(self.target_platform.lower())
 		row.prop(self, "target_platform", text="", icon_value=icon)
@@ -66,6 +80,10 @@ class BGE_preferences(bpy.types.AddonPreferences):
 		col = box.column(align=True)
 		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
 		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
+
+		modifiers.draw(col, context, global_modifiers)
+
+		col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
 
 		box = layout.box()
 		row = box.row()
@@ -90,8 +108,14 @@ def register():
 
 	icons.register()
 
+	modifiers.modifier.register_globals()
+
 	from bpy.utils import register_class
 	register_class(BGE_preferences)
+
+	for operator in operators.operators:
+		print("register operator: {}".format(operator))
+		register_class(operator)
 
 	from . import core
 	core.register()
@@ -102,9 +126,14 @@ def unregister():
 	from . import core
 	core.unregister()
 
+	for operator in operators.operators:
+		unregister_class(operator)
+
 	try:
 		unregister_class(BGE_preferences)
 	except:
 		print(BGE_preferences)
+
+	modifiers.modifier.unregister_globals()
 
 	icons.unregister()

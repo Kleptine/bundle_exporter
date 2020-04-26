@@ -34,16 +34,13 @@ class Modifier(modifier.Modifier):
 	id = 'lod'
 	url = "http://renderhjs.net/fbxbundle/#modifier_lod"
 
-	def __init__(self):
-		super().__init__()
-
 
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
 			row = layout.row(align=True)
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "levels", text="Steps", icon='AUTOMERGE_ON')
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "quality", text="Quality", icon='AUTOMERGE_ON')
+			row.prop( eval(self.settings_path()) , "levels", text="Steps", icon='AUTOMERGE_ON')
+			row.prop( eval(self.settings_path()) , "quality", text="Quality", icon='AUTOMERGE_ON')
 
 			col = layout.column(align=True)
 			for i in range(0, self.get("levels")):
@@ -57,7 +54,7 @@ class Modifier(modifier.Modifier):
 				r.label(text="{}%".format( math.ceil(get_quality(i, self.get("levels"), self.get("quality"))*100) ))
 			# row_freeze = row.row()
 			# row_freeze.enabled = self.get("merge_active")
-			# row_freeze.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_distance")
+			# row_freeze.prop( eval(self.settings_path()) , "merge_distance")
 
 
 	def process_objects(self, name, objects):

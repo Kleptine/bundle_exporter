@@ -25,9 +25,6 @@ class Modifier(modifier.Modifier):
 	id = 'vertex_ao'
 	url = "http://renderhjs.net/fbxbundle/#modifier_ao"
 
-	def __init__(self):
-		super().__init__()
-
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
@@ -36,7 +33,7 @@ class Modifier(modifier.Modifier):
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "contrast", text="Contrast")
+			row.prop( eval(self.settings_path()) , "contrast", text="Contrast")
 
 
 

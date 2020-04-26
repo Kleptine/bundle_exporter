@@ -17,12 +17,8 @@ class Modifier(modifier.Modifier):
 	id = 'copy_modifiers'
 	url = "http://renderhjs.net/fbxbundle/#modifier_modifiers"
 
-	def __init__(self):
-		super().__init__()
-
-
 	#def register(self):
-	#	exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
+	#	exec(self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
 
 		
 
@@ -36,7 +32,7 @@ class Modifier(modifier.Modifier):
 			row.separator()
 
 
-			row.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
+			row.prop_search(eval(self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
 
 			if self.get('source') in bpy.data.objects:
 				row = layout.row()

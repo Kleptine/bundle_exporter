@@ -44,9 +44,6 @@ class Modifier(modifier.Modifier):
 	id = 'merge'
 	url = "http://renderhjs.net/fbxbundle/#modifier_merge"
 	
-	def __init__(self):
-		super().__init__()
-
 
 	def draw(self, layout):
 		super().draw(layout)
@@ -56,15 +53,15 @@ class Modifier(modifier.Modifier):
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_verts", text="Merge Verts")
+			row.prop( eval(self.settings_path()) , "merge_verts", text="Merge Verts")
 			row_freeze = row.row()
 			row_freeze.enabled = self.get("merge_verts")
-			row_freeze.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_distance")
+			row_freeze.prop( eval(self.settings_path()) , "merge_distance")
 
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "merge_by_material", text="Split by Material")
+			row.prop( eval(self.settings_path()) , "merge_by_material", text="Split by Material")
 
 
 			

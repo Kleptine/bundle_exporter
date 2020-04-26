@@ -5,7 +5,6 @@ import imp
 from . import modifier
 
 
-
 class Settings(modifier.Settings):
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -27,22 +26,18 @@ class Settings(modifier.Settings):
 		subtype='FACTOR'
 	)
 
-
 class Modifier(modifier.Modifier):
 	label = "Collider Mesh"
 	id = 'collider'
 	url = "http://renderhjs.net/fbxbundle/#modifier_collider"
-
-	def __init__(self):
-		super().__init__()
 
 
 	def draw(self, layout):
 		super().draw(layout)
 		if(self.get("active")):
 			row = layout.row(align=True)
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "ratio", text="Ratio", icon='AUTOMERGE_ON')
-			row.prop( eval("bpy.context.scene."+self.settings_path()) , "angle", text="Angle", icon='AUTOMERGE_ON')
+			row.prop( eval(self.settings_path()) , "ratio", text="Ratio", icon='AUTOMERGE_ON')
+			row.prop( eval(self.settings_path()) , "angle", text="Angle", icon='AUTOMERGE_ON')
 
 			
 	def process_objects(self, name, objects):

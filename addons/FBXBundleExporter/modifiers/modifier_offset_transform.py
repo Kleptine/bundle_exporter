@@ -20,9 +20,6 @@ class Modifier(modifier.Modifier):
 	id = 'offset_transform'
 	url = "http://renderhjs.net/fbxbundle/#modifier_offset"
 
-	def __init__(self):
-		super().__init__()
-
 
 	#def register(self):
 	#	exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
@@ -32,7 +29,7 @@ class Modifier(modifier.Modifier):
 		super().draw(layout)
 		if(self.get("active")):
 			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-			layout.prop_search(eval("bpy.context.scene."+self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
+			layout.prop_search(eval(self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
 			
 
 			if self.get('source') in bpy.data.objects:
