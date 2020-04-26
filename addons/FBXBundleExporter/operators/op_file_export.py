@@ -52,7 +52,7 @@ def export(self, target_platform):
 		self.report({'ERROR_INVALID_INPUT'}, "Export path not set" )
 		return
 
-	folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
+	folder = bpy.path.abspath( bpy.context.scene.BGE_Settings.path)
 	if not os.path.exists(folder):
 		self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist" )
 		return
@@ -207,7 +207,7 @@ def export(self, target_platform):
 		for x in filenames:
 			self.layout.label(text=x)
 
-		self.layout.operator("wm.url_open", text=folder, icon='FILE_FOLDER').url = folder
+		self.layout.operator("wm.path_open", text=folder, icon='FILE_FOLDER').filepath = folder
 
 	bpy.context.window_manager.popup_menu(draw, title = "Exported {}x files".format(len(bundles)), icon = 'INFO')
 	

@@ -5,26 +5,12 @@ from . import modifiers
 from . import platforms
 from . import operators
 
+from . import icons
+
 import bpy, bmesh
 import os
-import mathutils
-from mathutils import Vector
 import math
 import bpy.utils.previews
-
-
-bl_info = {
-	"name": "Game Exporter",
-	"description": "Export objects in bundles",
-	"author": "renderhjs",
-	"blender": (2, 80, 0),
-	"version": (2, 0, 0),
-	"category": "3D View",
-	"location": "3D View > Tools Panel > Game Exporter",
-	"warning": "",
-	"wiki_url": "http://renderhjs.net/fbxbundle/",
-	"tracker_url": "",
-}
 
 from bpy.props import (
 	StringProperty,
@@ -36,64 +22,31 @@ from bpy.props import (
 	PointerProperty,
 )
 
-mode_bundle_types = [('NAME', 'Name', "Bundle by matching object names"), 
-		('PARENT', 'Parent', "Bundle by the parent object"), 
-		# ('SPACE', 'Space', "Bundle by shared space"), 
-		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
-		('MATERIAL', 'Material', "Bundle by matching material names"),
-		('SCENE', 'Scene', "Bundle by current scene")]
-mode_pivot_types = [('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
-		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
-		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
-		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
-		('PARENT', 'Parent', "Pivot from the parent object"),
-		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)"),
-		('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'")]
-target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
-		('UNREAL', 'Unreal ', 'Unreal engine export'),
-		('BLENDER', 'Collada', 'Default Blender *.DAE export'),
-		('GLTF', 'glTF', 'GL Transmission Format')]
+from .__init__ import mode_bundle_types, mode_pivot_types, target_platform_types
 
-class BGE_preferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
 
-	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
-	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
-	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
+def set_path(self, value):
+	#checks if the provided path is inside a subdirectory of the current file to save it as a relative path
+	if bpy.data.is_saved:
+		value = os.path.realpath(bpy.path.abspath(value))
+		file_path = os.path.dirname(os.path.realpath(bpy.path.abspath(bpy.data.filepath)))
+		if os.path.commonprefix([os.path.realpath(bpy.path.abspath(value)), file_path]) == file_path:
+			value = bpy.path.relpath(value)
 
-	def draw(self, context):
-		layout = self.layout
+	self.real_path = value
 
-		box = layout.box()
-		row = box.row()
-		row.label(text="Default Preferences")
-		col = box.column(align=True)
-		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
-		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
-		icon = icon_get(self.target_platform.lower())
-		col.prop(self, "target_platform", text="", icon_value=icon)
-
-		box = layout.box()
-		row = box.row()
-		row.label(text="Unity Editor script")
-		row.operator(operators.BGE_OT_unity_script.bl_idname, icon='FILE_TICK')
-		col = box.column(align=True)
-		col.label(text="Copies a Unity Editor script to automatically assign")
-		col.label(text="existing materials by name matching names in Blender")
-
-		box = layout.box()
-		row = box.row()
-		row.label(text="Keyboard shortcuts")
-		col = box.column(align=True)
-		col.label(text="Ctrl + E = Export selected")
-		col.label(text="Ctrl + Shift + E = Export recent")
+def get_path(self):
+	return self.real_path
 
 class BGE_Settings(bpy.types.PropertyGroup):
+	real_path: bpy.props.StringProperty ()
 	path: bpy.props.StringProperty (
 		name="Output Path",
 		default="",
 		description="Define the path where to export or import from",
-		subtype='DIR_PATH'
+		subtype='DIR_PATH',
+		get=get_path,
+		set=set_path
 	)
 	padding: bpy.props.FloatProperty (
 		name="Padding",
@@ -117,10 +70,9 @@ class BGE_Settings(bpy.types.PropertyGroup):
 		default=""
 	)
 
-
-	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
-	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
-	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
+	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
+	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
+	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.target_platform)
 
 
 
@@ -139,7 +91,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
 		row = box.row(align=True)
 		row.label(text='Settings', icon='PREFERENCES')
 
-		icon = icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
+		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 		row.prop(bpy.context.scene.BGE_Settings, "target_platform", text="", icon_value=icon)
 		row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_platform"
 
@@ -161,7 +113,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
 		row.prop(context.scene.BGE_Settings, "path", text="")
 		if context.scene.BGE_Settings.path != "":
 			row = row.row(align=True)
-			row.operator(operators.BGE_OT_file_open_folder.bl_idname, text="", icon='FILE_FOLDER')
+			row.operator("wm.path_open", text="", icon='FILE_TICK').filepath = context.scene.BGE_Settings.path
 
 		row = col.row(align=True)
 		row.prop(context.scene.BGE_Settings, "mode_bundle", text="Bundle by", icon='GROUP')
@@ -294,7 +246,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		# Get bundles
 		bundles = objects_organise.get_bundles()
 
-		icon = icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
+		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 
 
 		col = layout.column(align=True)	
@@ -392,28 +344,9 @@ class BGE_PT_files_panel(bpy.types.Panel):
 						row.label(text=helpers[i].name)
 
 
-def icon_get(name):
-	if name not in preview_icons:
-		print("Icon '{}' not found ".format(name))
-	return preview_icons[name].icon_id
-
-
-preview_icons = None
-def icon_register(fileName):
-	name = fileName.split('.')[0]   # Don't include file extension
-	icons_dir = os.path.join(os.path.dirname(__file__), "icons")
-	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
-
-def icons_unregister():
-	global preview_icons
-	bpy.utils.previews.remove(preview_icons)
-	preview_icons = None
-	
-
 
 addon_keymaps = []
-icons = ["unity.png", "unreal.png", "blender.png","gltf.png"]
-classes = [BGE_preferences, BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
+classes = [BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
 
 def register():
 	from bpy.utils import register_class
@@ -431,12 +364,6 @@ def register():
 		print("register operator: {}".format(operator))
 		register_class(operator)
 
-	# Register Icons
-	global preview_icons
-	preview_icons = bpy.utils.previews.new()
-	
-	for icon in icons:
-		icon_register(icon)
 
 	# handle the keymap
 	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
@@ -463,9 +390,6 @@ def unregister():
 
 	for operator in operators.operators:
 		unregister_class(operator)
-
-	# Remove icons
-	icons_unregister()
 
 	# handle the keymap
 	for km in addon_keymaps:
