@@ -24,6 +24,7 @@ class Modifier(modifier.Modifier):
 	label = "Vertex AO"
 	id = 'vertex_ao'
 	url = "http://renderhjs.net/fbxbundle/#modifier_ao"
+	type = "MESH"
 
 	def draw(self, layout):
 		super().draw(layout)

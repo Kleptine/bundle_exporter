@@ -48,14 +48,11 @@ target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis ro
 		('GLTF', 'glTF', 'GL Transmission Format')]
 
 #https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
-modifier_ids = ["BGE_modifier_"+x.Modifier.id for x in modifiers.modifier_modules]
 modifier_annotations = {}
-for x in modifiers.modifier_modules:
-	modifier_annotations[x.Modifier.settings_name()] = (bpy.props.PointerProperty, {'type': x.Settings})
+for x in modifiers.modifiers_dict:
+	modifier_annotations[modifiers.modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers.modifiers_dict[x]['global']})
 
 BGE_preferences_modifiers = type("BGE_preferences_modifiers", (object,), {'__annotations__': modifier_annotations})
-
-global_modifiers = [module.Modifier(use_global_settings=True) for module in modifiers.modifier_modules]
 
 class BGE_preferences(bpy.types.AddonPreferences, BGE_preferences_modifiers):
 	bl_idname = __name__
@@ -81,7 +78,7 @@ class BGE_preferences(bpy.types.AddonPreferences, BGE_preferences_modifiers):
 		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
 		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
 
-		modifiers.draw(col, context, global_modifiers)
+		modifiers.draw(col, context, use_global_settings=True)
 
 		col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
 
@@ -108,7 +105,7 @@ def register():
 
 	icons.register()
 
-	modifiers.modifier.register_globals()
+	modifiers.register_globals()
 
 	from bpy.utils import register_class
 	register_class(BGE_preferences)
@@ -134,6 +131,6 @@ def unregister():
 	except:
 		print(BGE_preferences)
 
-	modifiers.modifier.unregister_globals()
+	modifiers.unregister_globals()
 
 	icons.unregister()

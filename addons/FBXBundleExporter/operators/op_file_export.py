@@ -151,7 +151,8 @@ def export(self, target_platform):
 		# os.path.join(folder, name)+"."+platforms.platforms[mode].extension
 		path_folder = folder
 		path_name = name
-		for modifier in modifiers.modifiers:
+		for modifier_id in modifiers.modifiers_dict:
+			modifier= modifiers.modifiers_dict[modifier_id]['modifier']
 			if modifier.get("active"):
 				copies = modifier.process_objects(name, copies)
 				path_folder = modifier.process_path(path_name, path_folder)
@@ -198,7 +199,8 @@ def export(self, target_platform):
 		filenames = []
 		# Get bundle file names
 		for name,data in bundles.items():
-			for modifier in modifiers.modifiers:
+			for modifier_id in modifiers.modifiers_dict:
+				modifier = modifiers.modifiers_dict[modifier_id]['modifier']
 				if modifier.get("active"):
 					name = modifier.process_name(name)	
 			filenames.append(name+"."+platforms.platforms[mode].extension)

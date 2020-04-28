@@ -78,11 +78,11 @@ class BGE_Settings(bpy.types.PropertyGroup):
 
 class BGE_PT_core_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_core_panel"
-	bl_label = " "
+	bl_label = "Main Settings"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Game Exporter"
-	bl_options = {'HIDE_HEADER'}
+	#bl_options = {'HIDE_HEADER'}
 
 	def draw(self, context):
 		layout = self.layout
@@ -213,7 +213,7 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
-		modifiers.draw(self.layout, context, modifiers.modifiers)
+		modifiers.draw(self.layout, context, use_global_settings=False)
 
 class BGE_PT_armature_options_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_armature_options_panel"
@@ -311,7 +311,8 @@ class BGE_PT_files_panel(bpy.types.Panel):
 				# Process object name via modifiers
 				path_folder = folder
 				path_name = fileName
-				for modifier in modifiers.modifiers:
+				for modifier_id in modifiers.modifiers_dict:
+					modifier = modifiers.modifiers_dict[modifier_id]['modifier']
 					if modifier.get("active"):
 						path_folder = modifier.process_path(path_name, path_folder)
 						path_name = modifier.process_name(path_name)
@@ -353,7 +354,7 @@ def register():
 	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
 
 	# Register modifier settings
-	modifiers.modifier.register_locals()
+	modifiers.register_locals()
 
 	# handle the keymap
 	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
@@ -375,7 +376,7 @@ def unregister():
 	del bpy.types.Scene.BGE_Settings
 
 	# Unregister modifier settings
-	modifiers.modifier.unregister_locals()
+	modifiers.unregister_locals()
 
 	# handle the keymap
 	for km in addon_keymaps:

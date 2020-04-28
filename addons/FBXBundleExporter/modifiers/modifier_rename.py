@@ -24,6 +24,7 @@ class Modifier(modifier.Modifier):
 	label = "Rename"
 	id = 'rename'
 	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
+	type = "GENERAL"
 
 
 	def draw(self, layout):
