@@ -23,6 +23,12 @@ local_settings = []
 
 import bpy
 
+modifier_annotations = {}
+for x in modifiers_dict:
+	modifier_annotations[modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['global']})
+BGE_preferences_modifiers = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})
+BGE_preferences_modifiers_local = None
+
 def create_local_settings(Settings, defaults_path, name):
 	new_annotattions = {}
 	
@@ -40,7 +46,10 @@ def register_globals():
 	for x in modifiers_dict:
 		register_class(modifiers_dict[x]['global'])
 
+	register_class(BGE_preferences_modifiers)
+
 def register_locals():
+	global BGE_preferences_modifiers_local
 	from bpy.utils import register_class
 	for x in modifiers_dict:
 		local_setting = create_local_settings(modifiers_dict[x]['global'], modifiers_dict[x]['modifier'].settings_path_global(), modifiers_dict[x]['modifier'].id)
@@ -48,20 +57,29 @@ def register_locals():
 		register_class(local_setting)
 		setattr(bpy.types.Scene, modifiers_dict[x]['modifier'].settings_name(), bpy.props.PointerProperty(type=local_setting))
 
+	modifier_annotations = {}
+	for x in modifiers_dict:
+		modifier_annotations[modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['local']})
+	BGE_preferences_modifiers_local = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})
+	register_class(BGE_preferences_modifiers_local)
+
 def unregister_globals():
 	from bpy.utils import unregister_class
+	unregister_class(BGE_preferences_modifiers)
 	for x in modifiers_dict:
 		unregister_class(modifiers_dict[x]['global'])
 
 def unregister_locals():
 	from bpy.utils import unregister_class
+
+	unregister_class(BGE_preferences_modifiers_local)
+
 	for x in modifiers_dict:
 		unregister_class(modifiers_dict[x]['local'])
 		delattr(bpy.types.Scene, modifiers_dict[x]['modifier'].settings_name())
 
 def draw(layout, context, use_global_settings = False, types=('GENERAL','MESH')):
 	col = layout.column()
-
 	for modifier_id in modifiers_dict:
 		modifier = modifiers_dict[modifier_id]['modifier_global'] if use_global_settings else modifiers_dict[modifier_id]['modifier']
 		if modifier.type in types:

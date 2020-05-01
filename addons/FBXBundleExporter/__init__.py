@@ -33,7 +33,7 @@ mode_bundle_types = [('NAME', 'Name', "Bundle by matching object names"),
 		('PARENT', 'Parent', "Bundle by the parent object"), 
 		# ('SPACE', 'Space', "Bundle by shared space"), 
 		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
-		('MATERIAL', 'Material', "Bundle by matching material names"),
+		#('MATERIAL', 'Material', "Bundle by matching material names"),
 		('SCENE', 'Scene', "Bundle by current scene")]
 mode_pivot_types = [('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
 		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
@@ -60,6 +60,8 @@ class BGE_preferences(bpy.types.AddonPreferences, BGE_preferences_modifiers):
 	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
+
+	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_preferences_modifiers)
 
 	#BGE_modifier_collider: bpy.props.PointerProperty(type=modifiers.modifier_collider.Settings)
 	
@@ -114,6 +116,8 @@ def register():
 		print("register operator: {}".format(operator))
 		register_class(operator)
 
+	modifiers.register_locals()
+
 	from . import core
 	core.register()
 
@@ -122,6 +126,8 @@ def unregister():
 	from bpy.utils import unregister_class
 	from . import core
 	core.unregister()
+
+	modifiers.unregister_locals()
 
 	for operator in operators.operators:
 		unregister_class(operator)

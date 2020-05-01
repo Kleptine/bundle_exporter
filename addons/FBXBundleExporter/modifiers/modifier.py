@@ -4,7 +4,6 @@ import operator
 import mathutils
 from mathutils import Vector
 
-
 class Settings(bpy.types.PropertyGroup):
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -17,8 +16,9 @@ class Modifier:
 	url = ""
 	type = "MESH"
 
-	def __init__(self, use_global_settings = False):
+	def __init__(self, path = 'bpy.context.scene', use_global_settings = False):
 		self.use_global_settings = use_global_settings
+		self.path = path
 		
 	@classmethod
 	def settings_name(cls):
@@ -31,6 +31,9 @@ class Modifier:
 	@classmethod
 	def settings_path_local(cls):
 		return "bpy.context.scene.{}".format(cls.settings_name())
+
+	def settings_path_custom(self):
+		return self.path
 	
 	def settings_path(self):
 		if self.use_global_settings:

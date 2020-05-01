@@ -6,6 +6,7 @@ from . import platforms
 from . import operators
 
 from . import icons
+from . import bundle
 
 import bpy, bmesh
 import os
@@ -60,6 +61,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
 		default=False,
 		description="Compact list view"
 	)
+	#!TODO - REMOVE THIS PROPERTY
 	include_children: bpy.props.BoolProperty (
 		name="Incl. Children",
 		default=True,
@@ -69,11 +71,20 @@ class BGE_Settings(bpy.types.PropertyGroup):
 		name="Recent export",
 		default=""
 	)
+	bundles: bpy.props.CollectionProperty(
+		type=bundle.Bundle
+	)
+	bundle_index:bpy.props.IntProperty(
+		name="Bundles",
+		default=False,
+		description="Bundles"
+	)
 
 	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.target_platform)
 
+	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_preferences_modifiers_local)
 
 
 class BGE_PT_core_panel(bpy.types.Panel):
@@ -228,6 +239,22 @@ class BGE_PT_armature_options_panel(bpy.types.Panel):
 		layout = self.layout
 		col = layout.column()
 
+class BGE_UL_bundles(bpy.types.UIList):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+		col = layout.column()
+		col.alert = not item.is_key_valid()
+		col.label(text=item.filename, icon="FILE_3D")
+
+		split = layout.split(factor=0.3, align=True)
+		col = split.column()
+		col.alert = not item.is_key_valid()
+		col.prop(item, "key", text="", expand=True)
+		split.prop(item, "mode_bundle", text="", icon='GROUP')
+		split.prop(item, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
+
+	def invoke(self, context, event):
+		pass
+
 class BGE_PT_files_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_files_panel"
 	bl_label = "Bundles"
@@ -246,7 +273,10 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 
 
-		col = layout.column(align=True)	
+		col = layout.column(align=True)
+
+		col.template_list("BGE_UL_bundles", "", bpy.context.scene.BGE_Settings, "bundles", bpy.context.scene.BGE_Settings, "bundle_index", rows=2)
+
 		row = col.row(align=True)
 
 		split = row.split(factor=0.4, align=True)
@@ -258,7 +288,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		c = split.column(align=True)
 		c.scale_y = 1.85
 		c.operator(operators.BGE_OT_file_export.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
-		
+
 
 		if len(bpy.context.scene.BGE_Settings.recent) > 0:
 			if len(objects_organise.recent_load_objects()) > 0:
@@ -344,17 +374,16 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 
 addon_keymaps = []
-classes = [BGE_Settings, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_armature_options_panel, BGE_PT_files_panel]
+classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_armature_options_panel, BGE_PT_files_panel]
 
 def register():
 	from bpy.utils import register_class
+	register_class(bundle.Bundle)
+
 	for cls in classes:
 		register_class(cls)
 
 	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
-
-	# Register modifier settings
-	modifiers.register_locals()
 
 	# handle the keymap
 	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
@@ -366,6 +395,8 @@ def register():
 
 def unregister():
 	from bpy.utils import unregister_class
+	unregister_class(bundle.Bundle)
+
 	for cls in reversed(classes):
 		try:
 			unregister_class(cls)
@@ -374,9 +405,6 @@ def unregister():
 
 	#Unregister Settings
 	del bpy.types.Scene.BGE_Settings
-
-	# Unregister modifier settings
-	modifiers.unregister_locals()
 
 	# handle the keymap
 	for km in addon_keymaps:
