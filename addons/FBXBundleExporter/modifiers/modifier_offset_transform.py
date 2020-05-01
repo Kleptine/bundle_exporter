@@ -6,7 +6,7 @@ from mathutils import Vector
 from . import modifier
 
 
-class Settings(modifier.Settings):
+class BGE_mod_offset_transform(modifier.BGE_mod_default):
 	label = "Offset Transform"
 	id = 'offset_transform'
 	url = "http://renderhjs.net/fbxbundle/#modifier_offset"

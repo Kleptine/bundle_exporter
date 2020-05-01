@@ -86,7 +86,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.target_platform)
 
-	scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)
+	scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)#sometimes this variable may point to an old version, maybe force reload modules will fix it
 
 
 class BGE_PT_core_panel(bpy.types.Panel):
@@ -285,7 +285,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 		c = split.column(align=True)
 		c.scale_y = 1.85
-		c.operator(operators.BGE_OT_file_import.bl_idname, text="Import", icon='IMPORT')
+		c.operator(operators.BGE_OT_create_bundle.bl_idname, text="Create", icon='IMPORT')
 		
 		c = split.column(align=True)
 		c.scale_y = 1.85
@@ -343,8 +343,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 				# Process object name via modifiers
 				path_folder = folder
 				path_name = fileName
-				for modifier_id in modifiers.modifiers_dict:
-					modifier = modifiers.modifiers_dict[modifier_id]['modifier']
+				for modifier in modifiers.get_modifiers(context.scene.BGE_Settings.scene_modifiers):
 					if modifier.get("active"):
 						path_folder = modifier.process_path(path_name, path_folder)
 						path_name = modifier.process_name(path_name)
@@ -356,10 +355,8 @@ class BGE_PT_files_panel(bpy.types.Panel):
 				if(len(objects) > 1):
 					label = "{}  {}x".format(label, len(objects));
 
-				row.operator(operators.BGE_OT_select.bl_idname,icon_value=icon, emboss=False, text=label).key = fileName
 				r = row.row(align=True)
 				r.alert = True
-				r.operator(operators.BGE_OT_remove.bl_idname,text="", icon='X').key = fileName
 
 				if not context.scene.BGE_Settings.collapseBundles:
 					box = box.box()

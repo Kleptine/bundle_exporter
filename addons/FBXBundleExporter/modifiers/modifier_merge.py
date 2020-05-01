@@ -9,7 +9,7 @@ from .. import objects_organise
 
 from . import modifier
 
-class Settings(modifier.Settings):
+class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 	label = "Merge Meshes"
 	id = 'merge'
 	url = "http://renderhjs.net/fbxbundle/#modifier_merge"

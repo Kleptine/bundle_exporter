@@ -4,7 +4,7 @@ import operator
 import mathutils
 from mathutils import Vector
 
-class Settings(bpy.types.PropertyGroup):
+class BGE_mod_default(bpy.types.PropertyGroup):
 	label = "Modifier"
 	id = 'modifier'
 	url = ""

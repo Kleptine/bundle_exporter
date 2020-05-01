@@ -101,17 +101,15 @@ addon_keymaps = []
 
 def register():
 	print('--> REGISTER INIT')
+	from bpy.utils import register_class
 
 	icons.register()
 
 	modifiers.register_globals()
 
-	from bpy.utils import register_class
 	register_class(BGE_preferences)
 
-	for operator in operators.operators:
-		print("register operator: {}".format(operator))
-		register_class(operator)
+	operators.register()
 
 	modifiers.register_locals()
 
@@ -128,13 +126,9 @@ def unregister():
 
 	modifiers.unregister_locals()
 
-	for operator in operators.operators:
-		unregister_class(operator)
+	operators.unregister()
 
-	try:
-		unregister_class(BGE_preferences)
-	except:
-		print(BGE_preferences)
+	unregister_class(BGE_preferences)
 
 	modifiers.unregister_globals()
 

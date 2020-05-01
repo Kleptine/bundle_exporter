@@ -8,7 +8,7 @@ from . import modifier
 from .. import platforms
 
 
-class Settings(modifier.Settings):
+class BGE_mod_rename(modifier.BGE_mod_default):
 	label = "Rename"
 	id = 'rename'
 	url = "http://renderhjs.net/fbxbundle/#modifier_rename"

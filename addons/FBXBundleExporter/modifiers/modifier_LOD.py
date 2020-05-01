@@ -7,7 +7,7 @@ from . import modifier
 def get_quality(index, count, max_quality):
 	return 1 - (index)/(count-1) * (1 - max_quality)
 
-class Settings(modifier.Settings):
+class BGE_mod_lod(modifier.BGE_mod_default):
 	label = "LOD"
 	id = 'lod'
 	url = "http://renderhjs.net/fbxbundle/#modifier_lod"

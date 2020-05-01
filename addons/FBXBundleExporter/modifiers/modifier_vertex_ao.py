@@ -6,7 +6,7 @@ from . import modifier
 
 
 
-class Settings(modifier.Settings):
+class BGE_mod_vertex_ao(modifier.BGE_mod_default):
 	label = "Vertex AO"
 	id = 'vertex_ao'
 	url = "http://renderhjs.net/fbxbundle/#modifier_ao"

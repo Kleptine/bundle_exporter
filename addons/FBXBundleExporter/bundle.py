@@ -79,3 +79,10 @@ class Bundle(bpy.types.PropertyGroup):
     @property
     def filename(self):
         return platforms.platforms[bpy.context.scene.BGE_Settings.target_platform].get_filename(self.key)
+
+    def select():
+        print('SELECT BUNDLE ' + self.key)
+
+
+def create_bundles_from_selection():
+    bundle = bpy.context.scene.BGE_Settings.bundles.add()

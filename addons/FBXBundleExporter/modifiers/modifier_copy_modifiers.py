@@ -3,7 +3,7 @@ import imp
 
 from . import modifier
 
-class Settings(modifier.Settings):
+class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 	label = "Copy Modifiers"
 	id = 'copy_modifiers'
 	url = "http://renderhjs.net/fbxbundle/#modifier_modifiers"

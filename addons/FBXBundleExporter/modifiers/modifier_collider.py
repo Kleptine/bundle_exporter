@@ -5,7 +5,7 @@ import imp
 from . import modifier
 
 
-class Settings(modifier.Settings):
+class BGE_mod_collider(modifier.BGE_mod_default):
 	label = "Collider Mesh"
 	id = 'collider'
 	url = "http://renderhjs.net/fbxbundle/#modifier_collider"
