@@ -5,6 +5,11 @@ import mathutils
 from mathutils import Vector
 
 class Settings(bpy.types.PropertyGroup):
+	label = "Modifier"
+	id = 'modifier'
+	url = ""
+	type = "MESH"
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -26,11 +31,11 @@ class Modifier:
 
 	@classmethod
 	def settings_path_global(cls):
-		return "bpy.context.preferences.addons['{}'].preferences.BGE_modifier_{}".format(__name__.split('.')[0], cls.id)
+		return "bpy.context.preferences.addons['{}'].preferences.modifier_preferences.BGE_modifier_{}".format(__name__.split('.')[0], cls.id)
 
 	@classmethod
 	def settings_path_local(cls):
-		return "bpy.context.scene.{}".format(cls.settings_name())
+		return "bpy.context.scene.BGE_Settings.modifiers.{}".format(cls.settings_name())
 
 	def settings_path_custom(self):
 		return self.path

@@ -21,13 +21,15 @@ for x in local_variables:
 
 local_settings = []
 
+from . import modifier
+
 import bpy
 
 modifier_annotations = {}
 for x in modifiers_dict:
 	modifier_annotations[modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['global']})
-BGE_preferences_modifiers = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})
-BGE_preferences_modifiers_local = None
+BGE_modifiers = type("BGE_modifiers", (modifier.Settings,), {'__annotations__': modifier_annotations})
+BGE_modifiers_local = None
 
 def create_local_settings(Settings, defaults_path, name):
 	new_annotattions = {}
@@ -38,7 +40,7 @@ def create_local_settings(Settings, defaults_path, name):
 		prop_data['default'] = preferences_val
 		new_annotattions[key] = (Settings.__annotations__[key][0], prop_data)
 		#new_annotattions[key]['default']=preferences_val
-	SettingsScene = type(name+"Settings", (bpy.types.PropertyGroup,), {'__annotations__':new_annotattions})
+	SettingsScene = type(name+"Settings", (modifier.Settings,), {'__annotations__':new_annotattions})
 	return SettingsScene
 
 def register_globals():
@@ -46,37 +48,35 @@ def register_globals():
 	for x in modifiers_dict:
 		register_class(modifiers_dict[x]['global'])
 
-	register_class(BGE_preferences_modifiers)
+	register_class(BGE_modifiers)
 
 def register_locals():
-	global BGE_preferences_modifiers_local
+	global BGE_modifiers_local
 	from bpy.utils import register_class
 	for x in modifiers_dict:
 		local_setting = create_local_settings(modifiers_dict[x]['global'], modifiers_dict[x]['modifier'].settings_path_global(), modifiers_dict[x]['modifier'].id)
 		modifiers_dict[x]['local'] = local_setting
 		register_class(local_setting)
-		setattr(bpy.types.Scene, modifiers_dict[x]['modifier'].settings_name(), bpy.props.PointerProperty(type=local_setting))
 
 	modifier_annotations = {}
 	for x in modifiers_dict:
 		modifier_annotations[modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['local']})
-	BGE_preferences_modifiers_local = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})
-	register_class(BGE_preferences_modifiers_local)
+	BGE_modifiers_local = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})
+	register_class(BGE_modifiers_local)
 
 def unregister_globals():
 	from bpy.utils import unregister_class
-	unregister_class(BGE_preferences_modifiers)
+	unregister_class(BGE_modifiers)
 	for x in modifiers_dict:
 		unregister_class(modifiers_dict[x]['global'])
 
 def unregister_locals():
 	from bpy.utils import unregister_class
 
-	unregister_class(BGE_preferences_modifiers_local)
+	unregister_class(BGE_modifiers_local)
 
 	for x in modifiers_dict:
 		unregister_class(modifiers_dict[x]['local'])
-		delattr(bpy.types.Scene, modifiers_dict[x]['modifier'].settings_name())
 
 def draw(layout, context, use_global_settings = False, types=('GENERAL','MESH')):
 	col = layout.column()

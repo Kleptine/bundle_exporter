@@ -20,7 +20,7 @@ class Bundle(bpy.types.PropertyGroup):
     mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
 
-    moidifiers: bpy.props.PointerProperty(type=modifiers.BGE_preferences_modifiers)
+    moidifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
     #https://stackoverflow.com/questions/3942303/how-does-a-python-set-check-if-two-objects-are-equal-what-methods-does-an-o
     def __hash__(self):

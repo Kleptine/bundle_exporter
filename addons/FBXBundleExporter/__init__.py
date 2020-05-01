@@ -48,20 +48,14 @@ target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis ro
 		('GLTF', 'glTF', 'GL Transmission Format')]
 
 #https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
-modifier_annotations = {}
-for x in modifiers.modifiers_dict:
-	modifier_annotations[modifiers.modifiers_dict[x]['modifier'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers.modifiers_dict[x]['global']})
-
-BGE_preferences_modifiers = type("BGE_preferences_modifiers", (object,), {'__annotations__': modifier_annotations})
-
-class BGE_preferences(bpy.types.AddonPreferences, BGE_preferences_modifiers):
+class BGE_preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
 	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
 
-	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_preferences_modifiers)
+	modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
 	#BGE_modifier_collider: bpy.props.PointerProperty(type=modifiers.modifier_collider.Settings)
 	

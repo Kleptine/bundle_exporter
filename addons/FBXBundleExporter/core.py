@@ -84,7 +84,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.target_platform)
 
-	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_preferences_modifiers_local)
+	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)
 
 
 class BGE_PT_core_panel(bpy.types.Panel):

@@ -13,7 +13,7 @@ def icon_get(name):
 
 def icon_register(fileName):
 	name = fileName.split('.')[0]   # Don't include file extension
-	icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+	icons_dir = os.path.dirname(__file__)
 	preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
 
 def unregister():
