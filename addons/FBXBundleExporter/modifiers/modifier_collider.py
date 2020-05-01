@@ -6,6 +6,11 @@ from . import modifier
 
 
 class Settings(modifier.Settings):
+	label = "Collider Mesh"
+	id = 'collider'
+	url = "http://renderhjs.net/fbxbundle/#modifier_collider"
+	type = 'MESH'
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -26,18 +31,12 @@ class Settings(modifier.Settings):
 		subtype='FACTOR'
 	)
 
-class Modifier(modifier.Modifier):
-	label = "Collider Mesh"
-	id = 'collider'
-	url = "http://renderhjs.net/fbxbundle/#modifier_collider"
-
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if(self.active):
 			row = layout.row(align=True)
-			row.prop( eval(self.settings_path()) , "ratio", text="Ratio", icon='AUTOMERGE_ON')
-			row.prop( eval(self.settings_path()) , "angle", text="Angle", icon='AUTOMERGE_ON')
+			row.prop( self , "ratio", text="Ratio", icon='AUTOMERGE_ON')
+			row.prop( self , "angle", text="Angle", icon='AUTOMERGE_ON')
 
 			
 	def process_objects(self, name, objects):
@@ -68,7 +67,7 @@ class Modifier(modifier.Modifier):
 
 			# Decimate A
 			mod = copy.modifiers.new("RATIO", type='DECIMATE')
-			mod.ratio = self.get("ratio")
+			mod.ratio = self.ratio
 
 			# Displace
 			mod = copy.modifiers.new("__displace", type='DISPLACE')
@@ -79,7 +78,7 @@ class Modifier(modifier.Modifier):
 			# Decimate B
 			mod = copy.modifiers.new("ANGLE", type='DECIMATE')
 			mod.decimate_type = 'DISSOLVE'
-			mod.angle_limit = self.get("angle") * math.pi / 180
+			mod.angle_limit = self.angle * math.pi / 180
 
 			# Triangulate
 			mod = copy.modifiers.new("__triangulate", type='TRIANGULATE')
@@ -98,7 +97,7 @@ class Modifier(modifier.Modifier):
 
 
 			# bpy.ops.object.modifier_add(type='DECIMATE')
-			# bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.get("levels"), self.get("quality"))
+			# bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
 			new_objects.append(bpy.context.object)
 

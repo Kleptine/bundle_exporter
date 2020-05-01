@@ -1,3 +1,5 @@
+print('--> RELOADED INIT')
+
 from . import operators
 from . import modifiers
 from . import icons
@@ -74,7 +76,7 @@ class BGE_preferences(bpy.types.AddonPreferences):
 		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
 		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
 
-		modifiers.draw(col, context, use_global_settings=True)
+		modifiers.draw(col, context, self.modifier_preferences)
 
 		col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
 
@@ -98,6 +100,7 @@ class BGE_preferences(bpy.types.AddonPreferences):
 addon_keymaps = []
 
 def register():
+	print('--> REGISTER INIT')
 
 	icons.register()
 
@@ -117,7 +120,9 @@ def register():
 
 
 def unregister():
+	print('### UNREGISTER INIT')
 	from bpy.utils import unregister_class
+
 	from . import core
 	core.unregister()
 

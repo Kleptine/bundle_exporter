@@ -1,3 +1,5 @@
+print('--> RELOADED CORE')
+
 from . import gp_draw
 from . import objects_organise
 
@@ -84,7 +86,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
 	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.target_platform)
 
-	modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)
+	scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)
 
 
 class BGE_PT_core_panel(bpy.types.Panel):
@@ -224,7 +226,7 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
-		modifiers.draw(self.layout, context, use_global_settings=False)
+		modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers)
 
 class BGE_PT_armature_options_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_armature_options_panel"
@@ -377,6 +379,7 @@ addon_keymaps = []
 classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_armature_options_panel, BGE_PT_files_panel]
 
 def register():
+	print('--> REGISTER_CORE')
 	from bpy.utils import register_class
 	register_class(bundle.Bundle)
 
@@ -386,14 +389,15 @@ def register():
 	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
 
 	# handle the keymap
-	km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-	kmi = km.keymap_items.new(operators.BGE_OT_file_export.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
-	kmi = km.keymap_items.new(operators.BGE_OT_export_recent.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
+	#km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
+	#kmi = km.keymap_items.new(operators.BGE_OT_file_export.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
+	#kmi = km.keymap_items.new(operators.BGE_OT_export_recent.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
 	# kmi.properties.total = 4
-	addon_keymaps.append(km)
+	#addon_keymaps.append(km)
 
 
 def unregister():
+	print('### UNREGISTER CORE')
 	from bpy.utils import unregister_class
 	unregister_class(bundle.Bundle)
 
@@ -407,7 +411,7 @@ def unregister():
 	del bpy.types.Scene.BGE_Settings
 
 	# handle the keymap
-	for km in addon_keymaps:
-		bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
-	del addon_keymaps[:]
+	#for km in addon_keymaps:
+	#	bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
+	#del addon_keymaps[:]
 

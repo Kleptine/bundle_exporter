@@ -10,6 +10,13 @@ from .. import objects_organise
 from . import modifier
 
 class Settings(modifier.Settings):
+	label = "Merge Meshes"
+	id = 'merge'
+	url = "http://renderhjs.net/fbxbundle/#modifier_merge"
+	type = 'MESH'
+	
+
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -37,31 +44,23 @@ class Settings(modifier.Settings):
 	# 	default=True
 	# )
 
-
-
-class Modifier(modifier.Modifier):
-	label = "Merge Meshes"
-	id = 'merge'
-	url = "http://renderhjs.net/fbxbundle/#modifier_merge"
-	
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if(self.active):
 			col = layout.column(align=True)
 
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval(self.settings_path()) , "merge_verts", text="Merge Verts")
+			row.prop( self , "merge_verts", text="Merge Verts")
 			row_freeze = row.row()
-			row_freeze.enabled = self.get("merge_verts")
-			row_freeze.prop( eval(self.settings_path()) , "merge_distance")
+			row_freeze.enabled = self.merge_verts
+			row_freeze.prop( self , "merge_distance")
 
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval(self.settings_path()) , "merge_by_material", text="Split by Material")
+			row.prop( self , "merge_by_material", text="Split by Material")
 
 
 			
@@ -87,13 +86,13 @@ class Modifier(modifier.Modifier):
 			
 
 			# Merge Vertices?
-			if self.get("merge_verts") and self.get("merge_distance") > 0:
+			if self.merge_verts and self.merge_distance > 0:
 
 				bpy.ops.object.mode_set(mode='EDIT')
 				bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 				bpy.ops.mesh.select_all(action='SELECT')
 
-				bpy.ops.mesh.remove_doubles(threshold = self.get("merge_distance"))
+				bpy.ops.mesh.remove_doubles(threshold = self.merge_distance)
 
 				bpy.ops.mesh.quads_convert_to_tris()
 
@@ -101,7 +100,7 @@ class Modifier(modifier.Modifier):
 				bpy.ops.object.mode_set(mode='OBJECT')
 
 			
-			# if self.get("consistent_normals") :
+			# if self.consistent_normals :
 			# 	bpy.ops.object.mode_set(mode='EDIT')
 			# 	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 			# 	bpy.ops.mesh.select_all(action='SELECT')
@@ -112,7 +111,7 @@ class Modifier(modifier.Modifier):
 			# 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
-			if self.get("merge_by_material") :
+			if self.merge_by_material :
 				# TODO: Split faces by materials
 
 				bpy.ops.object.mode_set(mode='EDIT')

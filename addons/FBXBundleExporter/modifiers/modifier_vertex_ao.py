@@ -7,6 +7,11 @@ from . import modifier
 
 
 class Settings(modifier.Settings):
+	label = "Vertex AO"
+	id = 'vertex_ao'
+	url = "http://renderhjs.net/fbxbundle/#modifier_ao"
+	type = "MESH"
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -19,29 +24,20 @@ class Settings(modifier.Settings):
 		subtype='FACTOR'
 	)
 
-
-class Modifier(modifier.Modifier):
-	label = "Vertex AO"
-	id = 'vertex_ao'
-	url = "http://renderhjs.net/fbxbundle/#modifier_ao"
-	type = "MESH"
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if self.active:
 			col = layout.column(align=True)
 
 			row = col.row(align=True)
 			row.separator()
 			row.separator()
-			row.prop( eval(self.settings_path()) , "contrast", text="Contrast")
-
-
+			row.prop( self , "contrast", text="Contrast")
 
 	def process_objects(self, name, objects):
 		
 
-		contrast = self.get('contrast')
+		contrast = self.contrast
 
 		for obj in objects:
 			bpy.ops.object.select_all(action="DESELECT")

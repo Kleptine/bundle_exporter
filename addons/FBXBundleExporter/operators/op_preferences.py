@@ -7,12 +7,17 @@ class BGE_OT_save_preferences(bpy.types.Operator):
 
 	def execute(self, context):
 		from .. import core
+		from .. import modifiers
 
 		bpy.ops.wm.save_userpref()
+
+		modifiers.unregister_locals()
+		modifiers.register_locals()
 
 		core.unregister()
 		imp.reload(core)
 		core.register()
+
 
 		return {'FINISHED'}
 

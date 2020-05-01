@@ -9,6 +9,11 @@ from .. import platforms
 
 
 class Settings(modifier.Settings):
+	label = "Rename"
+	id = 'rename'
+	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
+	type = "GENERAL"
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -17,25 +22,15 @@ class Settings(modifier.Settings):
 	file: bpy.props.StringProperty(default="{bundle}")
 	obj: bpy.props.StringProperty(default="{object}")
 
-
-
-
-class Modifier(modifier.Modifier):
-	label = "Rename"
-	id = 'rename'
-	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
-	type = "GENERAL"
-
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if self.active:
 			# row = layout.row(align=True)
 
 			col = layout.column(align=True)
-			col.prop( eval(self.settings_path()) , "path", text="Path")
-			col.prop( eval(self.settings_path()) , "file", text="File")
-			col.prop( eval(self.settings_path()) , "obj", text="Object")
+			col.prop( self , "path", text="Path")
+			col.prop( self , "file", text="File")
+			col.prop( self , "obj", text="Object")
 
 
 			bundles = objects_organise.get_bundles()
@@ -78,7 +73,7 @@ class Modifier(modifier.Modifier):
 
 
 	def format_object_name(self, bundle, name):
-		val = self.get("obj")
+		val = self.obj
 		val = val.replace("{object}", name)
 		val = val.replace("{bundle}", bundle)
 		val = val.replace("{scene}", bpy.context.scene.name)
@@ -95,7 +90,7 @@ class Modifier(modifier.Modifier):
 
 
 	def process_name(self, name):
-		val = self.get("file")
+		val = self.file
 		val = val.replace("{bundle}", name)
 		val = val.replace("{scene}", bpy.context.scene.name)
 		return self.remove_illegal_characters( val )
@@ -103,7 +98,7 @@ class Modifier(modifier.Modifier):
 
 
 	def process_path(self, name, path):
-		val = self.get("path")
+		val = self.path
 		val = val.replace("{path}", path)
 		val = val.replace("{bundle}", name)
 		val = val.replace("{scene}", bpy.context.scene.name)

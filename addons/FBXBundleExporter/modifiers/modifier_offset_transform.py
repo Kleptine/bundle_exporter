@@ -7,35 +7,27 @@ from . import modifier
 
 
 class Settings(modifier.Settings):
+	label = "Offset Transform"
+	id = 'offset_transform'
+	url = "http://renderhjs.net/fbxbundle/#modifier_offset"
+	type = "MESH"
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
 	source: bpy.props.StringProperty()
 
-
-
-class Modifier(modifier.Modifier):
-	label = "Offset Transform"
-	id = 'offset_transform'
-	url = "http://renderhjs.net/fbxbundle/#modifier_offset"
-	type = "MESH"
-
-
-	#def register(self):
-	#	exec("bpy.types.Scene."+self.settings_path() + " = bpy.props.PointerProperty(type=Settings)")
-
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if(self.active):
 			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-			layout.prop_search(eval(self.settings_path()), "source",  bpy.context.scene, "objects", text="Source")
+			layout.prop_search(self, "source",  bpy.context.scene, "objects", text="Source")
 			
 
-			if self.get('source') in bpy.data.objects:
+			if self.source in bpy.data.objects:
 				
-				obj = bpy.data.objects[self.get('source')]
+				obj = bpy.data.objects[self.source]
 
 				messages = []
 				if obj.location.magnitude > 0:
@@ -58,8 +50,8 @@ class Modifier(modifier.Modifier):
 
 
 	def process_objects(self, name, objects):
-		if self.get('source') in bpy.data.objects:
-			source = bpy.data.objects[ self.get('source') ]
+		if self.source in bpy.data.objects:
+			source = bpy.data.objects[self.source]
 			print("Offset... "+source.name)
 
 

@@ -4,8 +4,15 @@ import imp
 
 from . import modifier
 
+def get_quality(index, count, max_quality):
+	return 1 - (index)/(count-1) * (1 - max_quality)
 
 class Settings(modifier.Settings):
+	label = "LOD"
+	id = 'lod'
+	url = "http://renderhjs.net/fbxbundle/#modifier_lod"
+	type = 'MESH'
+
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
@@ -24,26 +31,15 @@ class Settings(modifier.Settings):
 		subtype='FACTOR'
 	)
 
-
-def get_quality(index, count, max_quality):
-	return 1 - (index)/(count-1) * (1 - max_quality)
-
-
-class Modifier(modifier.Modifier):
-	label = "LOD"
-	id = 'lod'
-	url = "http://renderhjs.net/fbxbundle/#modifier_lod"
-
-
 	def draw(self, layout):
 		super().draw(layout)
-		if(self.get("active")):
+		if self.active:
 			row = layout.row(align=True)
-			row.prop( eval(self.settings_path()) , "levels", text="Steps", icon='AUTOMERGE_ON')
-			row.prop( eval(self.settings_path()) , "quality", text="Quality", icon='AUTOMERGE_ON')
+			row.prop( self , "levels", text="Steps", icon='AUTOMERGE_ON')
+			row.prop( self , "quality", text="Quality", icon='AUTOMERGE_ON')
 
 			col = layout.column(align=True)
-			for i in range(0, self.get("levels")):
+			for i in range(0, self.levels):
 				r = col.row()
 				r.enabled = False
 				icon = 'MESH_UVSPHERE' if i==0 else 'MESH_ICOSPHERE'
@@ -51,10 +47,10 @@ class Modifier(modifier.Modifier):
 				r = r.row()
 				r.enabled = False
 				r.alignment = 'RIGHT'
-				r.label(text="{}%".format( math.ceil(get_quality(i, self.get("levels"), self.get("quality"))*100) ))
+				r.label(text="{}%".format( math.ceil(get_quality(i, self.levels, self.quality)*100) ))
 			# row_freeze = row.row()
-			# row_freeze.enabled = self.get("merge_active")
-			# row_freeze.prop( eval(self.settings_path()) , "merge_distance")
+			# row_freeze.enabled = self.merge_active
+			# row_freeze.prop( self , "merge_distance")
 
 
 	def process_objects(self, name, objects):
@@ -69,7 +65,7 @@ class Modifier(modifier.Modifier):
 			obj.name = "{}_LOD{}".format(prefix, 0)
 			new_objects.append(obj)
 
-			for i in range(1, self.get("levels")):
+			for i in range(1, self.levels):
 
 				# Select
 				bpy.ops.object.select_all(action="DESELECT")
@@ -80,7 +76,7 @@ class Modifier(modifier.Modifier):
 				bpy.ops.object.duplicate()
 				bpy.context.object.name = "{}_LOD{}".format(prefix, i)
 				bpy.ops.object.modifier_add(type='DECIMATE')
-				bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.get("levels"), self.get("quality"))
+				bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
 				new_objects.append(bpy.context.object)
 
