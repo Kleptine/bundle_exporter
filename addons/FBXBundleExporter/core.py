@@ -226,20 +226,8 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
-		modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers)
-
-class BGE_PT_armature_options_panel(bpy.types.Panel):
-	bl_idname = "BGE_PT_armature_options_panel"
-	bl_label = "Armature Export Options"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'UI'
-	bl_category = "Game Exporter"
-	bl_context = "objectmode"
-	bl_options = {'DEFAULT_CLOSED'}
-
-	def draw(self, context):
-		layout = self.layout
-		col = layout.column()
+		self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
+		modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers, draw_only_active=True)
 
 class BGE_UL_bundles(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -253,6 +241,7 @@ class BGE_UL_bundles(bpy.types.UIList):
 		col.prop(item, "key", text="", expand=True)
 		split.prop(item, "mode_bundle", text="", icon='GROUP')
 		split.prop(item, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
+		layout.operator(operators.op_bundles.BGE_OT_remove.bl_idname, text='', icon='CANCEL').index = index
 
 	def invoke(self, context, event):
 		pass
@@ -270,7 +259,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		layout = self.layout
 		
 		# Get bundles
-		bundles = objects_organise.get_bundles()
+		bundles = bundle.get_bundles()
 
 		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 
@@ -291,6 +280,15 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		c.scale_y = 1.85
 		c.operator(operators.BGE_OT_file_export.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
 
+		
+		bundle_index = bpy.context.scene.BGE_Settings.bundle_index
+		
+		if bpy.context.scene.BGE_Settings.bundle_index < len(bundles) and len(bundles) > 0:
+			box = layout.box()
+			box.label(text=bundles[bundle_index].filename)
+			box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
+			modifiers.draw(box, context, bundles[bundle_index].override_modifiers, draw_only_active=True)
+
 
 		if len(bpy.context.scene.BGE_Settings.recent) > 0:
 			if len(objects_organise.recent_load_objects()) > 0:
@@ -308,7 +306,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 		layout.separator()
 
-		
+		bundles = objects_organise.get_bundles()
 		mode = bpy.context.scene.BGE_Settings.target_platform
 
 		
@@ -373,7 +371,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 
 addon_keymaps = []
-classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_armature_options_panel, BGE_PT_files_panel]
+classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
 
 def register():
 	print('--> REGISTER_CORE')

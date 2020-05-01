@@ -9,15 +9,18 @@ import importlib
 tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py')]
 
 for i in tree:
-    importlib.import_module('.'+i, package=__package__)
+	importlib.import_module('.'+i, package=__package__)
 
 __globals = globals().copy()
 
 modifiers_dict = {}
 
+num_id = 1
 for x in [x for x in __globals if x.startswith('modifier_')]:
 	for y in [item for item in dir(__globals[x]) if item.startswith('BGE_')]:
 		mod = getattr(__globals[x], y)
+		mod.unique_num = num_id
+		num_id +=1
 		modifiers_dict[mod.id] = {
 		'module':__globals[x],
 		'global':mod, 
@@ -100,11 +103,12 @@ def unregister_locals():
 def get_modifiers(modifier_group):
 	return [getattr(modifier_group, x) for x in modifier_group.keys() if x.startswith('BGE_modifier_')]
 
-def draw(layout, context, modifier_group, types=('GENERAL','MESH')):
+def draw(layout, context, modifier_group, draw_only_active=False, types=('GENERAL','MESH')):
 	col = layout.column()
 	for x in modifiers_dict:
 		modifier = getattr(modifier_group, modifiers_dict[x]['global'].settings_name())
 		if modifier.type in types:
-			box = col.box()
-		#box.label(text=str(modifier.global_settings))
-			modifier.draw(box)
+			if not draw_only_active or modifier.active:
+				box = col.box()
+			#box.label(text=str(modifier.global_settings))
+				modifier.draw(box)

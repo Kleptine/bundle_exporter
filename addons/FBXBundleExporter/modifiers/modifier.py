@@ -5,11 +5,13 @@ import mathutils
 from mathutils import Vector
 
 class BGE_mod_default(bpy.types.PropertyGroup):
+	unique_num = 0
 	label = "Modifier"
 	id = 'modifier'
 	url = ""
 	type = "MESH"
 	global_settings = True
+	icon = 'MODIFIER'
 
 	active: bpy.props.BoolProperty (
 		name="Active",

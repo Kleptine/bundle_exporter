@@ -11,6 +11,7 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
 	id = 'vertex_ao'
 	url = "http://renderhjs.net/fbxbundle/#modifier_ao"
 	type = "MESH"
+	icon = 'GROUP_VERTEX'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
