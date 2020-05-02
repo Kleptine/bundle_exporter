@@ -12,6 +12,7 @@ class BGE_mod_lod(modifier.BGE_mod_default):
 	id = 'lod'
 	url = "http://renderhjs.net/fbxbundle/#modifier_lod"
 	type = 'MESH'
+	icon = 'MOD_DECIM'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -53,7 +54,7 @@ class BGE_mod_lod(modifier.BGE_mod_default):
 			# row_freeze.prop( self , "merge_distance")
 
 
-	def process_objects(self, name, objects):
+	def process_objects(self, name, objects, helpers, armatures):
 		# UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html
 		# UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
 		# 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
@@ -80,4 +81,4 @@ class BGE_mod_lod(modifier.BGE_mod_default):
 
 				new_objects.append(bpy.context.object)
 
-		return new_objects
+		return new_objects, helpers, armatures

@@ -3,12 +3,12 @@ import imp
 
 from . import modifier
 
-class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
-	label = "Copy Modifiers"
-	id = 'copy_modifiers'
-	url = "http://renderhjs.net/fbxbundle/#modifier_modifiers"
+class BGE_mod_custom_pivot(modifier.BGE_mod_default):
+	label = "Custom Pivot"
+	id = 'custom_pivot'
+	url = "http://renderhjs.net/fbxbundle/"
 	type = 'MESH'
-	icon = 'MODIFIER_DATA'
+	icon = 'EMPTY_ARROWS'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -38,14 +38,11 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 
 
 
-	def process_objects(self, name, objects, helpers, armatures):
+	def process_pivot(self, pivot, meshes, helpers, armatures):
 		if self.source in bpy.data.objects:
 			source = bpy.data.objects[self.source]
-			source.select_set(True)
-			bpy.context.view_layer.objects.active = source
 
-			bpy.ops.object.make_links_data(type='MODIFIERS')
-			source.select_set(False)
+			return bpy.data.objects[self.source].location
+		return pivot
 
-		return objects, helpers, armatures
 		

@@ -11,6 +11,7 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
 	id = 'offset_transform'
 	url = "http://renderhjs.net/fbxbundle/#modifier_offset"
 	type = "MESH"
+	icon = 'ORIENTATION_VIEW'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -49,7 +50,7 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
 
 
 
-	def process_objects(self, name, objects):
+	def process_objects(self, name, objects, helpers, armatures):
 		if self.source in bpy.data.objects:
 			source = bpy.data.objects[self.source]
 			print("Offset... "+source.name)
@@ -87,3 +88,4 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
 			bpy.context.space_data.pivot_point = prev_cursor_mode
 			bpy.context.scene.cursor.location = prev_cursor_location
 		
+		return objects, helpers, armatures

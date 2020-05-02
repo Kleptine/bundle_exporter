@@ -1,14 +1,13 @@
 print('--> RELOADED CORE')
 
 from . import gp_draw
-from . import objects_organise
 
 from . import modifiers
 from . import platforms
 from . import operators
 
 from . import icons
-from . import bundle
+from . import bundles
 
 import bpy, bmesh
 import os
@@ -63,18 +62,12 @@ class BGE_Settings(bpy.types.PropertyGroup):
 		default=False,
 		description="Compact list view"
 	)
-	#!TODO - REMOVE THIS PROPERTY
-	include_children: bpy.props.BoolProperty (
-		name="Incl. Children",
-		default=True,
-		description="Include nested children in bundles, e.g parent or group."
-	)
 	recent: bpy.props.StringProperty (
 		name="Recent export",
 		default=""
 	)
 	bundles: bpy.props.CollectionProperty(
-		type=bundle.Bundle
+		type=bundles.Bundle
 	)
 	bundle_index:bpy.props.IntProperty(
 		name="Bundles",
@@ -142,7 +135,6 @@ class BGE_PT_core_panel(bpy.types.Panel):
 		col = box.column(align=True)
 		row = col.row(align=True)
 		row.prop(context.scene.BGE_Settings, "padding", text="Padding", expand=True)
-		row.prop(context.scene.BGE_Settings, "include_children", text="Include children", expand=True)
 
 		# Warnings
 
@@ -185,9 +177,6 @@ class BGE_PT_tools_panel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
-		
-		# Get bundles
-		#bundles = objects_organise.get_bundles()
 
 		row = col.row(align=True)
 		row.scale_y = 1.85
@@ -218,12 +207,12 @@ class BGE_PT_tools_panel(bpy.types.Panel):
 
 class BGE_PT_modifiers_panel(bpy.types.Panel):
 	bl_idname = "BGE_PT_modifiers_panel"
-	bl_label = "Mesh Export Options"
+	bl_label = "Export Modifiers"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Game Exporter"
 	bl_context = "objectmode"
-	bl_options = {'DEFAULT_CLOSED'}
+	#bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
@@ -232,16 +221,17 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 class BGE_UL_bundles(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		col = layout.column()
-		col.alert = not item.is_key_valid()
-		col.label(text=item.filename, icon="FILE_3D")
+		row = col.row()
+		row.operator(operators.op_bundles.BGE_OT_select.bl_idname, text='', icon='RESTRICT_SELECT_OFF').index = index
+		row.alert = not item.is_key_valid()
+		row.label(text=item.filename, icon="FILE_3D")
 
-		split = layout.split(factor=0.3, align=True)
-		col = split.column()
-		col.alert = not item.is_key_valid()
-		col.prop(item, "key", text="", expand=True)
-		split.prop(item, "mode_bundle", text="", icon='GROUP')
-		split.prop(item, "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
-		layout.operator(operators.op_bundles.BGE_OT_remove.bl_idname, text='', icon='CANCEL').index = index
+		#split = col.split(factor=0.3, align=True)
+		#split.alignment='RIGHT'
+		#split.label(text = item.mode_bundle, icon='GROUP')
+		#split.label(text = item.mode_pivot, icon='OUTLINER_DATA_EMPTY')
+		
+		row.operator(operators.op_bundles.BGE_OT_remove.bl_idname, text='', icon='CANCEL').index = index
 
 	def invoke(self, context, event):
 		pass
@@ -259,7 +249,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		layout = self.layout
 		
 		# Get bundles
-		bundles = bundle.get_bundles()
+		bundle_list = bundles.get_bundles()
 
 		icon = icons.icon_get(bpy.context.scene.BGE_Settings.target_platform.lower())
 
@@ -278,97 +268,35 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		
 		c = split.column(align=True)
 		c.scale_y = 1.85
-		c.operator(operators.BGE_OT_file_export.bl_idname, text="Export {}x".format(len(bundles)), icon_value=icon)
+		c.operator(operators.BGE_OT_file_export.bl_idname, text="Export {}x".format(len(bundle_list)), icon_value=icon)
 
 		
 		bundle_index = bpy.context.scene.BGE_Settings.bundle_index
 		
-		if bpy.context.scene.BGE_Settings.bundle_index < len(bundles) and len(bundles) > 0:
+		if bpy.context.scene.BGE_Settings.bundle_index < len(bundle_list) and len(bundle_list) > 0:
 			box = layout.box()
-			box.label(text=bundles[bundle_index].filename)
+			box.label(text=bundle_list[bundle_index].filename, icon='FILE_3D')
+			split = box.split(factor=0.3, align=True)
+			col = split.column()
+			col.alert = not bundle_list[bundle_index].is_key_valid()
+			col.prop(bundle_list[bundle_index], "key", text="", expand=True)
+			split.prop(bundle_list[bundle_index], "mode_bundle", text="", icon='GROUP')
+			split.prop(bundle_list[bundle_index], "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
+			
+			sub_box = box.box()
+			sub_box = sub_box.column(align=True)
+			objs = bundle_list[bundle_index].objects
+			for x in objs:
+				icon = 'OUTLINER_OB_MESH'
+				if x.type== 'ARMATURE':
+					icon = 'OUTLINER_OB_ARMATURE'
+				elif x.type=='EMPTY':
+					icon = 'OUTLINER_OB_EMPTY'
+				sub_box.label(text=x.name, icon=icon)
 			box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
-			modifiers.draw(box, context, bundles[bundle_index].override_modifiers, draw_only_active=True)
-
-
-		if len(bpy.context.scene.BGE_Settings.recent) > 0:
-			if len(objects_organise.recent_load_objects()) > 0:
-				row = col.row(align=True)
-				row.scale_y = 1.3
-
-				r = row.row(align=True)
-				r.operator(operators.BGE_OT_export_recent.bl_idname, text=objects_organise.recent_get_label(), icon='RECOVER_LAST')
-				
-				r = r.row(align=True)
-				# r.alert = True
-				r.operator(operators.BGE_OT_export_recent_clear.bl_idname, text="", icon='X')
-
-
+			modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
 
 		layout.separator()
-
-		bundles = objects_organise.get_bundles()
-		mode = bpy.context.scene.BGE_Settings.target_platform
-
-		
-		if(len(bundles) > 0):
-			# box_files = layout.box()
-			# box_files.active = False
-			row = layout.row()
-			if len(bundles) == 1:
-				row.label(text = "1x Bundle")
-			else:
-				row.label(text = "{}x Bundles".format(len(bundles)))
-
-			row.prop(context.scene.BGE_Settings, "collapseBundles", text="Compact", expand=True)
-
-
-			folder = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
-
-			# Display bundles
-			for fileName,data in bundles.items():
-				objects = data['objects']
-				helpers = data['helpers']
-
-				# row = layout.row(align=True)
-				box = layout.box()
-				# box.scale_y = 0.8
-				column = box.column(align=True)
-
-				row = column.row(align=True)
-				if(fileName == "unknown"):
-					row.alert = True
-
-				# Process object name via modifiers
-				path_folder = folder
-				path_name = fileName
-				for modifier in modifiers.get_modifiers(context.scene.BGE_Settings.scene_modifiers):
-					if modifier.get("active"):
-						path_folder = modifier.process_path(path_name, path_folder)
-						path_name = modifier.process_name(path_name)
-	
-				label = fileName
-				if mode in platforms.platforms:
-					label = platforms.platforms[mode].get_filename(path_name)
-
-				if(len(objects) > 1):
-					label = "{}  {}x".format(label, len(objects));
-
-				r = row.row(align=True)
-				r.alert = True
-
-				if not context.scene.BGE_Settings.collapseBundles:
-					box = box.box()
-					for i in range(0,len(objects)):
-						row = box.row(align=True)
-						row.label(text=objects[i].name)
-
-				if helpers and not context.scene.BGE_Settings.collapseBundles:
-					box = box.box()
-					for i in range(0,len(helpers)):
-						row = box.row(align=True)
-						row.label(text=helpers[i].name)
-
-
 
 addon_keymaps = []
 classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
@@ -376,25 +304,17 @@ classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_tools_panel, 
 def register():
 	print('--> REGISTER_CORE')
 	from bpy.utils import register_class
-	register_class(bundle.Bundle)
+	register_class(bundles.Bundle)
 
 	for cls in classes:
 		register_class(cls)
 
 	bpy.types.Scene.BGE_Settings = bpy.props.PointerProperty(type=BGE_Settings)
 
-	# handle the keymap
-	#km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-	#kmi = km.keymap_items.new(operators.BGE_OT_file_export.bl_idname, 'E', 'PRESS', ctrl=True, shift=False)
-	#kmi = km.keymap_items.new(operators.BGE_OT_export_recent.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
-	# kmi.properties.total = 4
-	#addon_keymaps.append(km)
-
-
 def unregister():
 	print('### UNREGISTER CORE')
 	from bpy.utils import unregister_class
-	unregister_class(bundle.Bundle)
+	unregister_class(bundles.Bundle)
 
 	for cls in reversed(classes):
 		try:
@@ -402,11 +322,4 @@ def unregister():
 		except:
 			print(cls)
 
-	#Unregister Settings
 	del bpy.types.Scene.BGE_Settings
-
-	# handle the keymap
-	#for km in addon_keymaps:
-	#	bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
-	#del addon_keymaps[:]
-

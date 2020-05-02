@@ -10,6 +10,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 	id = 'collider'
 	url = "http://renderhjs.net/fbxbundle/#modifier_collider"
 	type = 'MESH'
+	icon = 'CUBE'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -39,7 +40,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 			row.prop( self , "angle", text="Angle", icon='AUTOMERGE_ON')
 
 			
-	def process_objects(self, name, objects):
+	def process_objects(self, name, objects, helpers, armatures):
 		# UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html
 		# UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
 		# 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
@@ -61,8 +62,8 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 			copy = bpy.context.object
 
 			# Display as wire
-			copy.draw_type = 'WIRE'
-			copy.show_all_edges = True
+			#copy.draw_type = 'WIRE'
+			#copy.show_all_edges = True
 			
 
 			# Decimate A
@@ -89,16 +90,9 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 			mod.target = obj
 			mod.show_expanded = False			
 
-
-
-
-
-
-
-
 			# bpy.ops.object.modifier_add(type='DECIMATE')
 			# bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
 			new_objects.append(bpy.context.object)
 
-		return new_objects
+		return new_objects, helpers, armatures

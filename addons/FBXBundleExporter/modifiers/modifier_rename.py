@@ -13,6 +13,7 @@ class BGE_mod_rename(modifier.BGE_mod_default):
 	id = 'rename'
 	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
 	type = "GENERAL"
+	icon = 'SYNTAX_OFF'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -81,11 +82,11 @@ class BGE_mod_rename(modifier.BGE_mod_default):
 
 
 
-	def process_objects(self, name, objects):
+	def process_objects(self, name, objects, helpers, armatures):
 		for obj in objects:
 			obj.name = self.remove_illegal_characters( self.format_object_name(name, obj.name) )
 
-		return objects
+		return objects, helpers, armatures
 
 
 

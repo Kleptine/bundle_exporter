@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------- #
 import os
 import importlib
-tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py')]
+tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py') and x != '__init__.py']
 
 for i in tree:
 	importlib.import_module('.'+i, package=__package__)

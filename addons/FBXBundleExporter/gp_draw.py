@@ -6,9 +6,6 @@ import math
 import random
 
 
-from . import objects_organise
-
-
 _draw = None
 
 def get_draw():

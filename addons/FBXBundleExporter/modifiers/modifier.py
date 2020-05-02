@@ -12,11 +12,16 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 	type = "MESH"
 	global_settings = True
 	icon = 'MODIFIER'
+	priority = 999 #lower number will be executed earlier
+
 
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
+
+	def __lt__(self, other):
+		return self.priority < other.priority
 		
 	@classmethod
 	def settings_name(cls):
@@ -30,7 +35,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 	def draw(self, layout):
 		row = layout.row(align=True)
 		row.prop(self, "active", text="")
-		row.label(text="{}".format(self.label), icon='MODIFIER')
+		row.label(text="{}".format(self.label), icon=self.icon)
 
 		r = row.row(align=True)
 		r.enabled = self.active
@@ -46,13 +51,15 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 		# print("Modifier '{}'' mode: {}".format(label, mode))
 
 
-	def process_objects(self, name, objects):
-		return objects
 
+	def process_objects(self, name, objects, helpers, armatures):
+		return objects, helpers, armatures
 
 	def process_name(self, name):
 		return name
 
+	def process_pivot(self, pivot, objects, helpers, armatures):
+		return pivot
 
 	def process_path(self, name, path):
 		return path
