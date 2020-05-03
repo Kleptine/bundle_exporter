@@ -1,6 +1,5 @@
 import bpy
 
-from .. import objects_organise
 from .. import bundles
 from .. import modifiers
 
@@ -18,7 +17,6 @@ class BGE_OT_create_bundle(bpy.types.Operator):
 	bl_label = "Create Bundle"
 
 	def execute(self, context):
-		#bundles = objects_organise.get_bundles()
 		bundles.create_bundles_from_selection()
 		return {'FINISHED'}
 
@@ -42,7 +40,6 @@ class BGE_OT_override_bundle_modifier(bpy.types.Operator):
 	#collection: bpy.props.PointerProperty(type=bpy.types.PropertyGroup)
 
 	def execute(self, context):
-		#bundles = objects_organise.get_bundles()
 		print(self.option)
 		mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.bundles[bpy.context.scene.BGE_Settings.bundle_index].override_modifiers)
 		for x in mods:
@@ -59,7 +56,6 @@ class BGE_OT_add_bundle_modifier(bpy.types.Operator):
 	#collection: bpy.props.PointerProperty(type=bpy.types.PropertyGroup)
 
 	def execute(self, context):
-		#bundles = objects_organise.get_bundles()
 		print(self.option)
 		mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.scene_modifiers)
 		for x in mods:

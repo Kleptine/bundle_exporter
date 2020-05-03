@@ -103,7 +103,7 @@ def unregister_locals():
 def get_modifiers(modifier_group):
 	return [getattr(modifier_group, x) for x in modifier_group.keys() if x.startswith('BGE_modifier_')]
 
-def draw(layout, context, modifier_group, draw_only_active=False, types=('GENERAL','MESH')):
+def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL','MESH', 'HELPER', 'ARMATURE'}):
 	col = layout.column()
 	for x in modifiers_dict:
 		modifier = getattr(modifier_group, modifiers_dict[x]['global'].settings_name())

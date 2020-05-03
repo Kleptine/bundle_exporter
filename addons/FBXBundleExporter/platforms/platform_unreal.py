@@ -41,6 +41,8 @@ class Platform(platform.Platform):
 			mesh_smooth_type = 'FACE', 
 			batch_mode='OFF', 
 			use_custom_props=False,
-
+			
+			add_leaf_bones=False,
+			use_armature_deform_only=True,
  			bake_space_transform = False
 		)

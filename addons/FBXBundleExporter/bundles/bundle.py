@@ -9,6 +9,10 @@ from .. import modifiers
 
 from ..__init__ import mode_bundle_types, mode_pivot_types
 
+from ..settings import mesh_types, empty_types, armature_types
+mesh_types = {'MESH','FONT','CURVE'}
+empty_types = {'EMPTY'}
+armature_types = {'ARMATURE'}
 
 def traverse_tree(t):
     yield t
@@ -37,19 +41,20 @@ class Bundle(bpy.types.PropertyGroup):
             return []
 
         objs = set()
-        if self.mode_bundle == 'NAME':#gets objects similar to the name of the key
+        if '__override_objects__' in self.keys():
+            objs.update(x for x in self['__override_objects__'])
+
+        elif self.mode_bundle == 'NAME':#gets objects similar to the name of the key
             objs.update(x for x in bpy.context.scene.objects if x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit()))
 
         elif self.mode_bundle == 'PARENT': #gets the children of the obj of name 3key
             obj = bpy.context.scene.objects[self.key]
-            #objs.add(obj)
             objs.update(x for x in traverse_tree(obj))
 
         elif self.mode_bundle == 'COLLECTION':#gets objects under the collection named #key
             collection = next(x for x in bpy.data.collections if self.key == x.name)
             for coll in traverse_tree(collection):
-                for obj in coll.objects:
-                    objs.add(obj)
+                objs.update(x for x in coll.objects)
         elif self.mode_bundle == 'SCENE':
             objs.update(x for x in bpy.context.scene.objects)
 
@@ -74,19 +79,19 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def meshes(self):
-        return self._get_objects(types={'MESH','FONT','CURVE'})
+        return self._get_objects(types=mesh_types)
 
     @property
     def helpers(self):
-        return self._get_objects(types={'EMPTY'})
+        return self._get_objects(types=empty_types)
 
     @property
     def armatures(self):
-        return self._get_objects(types={'ARMATURE'})
+        return self._get_objects(types=armature_types)
 
     @property
     def objects(self):
-        return self._get_objects(types={'MESH','FONT','CURVE','EMPTY','ARMATURE'})
+        return self._get_objects(types=mesh_types|empty_types|armature_types)
 
     @property
     def pivot(self):
@@ -174,6 +179,16 @@ class Bundle(bpy.types.PropertyGroup):
         bpy.ops.object.select_all(action='DESELECT')
         for x in self.objects:
             x.select_set(True)
+
+    def get_bounds(self):
+        objects = self.objects
+        if objects:
+            bounds = ObjectBounds(objects[0])
+            if len(objects) > 1:
+                for i in range(1,len(objects)):
+                    bounds.combine( ObjectBounds(objects[i]) )
+            return bounds
+        return False
 
 
     

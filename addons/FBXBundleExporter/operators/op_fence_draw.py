@@ -4,6 +4,7 @@ import operator
 
 from .. import objects_organise
 from .. import gp_draw
+from .. import bundles
 
 
 
@@ -15,23 +16,18 @@ class BGE_OT_fence_draw(bpy.types.Operator):
 	
 	@classmethod
 	def poll(cls, context):
-		if len(bpy.context.selected_objects) > 0:
-			return True
-
-		if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
-			return False
-
-		return False
+		return len(bpy.context.scene.BGE_Settings.bundles) > 0
 
 	def execute(self, context):
 
 		gp_draw.clear()
 
-		bundles = objects_organise.get_bundles()
-		for name,data in bundles.items():
-			objects = data['objects']
+		bundle_list = bundles.get_bundles()
+		for bundle in bundle_list:
+			name = bundle.key
+			objects = bundle.objects
 			if len(objects) > 0:
-				bounds_combined = objects_organise.get_bounds_combined(objects)
+				bounds_combined = bundle.get_bounds()
 				draw_bounds(name, objects, bounds_combined)
 
 		return {'FINISHED'}
@@ -91,7 +87,7 @@ def draw_bounds(name, objects, bounds):
 	draw.add_line([pivot+Vector((0,-padding/2,0)), pivot+Vector((0,padding/2,0)) ])
 	
 	# Draw Grid
-	draw_grid(objects, bounds)
+	#draw_grid(objects, bounds)
 
 
 

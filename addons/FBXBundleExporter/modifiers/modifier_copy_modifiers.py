@@ -3,6 +3,7 @@ import imp
 
 from . import modifier
 
+from ..settings import prefix_copy
 class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 	label = "Copy Modifiers"
 	id = 'copy_modifiers'
@@ -15,6 +16,8 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 		default=False
 	)
 	source: bpy.props.StringProperty()
+
+	replace_references : bpy.props.BoolProperty(default=True)
 
 	def draw(self, layout):
 		super().draw(layout)
@@ -34,18 +37,35 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 
 				row.separator()
 				count = len(bpy.data.objects[self.source].modifiers)
-				row.label(text="copyies {}x modifiers".format(count))
+				row.label(text="copies {}x modifiers".format(count))
 
 
 
 	def process_objects(self, name, objects, helpers, armatures):
-		if self.source in bpy.data.objects:
-			source = bpy.data.objects[self.source]
+		source = self.get_object_from_name(self.source)
+
+		if source:
+			bpy.ops.object.select_all(action="DESELECT")
+
+			for obj in objects:
+				obj.select_set(True)
+
 			source.select_set(True)
 			bpy.context.view_layer.objects.active = source
 
 			bpy.ops.object.make_links_data(type='MODIFIERS')
+
+			if self.replace_references:
+				for obj in objects:
+					for mod in obj.modifiers:
+						if hasattr(mod, 'object'):
+							if mod.object.name.startswith(prefix_copy):
+								if mod.object['__orig_name__'] in bpy.data.objects.keys():
+									mod.object = bpy.data.objects[mod.object['__orig_name__']]
+
 			source.select_set(False)
+		else:
+			print('MODIFIER_COPY_MODIFIERS source not found')
 
 		return objects, helpers, armatures
 		

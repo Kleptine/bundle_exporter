@@ -255,6 +255,10 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 
 		col = layout.column(align=True)
+		row = col.row(align=True)
+		row.scale_y = 1.2
+		row.operator(operators.BGE_OT_fence_draw.bl_idname, text="Draw Fences", icon='AXIS_TOP')
+		row.operator(operators.BGE_OT_fence_clear.bl_idname, text="", icon='PANEL_CLOSE')
 
 		col.template_list("BGE_UL_bundles", "", bpy.context.scene.BGE_Settings, "bundles", bpy.context.scene.BGE_Settings, "bundle_index", rows=2)
 
@@ -276,10 +280,11 @@ class BGE_PT_files_panel(bpy.types.Panel):
 		if bpy.context.scene.BGE_Settings.bundle_index < len(bundle_list) and len(bundle_list) > 0:
 			box = layout.box()
 			box.label(text=bundle_list[bundle_index].filename, icon='FILE_3D')
-			split = box.split(factor=0.3, align=True)
-			col = split.column()
+			col = box.column()
 			col.alert = not bundle_list[bundle_index].is_key_valid()
 			col.prop(bundle_list[bundle_index], "key", text="", expand=True)
+
+			split = col.split(factor=0.5, align=True)
 			split.prop(bundle_list[bundle_index], "mode_bundle", text="", icon='GROUP')
 			split.prop(bundle_list[bundle_index], "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
 			

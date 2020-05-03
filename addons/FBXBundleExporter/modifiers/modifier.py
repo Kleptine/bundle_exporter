@@ -4,6 +4,8 @@ import operator
 import mathutils
 from mathutils import Vector
 
+from ..settings import prefix_copy
+
 class BGE_mod_default(bpy.types.PropertyGroup):
 	unique_num = 0
 	label = "Modifier"
@@ -12,7 +14,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 	type = "MESH"
 	global_settings = True
 	icon = 'MODIFIER'
-	priority = 999 #lower number will be executed earlier
+	priority = 200 #lower number will be executed earlier
 
 
 	active: bpy.props.BoolProperty (
@@ -50,7 +52,13 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 		pass
 		# print("Modifier '{}'' mode: {}".format(label, mode))
 
-
+	def get_object_from_name(self, name):
+		source = None
+		if name in bpy.data.objects.keys():
+			source = bpy.data.objects[name]
+		if prefix_copy+name in bpy.data.objects.keys():
+			source = bpy.data.objects[prefix_copy+name]
+		return source
 
 	def process_objects(self, name, objects, helpers, armatures):
 		return objects, helpers, armatures

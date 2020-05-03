@@ -10,3 +10,6 @@ platforms = {
 	'UNREAL' : platform_unreal.Platform(),
 	'BLENDER' : platform_blender.Platform()
 }
+
+#https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
+#TODO - replace platforms with format + preset option

@@ -4,9 +4,6 @@ import string
 import random
 from mathutils import Vector
 
-
-from .. import objects_organise
-
 from . import modifier
 
 class BGE_mod_merge_meshes(modifier.BGE_mod_default):
@@ -16,18 +13,18 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 	type = 'MESH'
 	icon = 'SELECT_EXTEND'
 	priority = 0
-	
-
 
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
+
 	merge_verts: bpy.props.BoolProperty (
 		name="Merge",
 		description="Split meshes by material after merging.",
 		default=False
 	)
+	
 	merge_by_material: bpy.props.BoolProperty (
 		name="By Material",
 		description="Split meshes by material after merging.",
@@ -79,15 +76,15 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 		for x in objects:
 			x.select_set(True)
 
+		# Convert to mesh
+		bpy.ops.object.convert(target='MESH')
 
 		# Merge objects into single item
 		bpy.ops.object.join()
+		new_objects=[bpy.context.object]
 		bpy.context.object.name = name #assign bundle name
 		bpy.context.scene.cursor.location = Vector((0,0,0))
 		bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-		# Convert to mesh
-		bpy.ops.object.convert(target='MESH')
 
 		# Apply rotation
 		bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
@@ -183,12 +180,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 			# return material objects
 			return mat_objs, helpers, armatures
 
-		# Re-assign array
-		new_objects = [x for x in objects if x.type == 'EMPTY']
-		new_objects.append(bpy.context.object)
 		objects = new_objects
-
-
 		return objects, helpers, armatures
 
 

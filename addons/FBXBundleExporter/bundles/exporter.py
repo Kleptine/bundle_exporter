@@ -4,7 +4,45 @@ import pathlib
 import bpy
 from .. import platforms
 
-prefix_copy = "__EXPORT_PREFIX_"
+from ..settings import prefix_copy, mesh_types, empty_types, armature_types
+
+def copy_objects(objects):
+
+    bpy.ops.object.select_all(action="DESELECT")
+
+    export_collection = bpy.data.collections.new('armature_join_temp_collection')
+    bpy.context.scene.collection.children.link(export_collection)
+
+    for obj in objects:
+        obj['__orig_name__'] = obj.name
+        obj['__orig_hide__'] = obj.hide_viewport
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        obj.hide_viewport = False
+        obj.name = prefix_copy + obj.name
+        #traverse tree and unhide all collections too
+
+    bpy.ops.object.duplicate()
+
+    copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
+
+    for obj in copied_objects:
+        obj.name = obj['__orig_name__']
+
+    meshes = [x for x in copied_objects if x.type in mesh_types]
+    helpers = [x for x in copied_objects if x.type in empty_types]
+    armatures = [x for x in copied_objects if x.type in armature_types]
+
+    return meshes, helpers, armatures
+
+def restore_defaults(objects):
+    for obj in objects:
+        obj.name = obj['__orig_name__']
+        obj.hide_viewport = obj['__orig_hide__']
+
+        del obj['__orig_name__']
+        del obj['__orig_hide__']
+    
 
 def copy_object(obj, convert = True):
     name_original = obj.name
@@ -35,7 +73,7 @@ def export(bundles, path, target_platform):
         if not bpy.context.view_layer.objects.active:
             bpy.context.view_layer.objects.active = None
 
-        bpy.ops.object.mode_set(mode='OBJECT')
+        #bpy.ops.object.mode_set(mode='OBJECT')
         bpy.context.scene.unit_settings.system = 'METRIC'	
         bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
 
@@ -43,27 +81,13 @@ def export(bundles, path, target_platform):
             modifiers = bundle.modifiers
             print(modifiers)
             name = bundle.key
-            meshes = bundle.meshes
-            helpers = bundle.helpers
-            armatures = bundle.armatures
+            #meshes = bundle.meshes
+            #helpers = bundle.helpers
+            #armatures = bundle.armatures
             all_data = bundle.objects
-
             pivot = bundle.pivot
 
-            export_meshes = []
-
-            for obj in meshes:
-                export_meshes.append(copy_object(obj))
-
-            export_helpers = []
-            for helper in helpers:
-                copied_helper = copy_object(helper, convert = False)
-                copied_helper.scale[0]*= 0.01
-                copied_helper.scale[1]*= 0.01
-                copied_helper.scale[2]*= 0.01
-                export_helpers.append(copied_helper)
-
-            export_armatures = []
+            export_meshes, export_helpers, export_armatures = copy_objects(all_data)
 
             bpy.ops.object.select_all(action="DESELECT")
 
@@ -78,6 +102,9 @@ def export(bundles, path, target_platform):
                 pivot = modifier.process_pivot(pivot, export_meshes, export_helpers, export_armatures)
                 path_folder = modifier.process_path(path_name, path_folder)
                 path_name = modifier.process_name(path_name)
+
+            path_folder = bpy.path.abspath(path_folder)
+            print(path_folder)
 
             for x in export_meshes + export_helpers + export_armatures:
                 x.location-= pivot
@@ -98,7 +125,7 @@ def export(bundles, path, target_platform):
                 obj.select_set(True)
 
             # Export per platform (Unreal, Unity, ...)
-            print("Export {}x = {}".format(len(meshes),path_full))
+            print("Export {}x = {}".format(len(all_data),path_full))
             platforms.platforms[target_platform].file_export(path_full)
 
             # Delete export_meshes
@@ -106,8 +133,7 @@ def export(bundles, path, target_platform):
             export_meshes.clear()
             
             # Restore names
-            for obj in all_data:
-                obj.name = obj.name.replace(prefix_copy,"")
+            restore_defaults(all_data)
 
         # Restore previous settings
         bpy.context.scene.unit_settings.system = previous_unit_system

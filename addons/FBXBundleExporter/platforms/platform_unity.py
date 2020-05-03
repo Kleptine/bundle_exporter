@@ -42,5 +42,7 @@ class Platform(platform.Platform):
 			batch_mode='OFF', 
 			use_custom_props=False,
 
+			add_leaf_bones=False,
+			use_armature_deform_only=True,
  			bake_space_transform = True
 		)

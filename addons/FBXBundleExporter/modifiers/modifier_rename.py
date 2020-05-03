@@ -2,7 +2,6 @@ import bpy, bmesh
 import math
 import imp
 import os
-from .. import objects_organise
 
 from . import modifier
 from .. import platforms
@@ -14,6 +13,7 @@ class BGE_mod_rename(modifier.BGE_mod_default):
 	url = "http://renderhjs.net/fbxbundle/#modifier_rename"
 	type = "GENERAL"
 	icon = 'SYNTAX_OFF'
+	priority = 999
 
 	active: bpy.props.BoolProperty (
 		name="Active",
@@ -33,45 +33,17 @@ class BGE_mod_rename(modifier.BGE_mod_default):
 			col.prop( self , "file", text="File")
 			col.prop( self , "obj", text="Object")
 
-
-			bundles = objects_organise.get_bundles()
-			mode = bpy.context.scene.BGE_Settings.target_platform
-
-			if mode in platforms.platforms:
-				# label = 
-				col = layout.column(align=True)
-				col.enabled = False
-
-				path = os.path.dirname( bpy.path.abspath( bpy.context.scene.BGE_Settings.path ))
-				for name,data in bundles.items():
-					objects = data['objects']
-					full = self.process_path(name, path)+"{}".format(os.path.sep)+platforms.platforms[mode].get_filename( self.process_name(name) )  
-					
-
-					col.label(text= full )
-					for obj in objects:
-						row = col.row(align=True)
-						row.separator()
-						row.separator()
-						row.label(text= self.format_object_name(name, obj.name) )
-						break
-					break
-
-
-
 	def remove_illegal_characters(self, value):
 		# Fix wrong path seperators
-		chars = '\/'
-		for c in chars:
-			value = value.replace(c,os.path.sep)
+		#chars = '\/'
+		#for c in chars:
+		#	value = value.replace(c,os.path.sep)
 
 		# Remove illegal characters (windows, osx, linux)
 		chars = '*?"<>|'
 		for c in chars:
 			value = value.replace(c,'')
 		return value
-
-
 
 	def format_object_name(self, bundle, name):
 		val = self.obj

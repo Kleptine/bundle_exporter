@@ -3,18 +3,18 @@ import imp
 
 from . import modifier
 
-class BGE_mod_custom_pivot(modifier.BGE_mod_default):
-	label = "Custom Pivot"
-	id = 'custom_pivot'
+class BGE_mod_transform_helpers(modifier.BGE_mod_default):
+	label = "Transfrom Helpers"
+	id = 'transform_helpers'
 	url = "http://renderhjs.net/fbxbundle/"
-	type = 'MESH'
+	type = 'HELPER'
 	icon = 'EMPTY_ARROWS'
 
 	active: bpy.props.BoolProperty (
 		name="Active",
 		default=False
 	)
-	source: bpy.props.StringProperty()
+	scale: bpy.props.FloatVectorProperty(default = (0.01,0.01,0.01),subtype = 'XYZ',size=3)
 
 	def draw(self, layout):
 		super().draw(layout)
@@ -25,13 +25,11 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
 			row.separator()
 			row.separator()
 
-			row.prop_search(self, "source",  bpy.context.scene, "objects", text="Source")
+			row.prop(self, "scale", text="Scale")
 
 
-	def process_pivot(self, pivot, meshes, helpers, armatures):
-		source = self.get_object_from_name(self.source)
-		if source:
-			return source.location
-		return pivot
+	def process_objects(self, name, objects, helpers, armatures):
+		for x in helpers:
+			x.scale *= self.scale 
 
-		
+		return objects, helpers, armatures
