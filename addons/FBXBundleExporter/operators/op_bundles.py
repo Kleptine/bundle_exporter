@@ -8,8 +8,12 @@ class BGE_OT_select(bpy.types.Operator):
 	bl_label = "Select"
 
 	index: bpy.props.IntProperty (name="index")
-	def execute(self, context):
-		bpy.context.scene.BGE_Settings.bundles[self.index].select()
+
+	def invoke(self, context, event):
+		if event.ctrl or event.shift:
+			bpy.context.scene.BGE_Settings.bundles[self.index].select(alone = False)
+		else:
+			bpy.context.scene.BGE_Settings.bundles[self.index].select()
 		return {'FINISHED'}
 
 class BGE_OT_create_bundle(bpy.types.Operator):

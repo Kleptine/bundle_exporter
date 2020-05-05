@@ -37,7 +37,6 @@ modifier_annotations = {}
 for x in modifiers_dict:
 	SettingsGlobal = type(modifiers_dict[x]['global'].__name__, (modifiers_dict[x]['global'],), modifiers_dict[x]['global'].__dict__.copy())
 	modifiers_dict[x]['addon'] = SettingsGlobal
-	print(modifiers_dict[x]['addon'])
 
 	modifier_annotations[modifiers_dict[x]['global'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['addon']})
 BGE_modifiers = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations})

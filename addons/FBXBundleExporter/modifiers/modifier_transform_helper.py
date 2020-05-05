@@ -1,4 +1,4 @@
-import bpy, bmesh
+import bpy, bmesh, mathutils
 import imp
 
 from . import modifier
@@ -30,6 +30,7 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
 
 	def process_objects(self, name, objects, helpers, armatures):
 		for x in helpers:
-			x.scale *= self.scale 
+			new_scale = mathutils.Vector((x.scale.x * self.scale.x, x.scale.y * self.scale.y, x.scale.z * self.scale.z))
+			x.scale = new_scale
 
 		return objects, helpers, armatures

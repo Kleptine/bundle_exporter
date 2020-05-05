@@ -5,14 +5,6 @@ from . import exporter
 
 Bundle = bundle.Bundle
 
-
-def is_object_valid(obj):
-	# Objects to include in a bundle as 'export-able'
-	if obj.hide_viewport:
-		return False
-		
-	return True
-
 def get_key(obj, mode_bundle):
 	if mode_bundle == 'NAME':
 		name = obj.name
@@ -43,8 +35,8 @@ def get_key(obj, mode_bundle):
 
 	return "UNDEFINED"
 
-def get_bundles():
-    return [x for x in bpy.context.scene.BGE_Settings.bundles]
+def get_bundles(only_valid = False):
+    return [x for x in bpy.context.scene.BGE_Settings.bundles] if not only_valid else [x for x in bpy.context.scene.BGE_Settings.bundles if x.is_key_valid()]
 
 def create_bundles_from_selection():
     mode_bundle = bpy.context.scene.BGE_Settings.mode_bundle

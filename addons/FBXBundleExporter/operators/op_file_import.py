@@ -3,8 +3,6 @@ import os
 import mathutils
 from mathutils import Vector
 
-from .. import objects_organise
-
 class BGE_OT_file_import(bpy.types.Operator):
 	bl_idname = "bge.file_import"
 	bl_label = "Import"

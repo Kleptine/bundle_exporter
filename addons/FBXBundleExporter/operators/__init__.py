@@ -32,5 +32,4 @@ def unregister():
 	print('### UNREGISTER OPERATORS')
 	from bpy.utils import unregister_class
 	for operator in operators:
-		print(operator)
 		unregister_class(operator)

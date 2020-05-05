@@ -4,8 +4,6 @@ import imp
 import os
 
 from . import modifier
-from .. import platforms
-
 
 class BGE_mod_rename(modifier.BGE_mod_default):
 	label = "Rename"

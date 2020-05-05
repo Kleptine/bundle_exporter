@@ -2,10 +2,12 @@ print('--> RELOADED INIT')
 
 from . import operators
 from . import modifiers
-from . import icons
 
 import bpy, bmesh
 import bpy.utils.previews
+
+from . import settings
+from .settings import mode_bundle_types, mode_pivot_types
 
 
 bl_info = {
@@ -30,34 +32,24 @@ from bpy.props import (
 	EnumProperty,
 	PointerProperty,
 )
-
-mode_bundle_types = [('NAME', 'Name', "Bundle by matching object names"), 
-		('PARENT', 'Parent', "Bundle by the parent object"), 
-		# ('SPACE', 'Space', "Bundle by shared space"), 
-		('COLLECTION', 'Collection', "Bundle by 'Collections'"),
-		#('MATERIAL', 'Material', "Bundle by matching material names"),
-		('SCENE', 'Scene', "Bundle by current scene")]
-mode_pivot_types = [('OBJECT_FIRST', 'First Name', "Pivot at the first object sorted by name"), 
-		('OBJECT_LOWEST', 'Lowest Object', "Pivot at the lowest Z object's pivot"),
-		('BOUNDS_BOTTOM', 'Bottom Center', "Pivot at the bottom center of the bounds of the bundle"), 
-		('SCENE', 'Scene 0,0,0', "Pivot at the Scene center 0,0,0'"),
-		('PARENT', 'Parent', "Pivot from the parent object"),
-		('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)"),
-		('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'")]
-target_platform_types = [('UNITY', 'Unity ', 'Unity engine export, fixes axis rotation issues'),
-		('UNREAL', 'Unreal ', 'Unreal engine export'),
-		('BLENDER', 'Collada', 'Default Blender *.DAE export'),
-		('GLTF', 'glTF', 'GL Transmission Format')]
-
 #https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
+
+def export_presets_getter(self, context):
+	items = settings.get_presets_enum(bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
+	return items
+
+def update_scene_export_preset(self, context):
+	context.scene.BGE_Settings.export_preset = self.export_preset
 class BGE_preferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
 	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
 	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
-	target_platform: bpy.props.EnumProperty(items= target_platform_types, description="Target platform for the FBX exports.",name = "Target Platform", default = 'UNITY')
 
 	modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
+
+	export_format: bpy.props.EnumProperty(items = settings.export_formats)
+	export_preset: bpy.props.EnumProperty(items = export_presets_getter, update=update_scene_export_preset)
 
 	#BGE_modifier_collider: bpy.props.PointerProperty(type=modifiers.modifier_collider.Settings)
 	
@@ -69,12 +61,13 @@ class BGE_preferences(bpy.types.AddonPreferences):
 		row = box.row(align=True)
 		row.label(text='Default Settings (manually save preferences after changing values please)', icon='PREFERENCES')
 
-		icon = icons.icon_get(self.target_platform.lower())
-		row.prop(self, "target_platform", text="", icon_value=icon)
-		
 		col = box.column(align=True)
+		col.prop(self, 'export_format', text="Export Format")
+		col.prop(self, 'export_preset', text="Export Preset")
 		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
 		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
+		
+		
 
 		modifiers.draw(col, context, self.modifier_preferences)
 
@@ -102,8 +95,6 @@ addon_keymaps = []
 def register():
 	print('--> REGISTER INIT')
 	from bpy.utils import register_class
-
-	icons.register()
 
 	modifiers.register_globals()
 
@@ -134,5 +125,3 @@ def unregister():
 	unregister_class(BGE_preferences)
 
 	modifiers.unregister_globals()
-
-	icons.unregister()

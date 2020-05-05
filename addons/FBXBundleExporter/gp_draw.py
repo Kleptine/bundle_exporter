@@ -348,35 +348,9 @@ class LineDraw:
 			self.gp_layer = self.gp.layers[id_layer]
 		else:
 			self.gp_layer = self.gp.layers.new(id_layer, set_active=True)
-		#self.gp_layer.show_x_ray = False
-
-		# Palette
-		#if id_palette in self.gp.palettes:
-		#	self.gp_palette = self.gp.palettes.get(id_palette)
-		#else:
-		#	self.gp_palette = self.gp.palettes.new(id_palette, set_active=True)
-
-		# Color
-		#if len(self.gp_palette.colors) > 0:
-		#	self.gp_color = self.gp_palette.colors[0]
-		#else:
-		#	self.gp_color = self.gp_palette.colors.new()
-		#	self.gp_color.color=(0,0.8,1)
 
 		self.gp_layer.color = (0,0.8,1)
-
-		#if "_bundle_id" in bpy.data.materials.keys():
-		#	self.gp_mat = bpy.data.materials["_bundle_id"]
-		#else:
-		#	self.gp_mat = bpy.data.materials.new("_bundle_id")
-
-		#if not self.gp_mat.is_grease_pencil:
-		#	bpy.data.materials.create_gpencil_data(self.gp_mat)
-		#	self.gp_mat.grease_pencil.color = (0,0.8,1)
-
-		#if self.gp_mat.name not in self.gp.materials:
-		#	self.gp.materials.append(self.gp_mat)
-		
+	
 		# Frame
 		if len(self.gp_layer.frames) == 0:
 			self.gp_frame = self.gp_layer.frames.new(bpy.context.scene.frame_current)

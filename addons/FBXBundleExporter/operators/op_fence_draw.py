@@ -2,7 +2,6 @@ import bpy
 from mathutils import Vector
 import operator
 
-from .. import objects_organise
 from .. import gp_draw
 from .. import bundles
 
@@ -28,14 +27,15 @@ class BGE_OT_fence_draw(bpy.types.Operator):
 			objects = bundle.objects
 			if len(objects) > 0:
 				bounds_combined = bundle.get_bounds()
-				draw_bounds(name, objects, bounds_combined)
+				draw_bounds(name, bundle, bounds_combined)
 
 		return {'FINISHED'}
 
 
 
 
-def draw_bounds(name, objects, bounds):
+def draw_bounds(name, bundle, bounds):
+	objects = bundle.objects
 	print("Fence {}".format(name))
 
 	padding = bpy.context.scene.BGE_Settings.padding
@@ -71,7 +71,7 @@ def draw_bounds(name, objects, bounds):
 	draw.add_text(label.upper(), _min, padding*0.5)
 
 	# Draw pole + Flag
-	pivot = objects_organise.get_pivot(objects)
+	pivot = bundle.pivot
 	height = max(padding, size.z)*2.0
 	draw.add_line( [ Vector((pivot.x, pivot.y, _min.z)), Vector((pivot.x, pivot.y,_min.z+height))], dash=padding*0.25)
 	# Flag
@@ -85,72 +85,6 @@ def draw_bounds(name, objects, bounds):
 	draw.add_circle( pivot, padding, sides=8, alpha = 0.4)
 	draw.add_line([pivot+Vector((-padding/2,0,0)), pivot+Vector((padding/2,0,0)) ])
 	draw.add_line([pivot+Vector((0,-padding/2,0)), pivot+Vector((0,padding/2,0)) ])
-	
-	# Draw Grid
-	#draw_grid(objects, bounds)
-
-
-
-
-def draw_grid(objects, bounds_group):
-	draw = gp_draw.get_draw()
-	padding = bpy.context.scene.BGE_Settings.padding
-
-	bounds_objects = {}
-	for o in objects:
-		bounds_objects[o] = objects_organise.ObjectBounds(o)
-
-	grid_x = SortedGridAxis(objects, bounds_objects, 'x') 
-	grid_y = SortedGridAxis(objects, bounds_objects, 'y') 
-
-	# Draw grids
-	for i in range(len(grid_x.groups)-1):
-		A = grid_x.bounds[i][1] #End first item
-		B = grid_x.bounds[i+1][0] #Start next item
-		center = A + (B-A)/2
-
-		draw.add_line([
-			Vector((center, bounds_group.min.y, bounds_group.min.z+padding)),
-			Vector((center, bounds_group.min.y, bounds_group.min.z)),
-			Vector((center, bounds_group.max.y, bounds_group.min.z)),
-			Vector((center, bounds_group.max.y, bounds_group.min.z+padding))
-		], alpha=0.4)
-
-	for i in range(len(grid_y.groups)-1):
-		A = grid_y.bounds[i][1] #End first item
-		B = grid_y.bounds[i+1][0] #Start next item
-		center = A + (B-A)/2
-
-		draw.add_line([
-			Vector((bounds_group.min.x, center, bounds_group.min.z+padding)),
-			Vector((bounds_group.min.x, center, bounds_group.min.z)),
-			Vector((bounds_group.max.x, center, bounds_group.min.z)),
-			Vector((bounds_group.max.x, center, bounds_group.min.z+padding))
-		], alpha=0.4)
-
-	# Draw grids
-	# for i in range(len(grid_x.groups)):
-	# 	A = grid_x.bounds[i][0]
-	# 	B = grid_x.bounds[i][1]
-	# 	# center = A + (B-A)/2
-	# 	# center = grid_x.bounds[i][0]
-
-	# 	draw.add_line([
-	# 		Vector((A, bounds_group.min.y, bounds_group.min.z)),
-	# 		Vector((A, bounds_group.max.y, bounds_group.min.z))
-	# 	], padding)
-
-	# 	draw.add_line([
-	# 		Vector((B, bounds_group.min.y, bounds_group.min.z)),
-	# 		Vector((B, bounds_group.max.y, bounds_group.min.z))
-	# 	], padding)
-
-
-	# 	draw.add_text(str(i)+"A", Vector((A, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
-	# 	draw.add_text(str(i)+"B", Vector((B, bounds_group.min.y-padding*1.5, bounds_group.min.z)), padding*0.5)
-
-	
-
 
 class SortedGridAxis:
 	groups = []

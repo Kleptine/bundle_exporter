@@ -3,8 +3,6 @@ import os
 import pathlib
 import shutil
 
-from .. import objects_organise
-
 class BGE_OT_unity_script(bpy.types.Operator):
 	bl_idname = "bge.unity_script"
 	bl_label = "Copy Unity Script"

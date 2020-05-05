@@ -3,8 +3,8 @@ import operator
 import bpy
 from mathutils import Vector
 
-from .. import platforms
 from .. import modifiers
+from .. import settings
 
 
 from ..__init__ import mode_bundle_types, mode_pivot_types
@@ -37,30 +37,21 @@ class Bundle(bpy.types.PropertyGroup):
         return isinstance(other.__class__, Bundle) and self.key == other.key
 
     def _get_objects(self, types=()):
-        if not self.is_key_valid():
-            return []
+        if self.is_key_valid():
+            if self.mode_bundle == 'NAME':#gets objects similar to the name of the key
+                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit() )))
 
-        objs = set()
-        if '__override_objects__' in self.keys():
-            objs.update(x for x in self['__override_objects__'])
+            elif self.mode_bundle == 'PARENT': #gets the children of the obj of name 3key
+                obj = bpy.context.scene.objects[self.key]
+                yield from (x for x in traverse_tree(obj) if x.type in types)
 
-        elif self.mode_bundle == 'NAME':#gets objects similar to the name of the key
-            objs.update(x for x in bpy.context.scene.objects if x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit()))
+            elif self.mode_bundle == 'COLLECTION':#gets objects under the collection named #key
+                collection = next(x for x in bpy.data.collections if self.key == x.name)
+                for coll in traverse_tree(collection):
+                    yield from (x for x in coll.objects if x.type in types)
 
-        elif self.mode_bundle == 'PARENT': #gets the children of the obj of name 3key
-            obj = bpy.context.scene.objects[self.key]
-            objs.update(x for x in traverse_tree(obj))
-
-        elif self.mode_bundle == 'COLLECTION':#gets objects under the collection named #key
-            collection = next(x for x in bpy.data.collections if self.key == x.name)
-            for coll in traverse_tree(collection):
-                objs.update(x for x in coll.objects)
-        elif self.mode_bundle == 'SCENE':
-            objs.update(x for x in bpy.context.scene.objects)
-
-        #filter types
-        ans = [x for x in objs if x.type in types]
-        return ans
+            elif self.mode_bundle == 'SCENE':
+                yield from (x for x in bpy.context.scene.objects if x.type in types)
 
     def is_key_valid(self):
         if self.mode_bundle == 'NAME':
@@ -74,24 +65,23 @@ class Bundle(bpy.types.PropertyGroup):
         return False
 
     @property
-    def target_platform(self):
-        return bpy.context.scene.BGE_Settings.target_platform
-
-    @property
     def meshes(self):
-        return self._get_objects(types=mesh_types)
+        return list(self._get_objects(types=mesh_types))
 
     @property
     def helpers(self):
-        return self._get_objects(types=empty_types)
+        return list(self._get_objects(types=empty_types))
 
     @property
     def armatures(self):
-        return self._get_objects(types=armature_types)
+        return list(self._get_objects(types=armature_types))
 
     @property
     def objects(self):
-        return self._get_objects(types=mesh_types|empty_types|armature_types)
+        return list(self._get_objects(types=mesh_types|empty_types|armature_types))
+
+    def is_bundle_obj_selected(self):
+        return any(x.select_get() for x in self._get_objects(types=mesh_types|empty_types|armature_types))
 
     @property
     def pivot(self):
@@ -145,7 +135,7 @@ class Bundle(bpy.types.PropertyGroup):
             elif mode_pivot == 'EMPTY_LOCAL':
                 for obj in self.helpers:
                     if obj.empty_display_type == 'SINGLE_ARROW' or obj.empty_display_type == 'PLAIN_AXES' or obj.empty_display_type == 'ARROWS':
-                        if obj.name.lower().startswith('pivot'):
+                        if obj.name.lower().startswith('pivot') or obj.name.lower() == self.key.lower() + '.pivot':
                             return obj.location
 
         # Default
@@ -173,10 +163,11 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def filename(self):
-        return platforms.platforms[bpy.context.scene.BGE_Settings.target_platform].get_filename(self.key)
+        return self.key+'.'+settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
 
-    def select(self):
-        bpy.ops.object.select_all(action='DESELECT')
+    def select(self, alone=True):
+        if alone:
+            bpy.ops.object.select_all(action='DESELECT')
         for x in self.objects:
             x.select_set(True)
 
