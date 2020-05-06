@@ -1,9 +1,8 @@
 import bpy
 op = bpy.context.active_operator
 
-export_selected=True
-export_apply=True
-
+export_selected = True
+export_apply = True
 op.export_format = 'GLB'
 op.ui_tab = 'GENERAL'
 op.export_copyright = ''

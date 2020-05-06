@@ -1,36 +1,37 @@
-import bpy, bmesh, mathutils
+import bpy
+import mathutils
 import imp
 
 from . import modifier
 
+
 class BGE_mod_transform_helpers(modifier.BGE_mod_default):
-	label = "Transfrom Helpers"
-	id = 'transform_helpers'
-	url = "http://renderhjs.net/fbxbundle/"
-	type = 'HELPER'
-	icon = 'EMPTY_ARROWS'
+    label = "Transfrom Helpers"
+    id = 'transform_helpers'
+    url = "http://renderhjs.net/fbxbundle/"
+    type = 'HELPER'
+    icon = 'EMPTY_ARROWS'
 
-	active: bpy.props.BoolProperty (
-		name="Active",
-		default=False
-	)
-	scale: bpy.props.FloatVectorProperty(default = (0.01,0.01,0.01),subtype = 'XYZ',size=3)
+    active: bpy.props.BoolProperty(
+        name="Active",
+        default=False
+    )
+    scale: bpy.props.FloatVectorProperty(default=(0.01, 0.01, 0.01), subtype='XYZ', size=3)
 
-	def draw(self, layout):
-		super().draw(layout)
-		if(self.active):
-			# Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-			
-			row = layout.row(align=True)
-			row.separator()
-			row.separator()
+    def draw(self, layout):
+        super().draw(layout)
+        if(self.active):
+            # Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
 
-			row.prop(self, "scale", text="Scale")
+            row = layout.row(align=True)
+            row.separator()
+            row.separator()
 
+            row.prop(self, "scale", text="Scale")
 
-	def process_objects(self, name, objects, helpers, armatures):
-		for x in helpers:
-			new_scale = mathutils.Vector((x.scale.x * self.scale.x, x.scale.y * self.scale.y, x.scale.z * self.scale.z))
-			x.scale = new_scale
+    def process_objects(self, name, objects, helpers, armatures):
+        for x in helpers:
+            new_scale = mathutils.Vector((x.scale.x * self.scale.x, x.scale.y * self.scale.y, x.scale.z * self.scale.z))
+            x.scale = new_scale
 
-		return objects, helpers, armatures
+        return objects, helpers, armatures

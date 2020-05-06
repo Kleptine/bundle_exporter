@@ -14,10 +14,12 @@ mesh_types = {'MESH','FONT','CURVE'}
 empty_types = {'EMPTY'}
 armature_types = {'ARMATURE'}
 
+
 def traverse_tree(t):
     yield t
     for child in t.children:
         yield from traverse_tree(child)
+
 
 class Bundle(bpy.types.PropertyGroup):
 
@@ -32,7 +34,7 @@ class Bundle(bpy.types.PropertyGroup):
     #https://stackoverflow.com/questions/3942303/how-does-a-python-set-check-if-two-objects-are-equal-what-methods-does-an-o
     def __hash__(self):
         return hash(self.key)
-        
+
     def __eq__(self, other):
         return isinstance(other.__class__, Bundle) and self.key == other.key
 
@@ -87,7 +89,6 @@ class Bundle(bpy.types.PropertyGroup):
     def pivot(self):
         mode_pivot = self.mode_pivot
         objects = self.meshes
-        
 
         if len(objects):
             if mode_pivot == 'OBJECT_FIRST':
@@ -119,7 +120,7 @@ class Bundle(bpy.types.PropertyGroup):
 
             elif mode_pivot == 'SCENE':
                 return Vector((0,0,0))
-            
+
             elif mode_pivot == 'PARENT':
                 if len(objects) > 0:
                     if objects[0].parent:
@@ -182,53 +183,51 @@ class Bundle(bpy.types.PropertyGroup):
         return False
 
 
-    
 class ObjectBounds:
-	obj = None
-	min = Vector((0,0,0))
-	max = Vector((0,0,0))
-	size = Vector((0,0,0))
-	center = Vector((0,0,0))
+    obj = None
+    min = Vector((0,0,0))
+    max = Vector((0,0,0))
+    size = Vector((0,0,0))
+    center = Vector((0,0,0))
 
-	def __init__(self, obj):
-		self.obj = obj
-		corners = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
+    def __init__(self, obj):
+        self.obj = obj
+        corners = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
 
-		self.min = Vector((corners[0].x, corners[0].y, corners[0].z))
-		self.max = Vector((corners[0].x, corners[0].y, corners[0].z))
-		for corner in corners:
-			self.min.x = min(self.min.x, corner.x)
-			self.min.y = min(self.min.y, corner.y)
-			self.min.z = min(self.min.z, corner.z)
-			self.max.x = max(self.max.x, corner.x)
-			self.max.y = max(self.max.y, corner.y)
-			self.max.z = max(self.max.z, corner.z)
+        self.min = Vector((corners[0].x, corners[0].y, corners[0].z))
+        self.max = Vector((corners[0].x, corners[0].y, corners[0].z))
+        for corner in corners:
+            self.min.x = min(self.min.x, corner.x)
+            self.min.y = min(self.min.y, corner.y)
+            self.min.z = min(self.min.z, corner.z)
+            self.max.x = max(self.max.x, corner.x)
+            self.max.y = max(self.max.y, corner.y)
+            self.max.z = max(self.max.z, corner.z)
 
-		self.size = self.max - self.min
-		self.center = self.min+(self.max-self.min)/2
+        self.size = self.max - self.min
+        self.center = self.min+(self.max-self.min)/2
 
+    def combine(self, other):
+        self.min.x = min(self.min.x, other.min.x)
+        self.min.y = min(self.min.y, other.min.y)
+        self.min.z = min(self.min.z, other.min.z)
+        self.max.x = max(self.max.x, other.max.x)
+        self.max.y = max(self.max.y, other.max.y)
+        self.max.z = max(self.max.z, other.max.z)
 
-	def combine(self, other):
-		self.min.x = min(self.min.x, other.min.x)
-		self.min.y = min(self.min.y, other.min.y)
-		self.min.z = min(self.min.z, other.min.z)
-		self.max.x = max(self.max.x, other.max.x)
-		self.max.y = max(self.max.y, other.max.y)
-		self.max.z = max(self.max.z, other.max.z)
+        self.size = self.max - self.min
+        self.center = self.min+(self.max-self.min)/2
 
-		self.size = self.max - self.min
-		self.center = self.min+(self.max-self.min)/2
+    def is_colliding(self, other):
+        def is_collide_1D(A_min, A_max, B_min, B_max):
+            # One line is inside the other
+            length_A = A_max-A_min
+            length_B = B_max-B_min
+            center_A = A_min + length_A/2
+            center_B = B_min + length_B/2
+            return abs(center_A - center_B) <= (length_A+length_B)/2
 
-	def is_colliding(self, other):
-		def is_collide_1D(A_min, A_max, B_min, B_max):
-			# One line is inside the other
-			length_A = A_max-A_min
-			length_B = B_max-B_min
-			center_A = A_min + length_A/2
-			center_B = B_min + length_B/2
-			return abs(center_A - center_B) <= (length_A+length_B)/2
-
-		collide_x = is_collide_1D(self.min.x, self.max.x, other.min.x, other.max.x)
-		collide_y = is_collide_1D(self.min.y, self.max.y, other.min.y, other.max.y)
-		collide_z = is_collide_1D(self.min.z, self.max.z, other.min.z, other.max.z)
-		return collide_x and collide_y and collide_z
+        collide_x = is_collide_1D(self.min.x, self.max.x, other.min.x, other.max.x)
+        collide_y = is_collide_1D(self.min.y, self.max.y, other.min.y, other.max.y)
+        collide_z = is_collide_1D(self.min.z, self.max.z, other.min.z, other.max.z)
+        return collide_x and collide_y and collide_z

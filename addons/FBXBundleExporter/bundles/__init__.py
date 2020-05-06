@@ -5,38 +5,42 @@ from . import exporter
 
 Bundle = bundle.Bundle
 
+
 def get_key(obj, mode_bundle):
-	if mode_bundle == 'NAME':
-		name = obj.name
-		# Remove blender naming digits, e.g. cube.001, cube.002,...
-		if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
-			name = name[:-4]
-		return name
+    if mode_bundle == 'NAME':
+        name = obj.name
+        # Remove blender naming digits, e.g. cube.001, cube.002,...
+        if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
+            name = name[:-4]
+        return name
 
-	elif mode_bundle == 'PARENT':
-		if obj.parent:
-			limit = 100
-			obj_parent = obj.parent
-			for i in range(limit):
-				if obj_parent.parent:
-					obj_parent = obj_parent.parent
-				else:
-					break
-			return obj_parent.name
-		else:
-			return obj.name
+    elif mode_bundle == 'PARENT':
+        if obj.parent:
+            limit = 100
+            obj_parent = obj.parent
+            for i in range(limit):
+                if obj_parent.parent:
+                    obj_parent = obj_parent.parent
+                else:
+                    break
+            return obj_parent.name
+        else:
+            return obj.name
 
-	elif mode_bundle == 'COLLECTION':
-		if len(obj.users_collection) >= 1:
-			return obj.users_collection[0].name
+    elif mode_bundle == 'COLLECTION':
+        if len(obj.users_collection) >= 1:
+            return obj.users_collection[0].name
 
-	elif mode_bundle == 'SCENE':
-		return bpy.context.scene.name
+    elif mode_bundle == 'SCENE':
+        return bpy.context.scene.name
 
-	return "UNDEFINED"
+    return "UNDEFINED"
 
-def get_bundles(only_valid = False):
+
+def get_bundles(only_valid=False):
+
     return [x for x in bpy.context.scene.BGE_Settings.bundles] if not only_valid else [x for x in bpy.context.scene.BGE_Settings.bundles if x.is_key_valid()]
+
 
 def create_bundles_from_selection():
     mode_bundle = bpy.context.scene.BGE_Settings.mode_bundle

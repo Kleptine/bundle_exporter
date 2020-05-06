@@ -31,5 +31,5 @@ op.path_mode = 'AUTO'
 op.embed_textures = False
 op.batch_mode = 'OFF'
 op.use_batch_own_dir = True
-op.axis_forward='-Z'
-op.axis_up='Y'
+op.axis_forward = '-Z'
+op.axis_up = 'Y'

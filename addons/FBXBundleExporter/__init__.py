@@ -1,9 +1,7 @@
-print('--> RELOADED INIT')
-
 from . import operators
 from . import modifiers
 
-import bpy, bmesh
+import bpy
 import bpy.utils.previews
 
 from . import settings
@@ -11,117 +9,116 @@ from .settings import mode_bundle_types, mode_pivot_types
 
 
 bl_info = {
-	"name": "Game Exporter",
-	"description": "Export objects in bundles",
-	"author": "renderhjs",
-	"blender": (2, 80, 0),
-	"version": (2, 0, 0),
-	"category": "3D View",
-	"location": "3D View > Tools Panel > Game Exporter",
-	"warning": "",
-	"wiki_url": "http://renderhjs.net/fbxbundle/",
-	"tracker_url": "",
+    "name": "Game Exporter",
+    "description": "Export objects in bundles",
+    "author": "renderhjs",
+    "blender": (2, 80, 0),
+    "version": (2, 0, 0),
+    "category": "3D View",
+    "location": "3D View > Tools Panel > Game Exporter",
+    "warning": "",
+    "wiki_url": "http://renderhjs.net/fbxbundle/",
+    "tracker_url": "",
 }
 
 from bpy.props import (
-	StringProperty,
-	BoolProperty,
-	IntProperty,
-	FloatProperty,
-	FloatVectorProperty,
-	EnumProperty,
-	PointerProperty,
+    StringProperty,
+    BoolProperty,
+    IntProperty,
+    FloatProperty,
+    FloatVectorProperty,
+    EnumProperty,
+    PointerProperty,
 )
-#https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
 
+
+# https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
 def export_presets_getter(self, context):
-	items = settings.get_presets_enum(bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
-	return items
+    items = settings.get_presets_enum(bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
+    return items
+
 
 def update_scene_export_preset(self, context):
-	context.scene.BGE_Settings.export_preset = self.export_preset
+    context.scene.BGE_Settings.export_preset = self.export_preset
+
+
 class BGE_preferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
+    bl_idname = __name__
 
-	mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
-	mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
+    mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
+    mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
 
-	modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
+    modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
-	export_format: bpy.props.EnumProperty(items = settings.export_formats)
-	export_preset: bpy.props.EnumProperty(items = export_presets_getter, update=update_scene_export_preset)
+    export_format: bpy.props.EnumProperty(items = settings.export_formats)
+    export_preset: bpy.props.EnumProperty(items = export_presets_getter, update=update_scene_export_preset)
 
-	#BGE_modifier_collider: bpy.props.PointerProperty(type=modifiers.modifier_collider.Settings)
-	
+    def draw(self, context):
+        layout = self.layout
 
-	def draw(self, context):
-		layout = self.layout
+        box = layout.box()
+        row = box.row(align=True)
+        row.label(text='Default Settings (manually save preferences after changing values please)', icon='PREFERENCES')
 
-		box = layout.box()
-		row = box.row(align=True)
-		row.label(text='Default Settings (manually save preferences after changing values please)', icon='PREFERENCES')
+        col = box.column(align=True)
+        col.prop(self, 'export_format', text="Export Format")
+        col.prop(self, 'export_preset', text="Export Preset")
+        col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
+        col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
 
-		col = box.column(align=True)
-		col.prop(self, 'export_format', text="Export Format")
-		col.prop(self, 'export_preset', text="Export Preset")
-		col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
-		col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
-		
-		
+        modifiers.draw(col, context, self.modifier_preferences)
 
-		modifiers.draw(col, context, self.modifier_preferences)
+        col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
 
-		col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
+        box = layout.box()
+        row = box.row()
+        row.label(text="Unity Editor script")
+        row.operator(operators.BGE_OT_unity_script.bl_idname, icon='FILE_TICK')
+        col = box.column(align=True)
+        col.label(text="Copies a Unity Editor script to automatically assign")
+        col.label(text="existing materials by name matching names in Blender")
 
-		box = layout.box()
-		row = box.row()
-		row.label(text="Unity Editor script")
-		row.operator(operators.BGE_OT_unity_script.bl_idname, icon='FILE_TICK')
-		col = box.column(align=True)
-		col.label(text="Copies a Unity Editor script to automatically assign")
-		col.label(text="existing materials by name matching names in Blender")
-
-		box = layout.box()
-		row = box.row()
-		row.label(text="Keyboard shortcuts")
-		col = box.column(align=True)
-		col.label(text="Ctrl + E = Export selected")
-		col.label(text="Ctrl + Shift + E = Export recent")
-
+        box = layout.box()
+        row = box.row()
+        row.label(text="Keyboard shortcuts")
+        col = box.column(align=True)
+        col.label(text="Ctrl + E = Export selected")
+        col.label(text="Ctrl + Shift + E = Export recent")
 
 
 addon_keymaps = []
 
+
 def register():
-	print('--> REGISTER INIT')
-	from bpy.utils import register_class
+    print('--> REGISTER INIT')
+    from bpy.utils import register_class
 
-	modifiers.register_globals()
+    modifiers.register_globals()
 
-	register_class(BGE_preferences)
+    register_class(BGE_preferences)
 
-	operators.register()
+    operators.register()
 
-	modifiers.register_locals()
+    modifiers.register_locals()
 
-	from . import core
-	import imp
-	#to make sure it uses the correct variables when registering modifiers, otherwise errors will happen during development
-	imp.reload(core)
-	core.register()
+    from . import core
+    import imp
+    #to make sure it uses the correct variables when registering modifiers, otherwise errors will happen during development
+    imp.reload(core)
+    core.register()
 
 
 def unregister():
-	print('### UNREGISTER INIT')
-	from bpy.utils import unregister_class
+    print('### UNREGISTER INIT')
+    from bpy.utils import unregister_class
 
-	from . import core
-	core.unregister()
+    from . import core
+    core.unregister()
 
-	modifiers.unregister_locals()
+    modifiers.unregister_locals()
 
-	operators.unregister()
+    operators.unregister()
 
-	unregister_class(BGE_preferences)
+    unregister_class(BGE_preferences)
 
-	modifiers.unregister_globals()
+    modifiers.unregister_globals()

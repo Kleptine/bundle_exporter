@@ -1,4 +1,4 @@
-import bpy, bmesh
+import bpy
 import imp
 import string
 import random
@@ -6,183 +6,172 @@ from mathutils import Vector
 
 from . import modifier
 
+
 class BGE_mod_merge_meshes(modifier.BGE_mod_default):
-	label = "Merge Meshes"
-	id = 'merge'
-	url = "http://renderhjs.net/fbxbundle/#modifier_merge"
-	type = 'MESH'
-	icon = 'SELECT_EXTEND'
-	priority = 0
+    label = "Merge Meshes"
+    id = 'merge'
+    url = "http://renderhjs.net/fbxbundle/#modifier_merge"
+    type = 'MESH'
+    icon = 'SELECT_EXTEND'
+    priority = 0
 
-	active: bpy.props.BoolProperty (
-		name="Active",
-		default=False
-	)
+    active: bpy.props.BoolProperty(
+        name="Active",
+        default=False
+    )
 
-	merge_verts: bpy.props.BoolProperty (
-		name="Merge",
-		description="Split meshes by material after merging.",
-		default=False
-	)
-	
-	merge_by_material: bpy.props.BoolProperty (
-		name="By Material",
-		description="Split meshes by material after merging.",
-		default=False
-	)
+    merge_verts: bpy.props.BoolProperty(
+        name="Merge",
+        description="Split meshes by material after merging.",
+        default=False
+    )
 
-	merge_distance: bpy.props.FloatProperty (
-		name="Dist.",
-		default=0,
-		min = 0,
-		description="Minimum distance of verts to merge. Set to 0 to disable.",
-		subtype='DISTANCE'
-	)
-	# consistent_normals = bpy.props.BoolProperty (
-	# 	name="Make consistent Normals",
-	# 	default=True
-	# )
+    merge_by_material: bpy.props.BoolProperty(
+        name="By Material",
+        description="Split meshes by material after merging.",
+        default=False
+    )
 
-	def draw(self, layout):
-		super().draw(layout)
-		if(self.active):
-			col = layout.column(align=True)
+    merge_distance: bpy.props.FloatProperty(
+        name="Dist.",
+        default=0,
+        min=0,
+        description="Minimum distance of verts to merge. Set to 0 to disable.",
+        subtype='DISTANCE'
+    )
+    # consistent_normals = bpy.props.BoolProperty (
+    # 	name="Make consistent Normals",
+    # 	default=True
+    # )
 
-			row = col.row(align=True)
-			row.separator()
-			row.separator()
-			row.prop( self , "merge_verts", text="Merge Verts")
-			row_freeze = row.row()
-			row_freeze.enabled = self.merge_verts
-			row_freeze.prop( self , "merge_distance")
+    def draw(self, layout):
+        super().draw(layout)
+        if(self.active):
+            col = layout.column(align=True)
 
-			row = col.row(align=True)
-			row.separator()
-			row.separator()
-			row.prop( self , "merge_by_material", text="Split by Material")
+            row = col.row(align=True)
+            row.separator()
+            row.separator()
+            row.prop(self, "merge_verts", text="Merge Verts")
+            row_freeze = row.row()
+            row_freeze.enabled = self.merge_verts
+            row_freeze.prop(self, "merge_distance")
 
+            row = col.row(align=True)
+            row.separator()
+            row.separator()
+            row.prop(self, "merge_by_material", text="Split by Material")
 
-			
-			
+    def process_objects(self, name, objects, helpers, armatures):
 
+        if not len(objects) > 1:
+            return objects, helpers, armatures
 
-	def process_objects(self, name, objects, helpers, armatures):
+        bpy.ops.object.select_all(action='DESELECT')
+        for x in objects:
+            x.select_set(True)
 
-		
-		if not len(objects) > 1:
-			return objects, helpers, armatures
+        # Convert to mesh
+        bpy.ops.object.convert(target='MESH')
 
-		bpy.ops.object.select_all(action='DESELECT')
-		for x in objects:
-			x.select_set(True)
+        # Merge objects into single item
+        bpy.ops.object.join()
+        new_objects = [bpy.context.object]
+        bpy.context.object.name = name  # assign bundle name
+        bpy.context.scene.cursor.location = Vector((0, 0, 0))
+        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-		# Convert to mesh
-		bpy.ops.object.convert(target='MESH')
+        # Apply rotation
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
-		# Merge objects into single item
-		bpy.ops.object.join()
-		new_objects=[bpy.context.object]
-		bpy.context.object.name = name #assign bundle name
-		bpy.context.scene.cursor.location = Vector((0,0,0))
-		bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+        # Merge Vertices?
+        if self.merge_verts and self.merge_distance > 0:
 
-		# Apply rotation
-		bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-		
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+            bpy.ops.mesh.select_all(action='SELECT')
 
-		# Merge Vertices?
-		if self.merge_verts and self.merge_distance > 0:
+            bpy.ops.mesh.remove_doubles(threshold=self.merge_distance)
 
-			bpy.ops.object.mode_set(mode='EDIT')
-			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-			bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.quads_convert_to_tris()
 
-			bpy.ops.mesh.remove_doubles(threshold = self.merge_distance)
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
-			bpy.ops.mesh.quads_convert_to_tris()
+        # if self.consistent_normals :
+        # 	bpy.ops.object.mode_set(mode='EDIT')
+        # 	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+        # 	bpy.ops.mesh.select_all(action='SELECT')
 
-			bpy.ops.mesh.select_all(action='DESELECT')
-			bpy.ops.object.mode_set(mode='OBJECT')
+        # 	bpy.ops.mesh.normals_make_consistent(inside=False)
 
-		
-		# if self.consistent_normals :
-		# 	bpy.ops.object.mode_set(mode='EDIT')
-		# 	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-		# 	bpy.ops.mesh.select_all(action='SELECT')
+        # 	bpy.ops.mesh.select_all(action='DESELECT')
+        # 	bpy.ops.object.mode_set(mode='OBJECT')
 
-		# 	bpy.ops.mesh.normals_make_consistent(inside=False)
+        if self.merge_by_material :
+            # TODO: Split faces by materials
 
-		# 	bpy.ops.mesh.select_all(action='DESELECT')
-		# 	bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
 
+            # Rename with unique ID
+            prefix = "{}_{}".format(name, id_generator())
 
-		if self.merge_by_material :
-			# TODO: Split faces by materials
+            mats = {}
+            for i in range(0, len(bpy.context.object.material_slots)):
 
-			bpy.ops.object.mode_set(mode='EDIT')
-			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-			
-			# Rename with unique ID
-			prefix = "{}_{}".format( name, id_generator() )
-			
-			
+                slot = bpy.context.object.material_slots[i]
+                if slot.material and slot.material not in mats:
+                    # Store prefx by material
+                    prefix_mat = "{}_{}".format(prefix, slot.material.name)
 
-			mats = {}
-			for i in range(0, len(bpy.context.object.material_slots)):
+                    bpy.context.object.name = prefix_mat
 
-				slot = bpy.context.object.material_slots[i]
-				if slot.material and slot.material not in mats:
-					# Store prefx by material
-					prefix_mat = "{}_{}".format(prefix, slot.material.name)
-					
-					bpy.context.object.name = prefix_mat
+                    mat = slot.material
+                    mats[mat] = prefix_mat
 
-					mat = slot.material 
-					mats[mat] = prefix_mat
+                    if len(bpy.context.object.data.vertices) > 0:
+                        bpy.ops.mesh.select_all(action='DESELECT')
+                        bpy.context.object.active_material_index = i
+                        bpy.ops.object.material_slot_select()
+                        if len( [v for v in bpy.context.active_object.data.vertices if v.select] ) > 0:
+                            bpy.ops.mesh.separate(type='SELECTED')
 
-					if len(bpy.context.object.data.vertices) > 0:
-						bpy.ops.mesh.select_all(action='DESELECT')
-						bpy.context.object.active_material_index = i
-						bpy.ops.object.material_slot_select()
-						if len( [v for v in bpy.context.active_object.data.vertices if v.select] ) > 0:
-							bpy.ops.mesh.separate(type='SELECTED')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
-			
-			bpy.ops.object.mode_set(mode='OBJECT')
+            mat_objs = []
+            for obj in bpy.context.scene.objects:
+                if prefix in obj.name:
+                    if len(obj.data.vertices) == 0:
+                        bpy.ops.object.select_all(action='DESELECT')
+                        obj.select_set(True)
+                        bpy.ops.object.delete()
+                    else:
+                        mat_objs.append(obj)
 
-			mat_objs = []
-			for obj in bpy.context.scene.objects:
-				if prefix in obj.name:
-					if len(obj.data.vertices) == 0:
-						bpy.ops.object.select_all(action='DESELECT')
-						obj.select_set(True)
-						bpy.ops.object.delete()
-					else:
-						mat_objs.append(obj)
+            # Combine & Rename by materials
+            for mat in mats:
+                prefix_mat = mats[mat]
+                for obj in mat_objs:
 
-			# Combine & Rename by materials
-			for mat in mats:
-				prefix_mat = mats[mat]
-				for obj in mat_objs:
+                    bpy.ops.object.select_all(action='DESELECT')
+                    bpy.context.view_layer.objects.active = obj
+                    obj.select_set(True)
 
-					bpy.ops.object.select_all(action='DESELECT')
-					bpy.context.view_layer.objects.active = obj
-					obj.select_set(True)
+                    if prefix_mat in obj.name:
 
-					if prefix_mat in obj.name:
+                        for i in range( len(obj.material_slots)-1 ):
+                            bpy.ops.object.material_slot_remove()
+                        obj.material_slots[0].material = mat
 
-						for i in range( len(obj.material_slots)-1 ):
-							bpy.ops.object.material_slot_remove()
-						obj.material_slots[0].material = mat
+                        obj.name = "{}_{}".format(name, mat.name)
 
-						obj.name = "{}_{}".format(name, mat.name)
+            # return material objects
+            return mat_objs, helpers, armatures
 
-			# return material objects
-			return mat_objs, helpers, armatures
-
-		objects = new_objects
-		return objects, helpers, armatures
+        objects = new_objects
+        return objects, helpers, armatures
 
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-	return ''.join(random.choice(chars) for _ in range(size))
+    return ''.join(random.choice(chars) for _ in range(size))

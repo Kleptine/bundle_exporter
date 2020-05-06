@@ -1,8 +1,11 @@
-import bpy, bmesh, mathutils
+import bpy
+import bmesh
+import mathutils
 import imp
 
 from . import modifier
 from .. import settings
+
 
 class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     label = "Group Intstances to Objects"
@@ -12,7 +15,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     icon = 'OUTLINER_OB_GROUP_INSTANCE'
     priority = -999
 
-    active: bpy.props.BoolProperty (
+    active: bpy.props.BoolProperty(
         name="Active",
         default=False
     )
@@ -29,9 +32,9 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 bpy.ops.object.duplicates_make_real()
                 new_nodes = [obj for obj in bpy.context.scene.objects if obj.select_get() and obj != x]
 
-                #remove helper from export
+                # remove helper from export
                 helpers.pop(i)
-                #delete helper
+                # delete helper
                 bpy.ops.object.select_all(action='DESELECT')
                 x.select_set(True)
                 bpy.ops.object.delete()
@@ -42,7 +45,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
                 others = (x for x in new_nodes if x not in objects and x not in helpers and x not in armatures)
 
-                #delete the rest of the nodes
+                # delete the rest of the nodes
                 bpy.ops.object.select_all(action='DESELECT')
                 for y in others:
                     y.select_set(True)
