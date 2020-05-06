@@ -9,13 +9,13 @@ from .settings import mode_bundle_types, mode_pivot_types
 
 
 bl_info = {
-    "name": "Game Exporter",
+    "name": "Bundle Exporter",
     "description": "Export objects in bundles",
     "author": "renderhjs",
     "blender": (2, 80, 0),
     "version": (2, 0, 0),
     "category": "3D View",
-    "location": "3D View > Tools Panel > Game Exporter",
+    "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
     "wiki_url": "http://renderhjs.net/fbxbundle/",
     "tracker_url": "",
