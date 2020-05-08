@@ -31,6 +31,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 x.select_set(True)
                 bpy.ops.object.duplicates_make_real()
                 new_nodes = [obj for obj in bpy.context.scene.objects if obj.select_get() and obj != x]
+                bpy.ops.object.make_local(type='SELECT_OBDATA')
 
                 # remove helper from export
                 helpers.pop(i)
@@ -45,7 +46,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
                 others = (x for x in new_nodes if x not in objects and x not in helpers and x not in armatures)
 
-                # delete the rest of the nodes
+                # delete the nodes not supported by the exporter
                 bpy.ops.object.select_all(action='DESELECT')
                 for y in others:
                     y.select_set(True)

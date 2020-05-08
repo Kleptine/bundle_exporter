@@ -19,6 +19,7 @@ def copy_objects(objects):
     for obj in objects:
         obj['__orig_name__'] = obj.name
         obj['__orig_hide__'] = obj.hide_viewport
+        obj['__orig_collection__'] = obj.users_collection[0].name
         obj.select_set(True)
         bpy.context.view_layer.objects.active = obj
         obj.hide_viewport = False
@@ -136,14 +137,13 @@ def export(bundles, path, export_format, export_preset):
             export_preset_path = settings.get_presets(export_format)[export_preset]
             settings.export_operators[export_format](**get_export_arguments(export_preset_path, path_full))
         finally:
-            # Delete export_meshes
-            bpy.ops.object.select_all(action="DESELECT")
-            for obj in export_meshes + export_helpers + export_armatures:
-                if obj:
-                    obj.select_set(True)
-                else:
-                    print('missing obj ' + str(obj))
-            bpy.ops.object.delete()
+            all_meshes = export_meshes + export_helpers + export_armatures
+            scene_objs = [x for x in bpy.data.objects]
+            # sometimes objects have already been deleted and it can produce more error to just delete from the export obj arrays
+            # so I loop through all the objects to see if they are the ones duplicated
+            for obj in scene_objs:
+                if obj in all_meshes:
+                    bpy.data.objects.remove(obj, do_unlink=True)
 
             # Restore names
             restore_defaults(orig_objects)

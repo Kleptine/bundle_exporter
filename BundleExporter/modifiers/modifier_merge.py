@@ -39,6 +39,19 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         description="Minimum distance of verts to merge. Set to 0 to disable.",
         subtype='DISTANCE'
     )
+
+    merge_type: bpy.props.EnumProperty(
+        name='Merge Type',
+        items=[
+            ('ALL', 'All', 'Merge all meshes into one mesh'),
+            ('COLLECTION', 'By Collection', 'Groups objects by their corresponding collections and merges them'),
+            ('PARENT', 'By Parent', 'Merges all meshes with their children')
+        ]
+    )
+
+    keep_armature_modifier: bpy.props.BoolProperty(
+        default=True
+    )
     # consistent_normals = bpy.props.BoolProperty (
     # 	name="Make consistent Normals",
     # 	default=True
@@ -47,29 +60,88 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     def draw(self, layout):
         super().draw(layout)
         if(self.active):
-            col = layout.column(align=True)
+            row = layout.row()
+            row.separator()
+
+            col = row.column(align=False)
+
+            col.prop(self, 'merge_type')
+
+            col = col.column(align=True)
 
             row = col.row(align=True)
-            row.separator()
-            row.separator()
             row.prop(self, "merge_verts", text="Merge Verts")
             row_freeze = row.row()
             row_freeze.enabled = self.merge_verts
             row_freeze.prop(self, "merge_distance")
 
             row = col.row(align=True)
-            row.separator()
-            row.separator()
             row.prop(self, "merge_by_material", text="Split by Material")
 
     def process_objects(self, name, objects, helpers, armatures):
+        if len(objects) > 1:
+            if self.merge_type == 'ALL':
+                objects = self.merge_meshes(objects, name)
 
-        if not len(objects) > 1:
-            return objects, helpers, armatures
+            elif self.merge_type == 'COLLECTION':
+                # gather all collections
+                collections_dict = {}
+                for x in objects:
+                    if x['__orig_collection__'] not in collections_dict:
+                        collections_dict[x['__orig_collection__']] = []
+                    collections_dict[x['__orig_collection__']].append(x)
+                # empty the result list
+                objects = []
+                # merge by gathered objects
+                for collection_name, objs in collections_dict.items():
+                    merged = self.merge_meshes(objs, collection_name)
+                    # rename all merged objects to the name of the collection
+                    for obj in merged:
+                        obj.name = collection_name
+                    # repopulate export list
+                    objects.extend(merged)
+
+            elif self.merge_type == 'PARENT':
+                parent_collection = {}
+
+                for i in reversed(range(0, len(objects))):
+                    parent = parent_objs[i].parent
+                    if parent:
+                        while parent and parent.parent in objects:
+                            parent = parent.parent
+                        if parent not in parent_collection:
+                            parent_collection[parent] = []
+
+                        parent_collection[parent].append(objects[i])
+                    else:
+                        parent_collection[objects[i]] = []
+
+                objects = []
+
+                for parent, children in parent_collection.items():
+                    merged = self.merge_meshes([parent] + children, parent.name)
+                    objects.extend(merged)
+
+
+        return objects, helpers, armatures
+
+    def merge_meshes(self, objects, name):
+
+        if len(objects) < 2:
+            return objects
 
         bpy.ops.object.select_all(action='DESELECT')
+
+        armature_dict = {}
         for x in objects:
+            if self.keep_armature_modifier:
+                for mod in x.modifiers:
+                    if mod.type == 'ARMATURE':
+                        armature_dict = {x.identifier: getattr(mod, x.identifier) for x in mod.bl_rna.properties if not x.is_readonly}
+                        break
+
             x.select_set(True)
+        bpy.context.view_layer.objects.active = objects[0]
 
         # Convert to mesh
         bpy.ops.object.convert(target='MESH')
@@ -108,7 +180,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         # 	bpy.ops.mesh.select_all(action='DESELECT')
         # 	bpy.ops.object.mode_set(mode='OBJECT')
 
-        if self.merge_by_material :
+        if self.merge_by_material:
             # TODO: Split faces by materials
 
             bpy.ops.object.mode_set(mode='EDIT')
@@ -167,10 +239,17 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                         obj.name = "{}_{}".format(name, mat.name)
 
             # return material objects
-            return mat_objs, helpers, armatures
+            new_objects = mat_objs
 
         objects = new_objects
-        return objects, helpers, armatures
+
+        if armature_dict:
+            for x in objects:
+                mod = x.modifiers.new('MergeArmature', 'ARMATURE')
+                for prop, value in armature_dict.items():
+                    setattr(mod, prop, value)
+
+        return objects
 
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):

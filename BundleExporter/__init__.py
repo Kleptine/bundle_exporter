@@ -45,13 +45,13 @@ def update_scene_export_preset(self, context):
 class BGE_preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
-    mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
+    mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default='NAME')
+    mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
 
     modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
-    export_format: bpy.props.EnumProperty(items = settings.export_formats)
-    export_preset: bpy.props.EnumProperty(items = export_presets_getter, update=update_scene_export_preset)
+    export_format: bpy.props.EnumProperty(items=settings.export_formats)
+    export_preset: bpy.props.EnumProperty(items=export_presets_getter, update=update_scene_export_preset)
 
     def draw(self, context):
         layout = self.layout
