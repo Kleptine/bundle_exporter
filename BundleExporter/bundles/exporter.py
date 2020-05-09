@@ -13,13 +13,13 @@ def copy_objects(objects):
     global export_collection
 
     bpy.ops.object.select_all(action="DESELECT")
-    export_collection = bpy.data.collections.new('EXPORT.COLLECTION')
-    bpy.context.scene.collection.children.link(export_collection)
+    # export_collection = bpy.data.collections.new('EXPORT.COLLECTION')
+    # bpy.context.scene.collection.children.link(export_collection)
 
     for obj in objects:
         obj['__orig_name__'] = obj.name
         obj['__orig_hide__'] = obj.hide_viewport
-        obj['__orig_collection__'] = obj.users_collection[0].name
+        # obj['__orig_collection__'] = obj.users_collection[0].name
         obj.select_set(True)
         bpy.context.view_layer.objects.active = obj
         obj.hide_viewport = False
@@ -32,7 +32,7 @@ def copy_objects(objects):
 
     for obj in copied_objects:
         obj.name = obj['__orig_name__']
-        export_collection.objects.link(obj)
+        # export_collection.objects.link(obj)
 
     export_meshes = [x for x in copied_objects if x.type in mesh_types]
     export_helpers = [x for x in copied_objects if x.type in empty_types]
@@ -42,8 +42,8 @@ def copy_objects(objects):
 
 
 def restore_defaults(objects):
-    bpy.context.scene.collection.children.unlink(export_collection)
-    bpy.data.collections.remove(export_collection)
+    # bpy.context.scene.collection.children.unlink(export_collection)
+    # bpy.data.collections.remove(export_collection)
 
     for obj in objects:
         obj.name = obj['__orig_name__']

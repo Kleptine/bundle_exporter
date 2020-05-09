@@ -87,9 +87,10 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 # gather all collections
                 collections_dict = {}
                 for x in objects:
-                    if x['__orig_collection__'] not in collections_dict:
-                        collections_dict[x['__orig_collection__']] = []
-                    collections_dict[x['__orig_collection__']].append(x)
+                    obj_collection = x.users_collection[0].name
+                    if obj_collection not in collections_dict:
+                        collections_dict[obj_collection] = []
+                    collections_dict[obj_collection].append(x)
                 # empty the result list
                 objects = []
                 # merge by gathered objects
@@ -105,7 +106,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 parent_collection = {}
 
                 for i in reversed(range(0, len(objects))):
-                    parent = parent_objs[i].parent
+                    parent = objects[i].parent
                     if parent:
                         while parent and parent.parent in objects:
                             parent = parent.parent
@@ -121,7 +122,6 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 for parent, children in parent_collection.items():
                     merged = self.merge_meshes([parent] + children, parent.name)
                     objects.extend(merged)
-
 
         return objects, helpers, armatures
 

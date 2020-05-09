@@ -103,7 +103,7 @@ def register():
 
     from . import core
     import imp
-    #to make sure it uses the correct variables when registering modifiers, otherwise errors will happen during development
+    # to make sure it uses the correct variables when registering modifiers, otherwise errors will happen during development
     imp.reload(core)
     core.register()
 

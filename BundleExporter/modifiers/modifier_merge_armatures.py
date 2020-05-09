@@ -30,6 +30,15 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default=True
     )
 
+    merge_actions: bpy.props.BoolProperty(
+        name="Merge Actions",
+        default=True
+    )
+
+    action_match_pattern: bpy.props.StringProperty(
+        default=".*@"
+    )
+
     armature_name: bpy.props.StringProperty(
         name='Armature Name',
         default="MergedArmature"
@@ -37,7 +46,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
     new_name: bpy.props.StringProperty(
         name='Bone Name',
-        default="{armature.name}_{bone.name}"
+        default="{armature.name}_{name}"
     )
 
     def draw(self, layout):
@@ -59,6 +68,42 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         bpy.ops.object.select_all(action='DESELECT')
         for x in armatures:
             x.select_set(True)
+            x.animation_data.action = None
+
+        # create joined actions
+        if self.merge_actions:
+            action_patterns = {}
+            for x in bpy.data.actions:
+                match = re.search(self.action_match_pattern, x.name)
+                if match:
+                    action_name = x.name.replace(match, '')
+                    if action_name not in action_patterns:
+                        action_patterns[action_name] = []
+                    action_patterns[action_name].append(x.name)
+
+            for match, actions in action_patterns.items():
+                action = bpy.data.actions.new(match)
+                for action in actions:
+                    armature = None
+                    for arm in armatures:
+                        result_name = self.new_name.format(armature=arm, name=match)
+                        if result_name == action:
+                            armature = arm
+                            break
+                    if armature:
+                        for fcurv in action.fcurves:
+                            data_path = fcurv.data_path
+                            if self.rename_bones:
+                                if 'pose.bones["' in data_path and '"]' in data_path:
+                                    index1 = data_path.find('pose.bones["')
+                                    index2 = data_path.find('"]') 
+                                    bone_name = data_path[index1 + 1: index2]
+                                    new_bone_name = self.new_name.format(armature=armature, name=bone_name)
+                                    data_path = data_path[:index1] + '"' + new_bone_name + '"' + data_path[index2:]
+                            new_fcurv = action.fcurves.new(fcurv.data_path)
+
+                            for kp in fcurv.keyframe_points:
+                                new_fcurv.insert(kp.frame, kp.value, kp.options, kp.keyframe_type)
 
         # search for objects that have modifiers pointing to the armatures
         data_to_change = {}
@@ -80,7 +125,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         if self.rename_bones:
             for armature in armatures:
                 for bone in armature.data.bones:
-                    bone.name = self.new_name.format(armature=armature, bone=bone)
+                    bone.name = self.new_name.format(armature=armature, name=bone.name)
 
         # join the armatures
         bpy.ops.object.select_all(action='DESELECT')

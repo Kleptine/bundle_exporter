@@ -143,6 +143,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
         row.prop(context.scene.BGE_Settings, "padding", text="Padding", expand=True)
 
         # Warnings
+        col.alert = True
         if context.space_data.local_view:
             box = col.box()
             box.label(text="Can't export in local view mode.", icon='CANCEL')
@@ -172,6 +173,7 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
         self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
         modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers, draw_only_active=True)
 
+
 class BGE_UL_bundles(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         col = layout.column()
@@ -187,6 +189,7 @@ class BGE_UL_bundles(bpy.types.UIList):
 
     def invoke(self, context, event):
         pass
+
 
 class BGE_PT_files_panel(bpy.types.Panel):
     bl_idname = "BGE_PT_files_panel"
