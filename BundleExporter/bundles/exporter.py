@@ -42,7 +42,7 @@ def copy_objects(objects):
             # but to avoid breaking connections we need to make them visible before making them local
             #collection.hide_select = collection.hide_viewport# or collection.hide_select
             for obj in traverse_tree_from_iteration((x for x in collection.objects)):
-                obj['__do_export__'] = not collection.hide_viewport
+                obj['__do_export__'] = not (collection.hide_viewport or obj.hide_viewport)
                 # we need to also unhide these objects
                 obj['__orig_hide__'] = obj.hide_viewport
                 obj['__orig_hide_select__'] = obj.hide_select
@@ -91,18 +91,19 @@ def restore_defaults(objects):
     for collection in bpy.data.collections:
         collection.hide_viewport = collection['__orig_hide__']
         collection.hide_select = collection['__orig_hide_select__']
-
+        
         del collection['__orig_hide__']
         del collection['__orig_hide_select__']
 
         if collection.library:
             for obj in traverse_tree_from_iteration((x for x in collection.objects)):
-                obj.hide_viewport = obj['__orig_hide__']
-                obj.hide_select = obj>['__orig_hide_select__']
+                if '__orig_hide__' in obj:
+                    obj.hide_viewport = obj['__orig_hide__']
+                    obj.hide_select = obj['__orig_hide_select__']
 
-                del obj['__do_export__']
-                del obj['__orig_hide__']
-                del obj['__orig_hide_select__']
+                    del obj['__do_export__']
+                    del obj['__orig_hide__']
+                    del obj['__orig_hide_select__']
 
     # to "unexclude" layers
     for layer_collection in traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True):
