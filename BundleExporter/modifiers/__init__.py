@@ -5,6 +5,8 @@ import importlib
 # ---------------------------------------------------------------------------- #
 #                            AUTO LOAD ALL MODIFIERS                           #
 # ---------------------------------------------------------------------------- #
+# TODO: this should be cleaned out of unnecessary variables, the dictionary is probably not needed anymore
+# no need to have a reference to the module
 
 tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py') and x != '__init__.py']
 
@@ -24,7 +26,8 @@ for x in [x for x in __globals if x.startswith('modifier_')]:
         modifiers_dict[mod.id] = {
                                     'module': __globals[x],
                                     'global': mod,
-                                    'local': ''}
+                                    'local': ''
+        }
 
 local_settings = []
 

@@ -6,14 +6,7 @@ from mathutils import Vector
 from .. import modifiers
 from .. import settings
 
-
-from ..__init__ import mode_bundle_types, mode_pivot_types
-
-from ..settings import mesh_types, empty_types, armature_types
-mesh_types = {'MESH','FONT','CURVE'}
-empty_types = {'EMPTY'}
-armature_types = {'ARMATURE'}
-
+from ..settings import mesh_types, empty_types, armature_types, mode_bundle_types, mode_pivot_types
 
 def traverse_tree(t):
     yield t

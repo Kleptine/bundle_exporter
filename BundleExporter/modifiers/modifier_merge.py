@@ -123,7 +123,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                     merged = self.merge_meshes([parent] + children, parent.name)
                     objects.extend(merged)
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []
 
     def merge_meshes(self, objects, name):
 

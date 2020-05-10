@@ -83,4 +83,4 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
             bpy.context.space_data.pivot_point = prev_cursor_mode
             bpy.context.scene.cursor.location = prev_cursor_location
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []

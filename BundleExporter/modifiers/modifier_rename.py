@@ -49,7 +49,7 @@ class BGE_mod_rename(modifier.BGE_mod_default):
         for obj in objects:
             obj.name = self.remove_illegal_characters( self.format_object_name(name, obj.name) )
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []
 
     def process_name(self, name):
         val = self.file

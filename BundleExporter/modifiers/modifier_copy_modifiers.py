@@ -67,4 +67,4 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
         else:
             print('MODIFIER_COPY_MODIFIERS source not found')
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []

@@ -37,11 +37,6 @@ def get_key(obj, mode_bundle):
     return "UNDEFINED"
 
 
-def get_bundles(only_valid=False):
-
-    return [x for x in bpy.context.scene.BGE_Settings.bundles] if not only_valid else [x for x in bpy.context.scene.BGE_Settings.bundles if x.is_key_valid()]
-
-
 def create_bundles_from_selection():
     mode_bundle = bpy.context.scene.BGE_Settings.mode_bundle
     mode_pivot = bpy.context.scene.BGE_Settings.mode_pivot
@@ -56,3 +51,7 @@ def create_bundles_from_selection():
             bundle.key = key
             bundle.mode_bundle = mode_bundle
             bundle.mode_pivot = mode_pivot
+
+
+def get_bundles(only_valid=False):
+    return [x for x in bpy.context.scene.BGE_Settings.bundles] if not only_valid else [x for x in bpy.context.scene.BGE_Settings.bundles if x.is_key_valid()]

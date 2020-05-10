@@ -38,10 +38,6 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default=True
     )
 
-    action_match_pattern: bpy.props.StringProperty(
-        default=".*@"
-    )
-
     armature_name: bpy.props.StringProperty(
         name='Armature Name',
         default="MergedArmature"
@@ -64,54 +60,53 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             row.prop(self, "rename_bones", text='')
             if self.rename_bones:
                 row.prop(self, "new_name", text='Rename Data')
-            col.prop(self, merge_actions)
+            col.prop(self, 'merge_actions')
 
     def process_objects(self, name, objects, helpers, armatures):
         if not len(armatures) > 1:
-            return objects, helpers, armatures
+            return objects, helpers, armatures, []
 
         # gather merged actions data
         baked_merge_actions = {}
         if self.merge_actions:
 
             action_patterns = {}
-            # loop though actions to search the ones to merge
-            for action in bpy.data.actions:
-                match = re.search(self.action_match_pattern, action.name)
-                if match:
-                    match = action.name[match.start():match.end()]
-                    new_action_name = action.name.replace(match, '')
-                    if new_action_name not in baked_merge_actions:
-                        baked_merge_actions[new_action_name] = {}
-                    baked_merge_actions[new_action_name][action.name] = {}
+            #for each armature search corresponding actions
+            for armature in armatures:
+                # loop though actions to search the ones to merge
+                action_match_pattern = self.new_name.format(armature=armature, name='') # for example: 'myarmature@hand' will search for 'myarmature@' and therefore 'hand' is the name of the action
+                for action in bpy.data.actions:
+                    match = re.search(action_match_pattern, action.name)
+                    if match:
+                        match = action.name[match.start():match.end()]
+                        new_action_name = action.name.replace(match, '')
+                        if new_action_name not in baked_merge_actions:
+                            baked_merge_actions[new_action_name] = {}
+                        baked_merge_actions[new_action_name][action.name] = {}
 
-                    actions_data = baked_merge_actions[new_action_name][action.name]
+                        actions_data = baked_merge_actions[new_action_name][action.name]
 
-                    # figure out which armature the action corresponds to by its name
-                    armature = None
-                    for arm in armatures:
-                        result_name = self.new_name.format(armature=arm, name=new_action_name)
-                        if result_name == action.name:
-                            armature = arm
-                            break
-                    # if an armature is found, its data is added to the new action
-                    if armature:
+                        # figure out which armature the action corresponds to by its name
+                        armature = None
+                        for arm in armatures:
+                            result_name = self.new_name.format(armature=arm, name=new_action_name)
+                            if result_name == action.name:
+                                armature = arm
+                                break
+
                         #assign the action to record
                         if not armature.animation_data:
                             armature.animation_data_create ()
                         armature.animation_data.action = action
 
-                        print('ARMATURE FOUND FOR {}'.format(action.name))
                         for f in range(int(action.frame_range[0]), int(action.frame_range[1])):
                             if f not in actions_data:
                                 actions_data[f] = {}
                             bpy.context.scene.frame_set(f)
                             # gets the transform of all the deform bones for each frame
                             for bone in armature.pose.bones:
-                                if bone.bone.use_deform:
-                                    actions_data[f][self.new_name.format(armature=armature, name=bone.name)] = bone.matrix.copy()
-                    else:
-                        print('ARMATURE NOT FOUND FOR {}'.format(action.name))
+                                #if bone.bone.use_deform: # after disabling this check, the animation was correctly exported
+                                actions_data[f][self.new_name.format(armature=armature, name=bone.name)] = bone.matrix.copy()
 
         #for name, actions in baked_merge_actions.items():
         #    print('MERGED ACTION: {}'.format(name))
@@ -120,7 +115,8 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         #        for f in data:
         #            print('frame {}'.format(f))
 
-        # print(baked_merge_actions)
+        #print(baked_merge_actions)
+        
         bpy.ops.object.select_all(action='DESELECT')
         for x in armatures:
             x.select_set(True)
@@ -229,23 +225,24 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                         # set the time
                         bpy.context.scene.frame_set(frame)
 
-                        #for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones):
-                        #    if bone.name in frame_data.keys():
-                        #        matrix = frame_data[bone.name]
-                        #        bone.rotation_mode = 'QUATERNION'
-                        #        bone.matrix = matrix
-                        #        merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
-                        #        merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
-                        #        merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
+                        for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones):
+                            if bone.name in frame_data.keys():
+                                matrix = frame_data[bone.name]
+                                bone.rotation_mode = 'QUATERNION'
+                                bone.matrix = matrix
+                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
+                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
+                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
                         
-                        for bone_name, matrix in frame_data.items():
-                            bone = merged_armature.pose.bones[bone_name]
-                            bone.rotation_mode = 'QUATERNION'
-                            bone.matrix = matrix
-                            merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
-                            merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
-                            merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
+                        # TODO: the method below should be faster, but I don't know if it works
+                        #for bone_name, matrix in frame_data.items():
+                        #    bone = merged_armature.pose.bones[bone_name]
+                        #    bone.rotation_mode = 'QUATERNION'
+                        #    bone.matrix = matrix
+                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
+                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
+                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
 
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []

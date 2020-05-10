@@ -52,4 +52,4 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
             # Back to object mode
             bpy.ops.object.mode_set(mode='OBJECT')
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []

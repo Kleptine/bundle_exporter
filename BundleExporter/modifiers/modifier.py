@@ -60,7 +60,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         return source
 
     def process_objects(self, name, objects, helpers, armatures):
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []
 
     def process_name(self, name):
         return name

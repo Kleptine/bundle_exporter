@@ -82,4 +82,4 @@ class BGE_mod_lod(modifier.BGE_mod_default):
 
                 new_objects.append(bpy.context.object)
 
-        return new_objects, helpers, armatures
+        return new_objects, helpers, armatures, []

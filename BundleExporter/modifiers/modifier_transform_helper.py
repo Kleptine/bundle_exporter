@@ -34,4 +34,4 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
             new_scale = mathutils.Vector((x.scale.x * self.scale.x, x.scale.y * self.scale.y, x.scale.z * self.scale.z))
             x.scale = new_scale
 
-        return objects, helpers, armatures
+        return objects, helpers, armatures, []
