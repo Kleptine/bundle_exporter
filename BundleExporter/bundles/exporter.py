@@ -8,7 +8,7 @@ from ..settings import prefix_copy, mesh_types, empty_types, armature_types
 from ..utilities import traverse_tree, traverse_tree_from_iteration
 
 export_collection = None
-debug = True
+debug = False
 
 # copy all objects toguether to keep relations and store in them their original values
 def copy_objects(objects):
