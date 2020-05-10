@@ -130,6 +130,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         if len(objects) < 2:
             return objects
 
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         bpy.ops.object.select_all(action='DESELECT')
 
         armature_dict = {}

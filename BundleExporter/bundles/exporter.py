@@ -6,6 +6,8 @@ from .. import settings
 
 from ..settings import prefix_copy, mesh_types, empty_types, armature_types
 
+from ..utilities import traverse_tree
+
 export_collection = None
 
 
@@ -16,9 +18,25 @@ def copy_objects(objects):
     # export_collection = bpy.data.collections.new('EXPORT.COLLECTION')
     # bpy.context.scene.collection.children.link(export_collection)
 
+    for collection in bpy.data.collections:
+        print(collection.name)
+        collection['__orig_hide__'] = collection.hide_viewport
+        collection['__orig_hide_select__'] = collection.hide_select
+
+        # to avoid unhiding and exporting all hidden objects from the linked libraries
+        if not collection.library:
+            collection.hide_select = False
+            collection.hide_viewport = False
+
+    for layer_collection in traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True):
+        bpy.data.collections[layer_collection.name]['__orig_exclude__'] = layer_collection.exclude
+        layer_collection.exclude = False
+
     for obj in objects:
         obj['__orig_name__'] = obj.name
         obj['__orig_hide__'] = obj.hide_viewport
+        obj['__orig_hide_select__'] = obj.hide_select
+
         # obj['__orig_collection__'] = obj.users_collection[0].name
         obj.select_set(True)
         bpy.context.view_layer.objects.active = obj
@@ -48,9 +66,24 @@ def restore_defaults(objects):
     for obj in objects:
         obj.name = obj['__orig_name__']
         obj.hide_viewport = obj['__orig_hide__']
+        obj.hide_select = obj['__orig_hide_select__']
 
         del obj['__orig_name__']
         del obj['__orig_hide__']
+        del obj['__orig_hide_select__']
+
+    #make layers visible and selectable
+    for collection in bpy.data.collections:
+        collection.hide_viewport = collection['__orig_hide__']
+        collection.hide_select = collection['__orig_hide_select__']
+
+        del collection['__orig_hide__']
+        del collection['__orig_hide_select__']
+
+    # to "unexclude" layers
+    for layer_collection in traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True):
+        layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
+        del bpy.data.collections[layer_collection.name]['__orig_exclude__']
 
 
 # https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
