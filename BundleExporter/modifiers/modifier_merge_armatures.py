@@ -86,17 +86,11 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
                         actions_data = baked_merge_actions[new_action_name][action.name]
 
-                        # figure out which armature the action corresponds to by its name
-                        armature = None
-                        for arm in armatures:
-                            result_name = self.new_name.format(armature=arm, name=new_action_name)
-                            if result_name == action.name:
-                                armature = arm
-                                break
-
                         #assign the action to record
-                        if not armature.animation_data:
-                            armature.animation_data_create ()
+                        if armature.animation_data:
+                            armature.animation_data.action = None
+                            armature.animation_data_clear()
+                        armature.animation_data_create()
                         armature.animation_data.action = action
 
                         for f in range(int(action.frame_range[0]), int(action.frame_range[1])):
@@ -105,8 +99,16 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                             bpy.context.scene.frame_set(f)
                             # gets the transform of all the deform bones for each frame
                             for bone in armature.pose.bones:
-                                #if bone.bone.use_deform: # after disabling this check, the animation was correctly exported
-                                actions_data[f][self.new_name.format(armature=armature, name=bone.name)] = bone.matrix.copy()
+                                if bone.bone.use_deform: # after disabling this check, the animation was correctly exported
+                                    frame_data = {}
+                                    matrix = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='LOCAL')
+
+                                    frame_data['matrix'] = matrix
+                                    frame_data['location'] = bone.location.copy()
+                                    frame_data['scale'] = bone.scale.copy()
+                                    frame_data['rotation'] = bone.rotation_quaternion.copy()
+                                    actions_data[f][self.new_name.format(armature=armature, name=bone.name)] = frame_data
+                                    
 
         #for name, actions in baked_merge_actions.items():
         #    print('MERGED ACTION: {}'.format(name))
@@ -179,7 +181,6 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             x.hide_select = False
             x.driver_remove('hide')
             x.hide = False
-        # TODO: do the same for the bone.hide property and unlink any driver assigned to it
         bpy.ops.pose.select_all(action='SELECT')
         bpy.ops.pose.loc_clear()
         bpy.ops.pose.rot_clear()
@@ -201,6 +202,8 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
         # merge actions now
         if self.merge_actions:
+            options = {'INSERTKEY_NEEDED'}
+
             bpy.context.view_layer.objects.active = merged_armature
             bpy.ops.object.mode_set(mode='POSE', toggle=False)
 
@@ -220,29 +223,40 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
                 # loop though all the actions to merge
                 for action_info in actions.values():
-                    # assign transform data for each frame
-                    for frame, frame_data in action_info.items():
-                        # set the time
-                        bpy.context.scene.frame_set(frame)
+                    
+                    for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones if not bone.parent):
+                        bone.rotation_mode = 'QUATERNION'
+                        quat_prev = None
 
-                        for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones):
+                        for frame, frame_data in action_info.items():
                             if bone.name in frame_data.keys():
-                                matrix = frame_data[bone.name]
-                                bone.rotation_mode = 'QUATERNION'
-                                bone.matrix = matrix
-                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
-                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
-                                merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
-                        
-                        # TODO: the method below should be faster, but I don't know if it works
-                        #for bone_name, matrix in frame_data.items():
-                        #    bone = merged_armature.pose.bones[bone_name]
-                        #    bone.rotation_mode = 'QUATERNION'
-                        #    bone.matrix = matrix
-                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].location'.format(bone.name))
-                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].rotation_quaternion'.format(bone.name))
-                        #    merged_armature.keyframe_insert(data_path='pose.bones["{}"].scale'.format(bone.name))
+                                matrix = frame_data[bone.name]['matrix']
+                                bone.matrix_basis = matrix.copy()
 
+                                bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options=options)
+
+                                if quat_prev is not None:
+                                    quat = bone.rotation_quaternion.copy()
+                                    quat.make_compatible(quat_prev)
+                                    bone.rotation_quaternion = quat
+                                    quat_prev = quat
+                                    del quat
+                                else:
+                                    quat_prev = bone.rotation_quaternion.copy()
+
+                                bone.keyframe_insert("rotation_quaternion", index=-1, frame=frame, group=bone.name, options=options)
+                                bone.keyframe_insert("scale", index=-1, frame=frame, group=bone.name, options=options)
+                            else:
+                                pass
+
+        #clear all transform data
+        if merged_armature.animation_data:
+            merged_armature.animation_data.action = None
+        bpy.ops.object.mode_set(mode='POSE', toggle=False)
+        bpy.ops.pose.select_all(action='SELECT')
+        bpy.ops.pose.loc_clear()
+        bpy.ops.pose.rot_clear()
+        bpy.ops.pose.scale_clear()
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         return objects, helpers, armatures, []
