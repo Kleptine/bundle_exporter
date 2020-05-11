@@ -25,42 +25,34 @@ def copy_objects(objects):
     for collection in bpy.data.collections:
         collection['__orig_hide__'] = collection.hide_viewport
         collection['__orig_hide_select__'] = collection.hide_select
-
-        if collection.library:
-            # TODO: move this check into the modifier_instance_collection_to_objects as an option
-            # only visible objects will be exported from instanced collections
-            # but to avoid breaking connections we need to make them visible before making them local
-            for obj in traverse_tree_from_iteration((x for x in collection.objects)):
-                obj['__do_export__'] = not (collection.hide_viewport or obj.hide_viewport)
-                # we need to also unhide these objects
-                obj['__orig_hide__'] = obj.hide_viewport
-                obj['__orig_hide_select__'] = obj.hide_select
-
-                obj.hide_viewport = False
-                obj.hide_select = False
         
         collection.hide_select = False
         collection.hide_viewport = False
 
-    #TODO: maybe store the values for all the objects in the scene, that way we dont need to check if they are in an imported library
-    for obj in objects:
+    # when renaming objects bpy.data.objects changes?
+    objs = [x for x in bpy.data.objects]
+    for obj in objs:
         obj['__orig_name__'] = obj.name
         obj['__orig_hide__'] = obj.hide_viewport
         obj['__orig_hide_select__'] = obj.hide_select
-        obj['__orig_collection__'] = obj.users_collection[0].name
-        obj['__do_export__'] = not '__do_export__' in obj
+        obj['__orig_collection__'] = obj.users_collection[0].name if obj.users_collection else '__NONE__'
 
-        obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj # ?????
+        if obj in objects:
+            obj.select_set(True)
+            obj.name = prefix_copy + obj.name
+        # bpy.context.view_layer.objects.active = obj # ?????
         obj.hide_viewport = False
         obj.hide_select = False
-        obj.name = prefix_copy + obj.name
+        
 
     # duplicate the objects
     bpy.ops.object.duplicate()
     copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
     bpy.ops.object.make_local(type='SELECT_OBDATA')
     bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
+
+    for x in copied_objects:
+        x['__IS_COPY__'] = True
 
     #rename the duplicated objects to their real names
     for obj in copied_objects:
@@ -74,8 +66,12 @@ def copy_objects(objects):
 
 
 def restore_defaults(objects):
-    for obj in objects:
-        obj.name = obj['__orig_name__']
+    # when renaming objects bpy.data.objects changes?
+    objs = [x for x in bpy.data.objects]
+    for obj in objs:
+        if obj in objects:
+            print(obj)
+            obj.name = obj['__orig_name__']
         obj.hide_viewport = obj['__orig_hide__']
         obj.hide_select = obj['__orig_hide_select__']
 
@@ -83,9 +79,7 @@ def restore_defaults(objects):
         del obj['__orig_hide__']
         del obj['__orig_hide_select__']
         del obj['__orig_collection__']
-        del obj['__do_export__']
 
-    #make layers visible and selectable
     for collection in bpy.data.collections:
         collection.hide_viewport = collection['__orig_hide__']
         collection.hide_select = collection['__orig_hide_select__']
@@ -93,17 +87,6 @@ def restore_defaults(objects):
         del collection['__orig_hide__']
         del collection['__orig_hide_select__']
 
-        if collection.library:
-            for obj in traverse_tree_from_iteration((x for x in collection.objects)):
-                if '__orig_hide__' in obj:
-                    obj.hide_viewport = obj['__orig_hide__']
-                    obj.hide_select = obj['__orig_hide_select__']
-
-                    del obj['__do_export__']
-                    del obj['__orig_hide__']
-                    del obj['__orig_hide_select__']
-
-    # to "unexclude" layers
     for layer_collection in traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True):
         layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
         layer_collection.hide_viewport = bpy.data.collections[layer_collection.name]['__orig_hide_lc__']

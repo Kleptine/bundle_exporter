@@ -5,7 +5,7 @@ import imp
 
 from . import modifier
 from .. import settings
-
+from ..utilities import traverse_tree
 
 class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     label = "Group Intstances to Objects"
@@ -20,14 +20,29 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
         default=False
     )
 
+    export_hidden: bpy.props.BoolProperty(
+        name="Export Hidden",
+        default=False
+    )
+
     def draw(self, layout):
         super().draw(layout)
+        if(self.active):
+            row = layout.row()
+            row.separator()
+            row.prop(self, 'export_hidden')
 
     def process_objects(self, name, objects, helpers, armatures):
         objects_to_delete = []
         for i in reversed(range(0, len(helpers))):
             x = helpers[i]
             if x.instance_type == 'COLLECTION' and x.instance_collection:
+                
+                if not self.export_hidden:
+                    for collection in traverse_tree(x.instance_collection):
+                        for obj in collection.objects:
+                            obj['__do_export__'] = not (collection['__orig_hide__'] or ('__orig_hide_lc__' in collection and collection['__orig_hide_lc__']) or ('__orig_hide__' in obj and obj['__orig_hide__']))
+
                 bpy.ops.object.select_all(action='DESELECT')
                 x.select_set(True)
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)
@@ -39,7 +54,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                     y['__orig_collection__'] = x.name
 
                 # if the collection instance was hidden, it should not be exported
-                exportable_nodes = [x for x in new_nodes if x['__do_export__'] == 1]
+                exportable_nodes = [x for x in new_nodes if not '__do_export__' in x or x['__do_export__'] == 1]
                 
                 # remove helper from export
                 helpers.pop(i)

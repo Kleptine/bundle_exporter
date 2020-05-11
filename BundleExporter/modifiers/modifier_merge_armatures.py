@@ -28,6 +28,11 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default=True
     )
 
+    root_bone_name: bpy.props.StringProperty(
+        name='Root Name',
+        default="root"
+    )
+
     rename_bones: bpy.props.BoolProperty(
         name="Rename Bones",
         default=True
@@ -53,8 +58,10 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         if(self.active):
             row = layout.row()
             row.separator()
-            col = row.column()
-            col.prop(self, 'create_root_bone')
+            col = row.column(align=False)
+            row = col.row(align=True)
+            row.prop(self, 'create_root_bone')
+            row.prop(self, 'root_bone_name', text='')
             col.prop(self, 'armature_name')
             row = col.row(align=True)
             row.prop(self, "rename_bones", text='')
@@ -187,13 +194,14 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         bpy.ops.pose.scale_clear()
 
         # create a new root bone for all the bones
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        root_bone = merged_armature.data.edit_bones.new('ROOT')
-        root_bone.head = Vector((0, 0, 0))
-        root_bone.tail = Vector((0, 1, 0))
-        for x in merged_armature.data.edit_bones:
-            if not x.parent and x.name != root_bone:
-                x.parent = root_bone
+        if self.create_root_bone:
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            root_bone = merged_armature.data.edit_bones.new(self.root_bone_name)
+            root_bone.head = Vector((0, 0, 0))
+            root_bone.tail = Vector((0, 1, 0))
+            for x in merged_armature.data.edit_bones:
+                if not x.parent and x.name != root_bone:
+                    x.parent = root_bone
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         merged_armature.name = self.armature_name
@@ -223,7 +231,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
                 # loop though all the actions to merge
                 for action_info in actions.values():
-                    
+
                     for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones if not bone.parent):
                         bone.rotation_mode = 'QUATERNION'
                         quat_prev = None
