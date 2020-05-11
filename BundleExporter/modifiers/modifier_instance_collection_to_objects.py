@@ -33,6 +33,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)
                 new_nodes = [obj for obj in bpy.context.scene.objects if obj.select_get() and obj != x]
                 bpy.ops.object.make_local(type='SELECT_OBDATA')
+                bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
                 for y in new_nodes:
                     y['__orig_collection__'] = x.name
