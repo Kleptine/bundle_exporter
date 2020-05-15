@@ -63,28 +63,12 @@ class BGE_preferences(bpy.types.AddonPreferences):
         col = box.column(align=True)
         col.prop(self, 'export_format', text="Export Format")
         col.prop(self, 'export_preset', text="Export Preset")
-        col.prop(self, "mode_bundle", text="Bundle by", icon='GROUP')
+        col.prop(self, "mode_bundle", text="Bundle by")
         col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
 
         modifiers.draw(col, context, self.modifier_preferences)
 
         col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
-
-        box = layout.box()
-        row = box.row()
-        row.label(text="Unity Editor script")
-        row.operator(operators.BGE_OT_unity_script.bl_idname, icon='FILE_TICK')
-        col = box.column(align=True)
-        col.label(text="Copies a Unity Editor script to automatically assign")
-        col.label(text="existing materials by name matching names in Blender")
-
-        box = layout.box()
-        row = box.row()
-        row.label(text="Keyboard shortcuts")
-        col = box.column(align=True)
-        col.label(text="Ctrl + E = Export selected")
-        col.label(text="Ctrl + Shift + E = Export recent")
-
 
 addon_keymaps = []
 

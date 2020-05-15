@@ -11,6 +11,7 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/"
     type = 'HELPER'
     icon = 'EMPTY_ARROWS'
+    tooltip = 'Applies the specific transform to all empties'
 
     active: bpy.props.BoolProperty(
         name="Active",

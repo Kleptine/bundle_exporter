@@ -11,6 +11,8 @@ class BGE_mod_collider(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_collider"
     type = 'MESH'
     icon = 'CUBE'
+    priority = 999
+    tooltip = 'This modifier will create extra collision meshes based on the exported meshes'
 
     active: bpy.props.BoolProperty(
         name="Active",

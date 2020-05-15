@@ -11,6 +11,7 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_ao"
     type = "MESH"
     icon = 'GROUP_VERTEX'
+    tooltip = 'Ambient occlusion is baked into the mesh vertices on export'
 
     active: bpy.props.BoolProperty(
         name="Active",

@@ -5,8 +5,9 @@ from .. import modifiers
 
 
 class BGE_OT_select(bpy.types.Operator):
+    """Select the objects of the bundle"""
     bl_idname = "bge.select"
-    bl_label = "Select"
+    bl_label = "Select Bundle"
 
     index: bpy.props.IntProperty(name="index")
 
@@ -19,6 +20,7 @@ class BGE_OT_select(bpy.types.Operator):
 
 
 class BGE_OT_create_bundle(bpy.types.Operator):
+    """Create new bundle"""
     bl_idname = "bge.create_bundle"
     bl_label = "Create Bundle"
 
@@ -30,6 +32,13 @@ class BGE_OT_create_bundle(bpy.types.Operator):
     def poll(self, context):
         return len(bpy.context.selected_objects) > 0
 
+    @classmethod
+    def description(cls, context, properties):
+        if len(bpy.context.selected_objects) > 0:
+            return "Create new bundle(s) from selected objects"
+        else:
+            return "Select objects to create a bundle"
+
 
 mesh_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label, x['global'].icon, x['global'].unique_num) for x in modifiers.modifiers_dict.values() if x['global'].type == 'MESH']
 general_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label, x['global'].icon, x['global'].unique_num) for x in modifiers.modifiers_dict.values() if x['global'].type == 'GENERAL']
@@ -39,10 +48,20 @@ modifier_enum = [("", "General", "description", "MODIFIER", 0)] + general_modifi
 
 
 class BGE_OT_override_bundle_modifier(bpy.types.Operator):
+    """Add a modifier to the selected bundle, if the same modifier is already activated in the scene modifiers this will override it"""
     bl_idname = "bge.override_bundle_modifier"
     bl_label = "Add Override Modifier"
 
     option: bpy.props.EnumProperty(items= modifier_enum)
+
+    @classmethod
+    def description(cls, context, properties):
+        mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.bundles[bpy.context.scene.BGE_Settings.bundle_index].override_modifiers)
+        for x in mods:
+            if x.id == properties.option:
+                return x.tooltip
+
+        return "not implemented"
 
     def execute(self, context):
         print(self.option)
@@ -55,10 +74,20 @@ class BGE_OT_override_bundle_modifier(bpy.types.Operator):
 
 
 class BGE_OT_add_bundle_modifier(bpy.types.Operator):
+    """Add a modifier to the scene modifiers stack, these modifiers will be applied to the bundles when exported"""
     bl_idname = "bge.add_bundle_modifier"
     bl_label = "Add Export Modifier"
 
     option: bpy.props.EnumProperty(items=modifier_enum)
+
+    @classmethod
+    def description(cls, context, properties):
+        mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.bundles[bpy.context.scene.BGE_Settings.bundle_index].override_modifiers)
+        for x in mods:
+            if x.id == properties.option:
+                return x.tooltip
+
+        return "not implemented"
 
     def execute(self, context):
         print(self.option)
@@ -71,8 +100,9 @@ class BGE_OT_add_bundle_modifier(bpy.types.Operator):
 
 
 class BGE_OT_remove(bpy.types.Operator):
+    """Remove the bundle"""
     bl_idname = "bge.remove"
-    bl_label = "Remove"
+    bl_label = "Remove Bundle"
 
     index: bpy.props.IntProperty(name="index")
 

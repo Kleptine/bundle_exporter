@@ -16,6 +16,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     global_settings = True
     icon = 'MODIFIER'
     priority = 200  # lower number will be executed earlier
+    tooltip = 'Default modifier'
 
     active: bpy.props.BoolProperty(
         name="Active",

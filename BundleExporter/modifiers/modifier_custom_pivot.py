@@ -12,6 +12,7 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
     type = 'MESH'
     icon = 'EMPTY_ARROWS'
     priority = 10
+    tooltip = 'Assign a custom pivot based on the chosen source object'
 
     active: bpy.props.BoolProperty(
         name="Active",

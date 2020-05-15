@@ -23,6 +23,7 @@ class BGE_OT_save_preferences(bpy.types.Operator):
 
 
 class BGE_OT_load_preferences(bpy.types.Operator):
+    """Reload the addon preferences"""
     bl_idname = "bge.load_preferences"
     bl_label = "Load Preferences"
 

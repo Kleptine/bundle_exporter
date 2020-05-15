@@ -7,6 +7,7 @@ from .. import bundles
 
 
 class BGE_OT_fence_draw(bpy.types.Operator):
+    """Draws "fences" to visualize bundles"""
     bl_idname = "bge.fence_draw"
     bl_label = "Draw Fences"
     bl_description = "Draw fences around selected bundles"

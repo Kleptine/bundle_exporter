@@ -13,6 +13,7 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_modifiers"
     type = 'MESH'
     icon = 'MODIFIER_DATA'
+    tooltip = 'Copies all the modifiers from the selected source object to all the export meshes'
 
     active: bpy.props.BoolProperty(
         name="Active",

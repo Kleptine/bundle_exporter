@@ -14,6 +14,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     type = 'MESH'
     icon = 'SELECT_EXTEND'
     priority = 0
+    tooltip = 'Merges meshes when exporting'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -83,6 +84,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             if self.merge_type == 'ALL':
                 objects = self.merge_meshes(objects, name)
 
+            # TODO: change this to ['__orig_collection__']
             elif self.merge_type == 'COLLECTION':
                 # gather all collections
                 collections_dict = {}

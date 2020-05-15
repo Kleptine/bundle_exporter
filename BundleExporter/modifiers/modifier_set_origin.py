@@ -10,6 +10,7 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/"
     type = 'MESH'
     icon = 'OBJECT_ORIGIN'
+    tooltip = 'Applies the pivot of the bundle to all the meshes (changes their origin)'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -24,4 +25,5 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
             row = layout.row(align=True)
 
     def process_objects(self, name, objects, helpers, armatures):
-        pass
+        # TODO: needs to be implemented
+        return objects, helpers, armatures, []

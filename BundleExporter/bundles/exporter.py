@@ -40,7 +40,6 @@ def copy_objects(objects):
         if obj in objects:
             obj.select_set(True)
             obj.name = prefix_copy + obj.name
-        # bpy.context.view_layer.objects.active = obj # ?????
         obj.hide_viewport = False
         obj.hide_select = False
         
@@ -72,6 +71,10 @@ def restore_defaults(objects):
         if obj in objects:
             print(obj)
             obj.name = obj['__orig_name__']
+        #delete duplicated objects
+        elif '__IS_COPY__' in obj and obj['__IS_COPY__']:
+            bpy.data.objects.remove(obj, do_unlink=True)
+            continue
         obj.hide_viewport = obj['__orig_hide__']
         obj.hide_select = obj['__orig_hide_select__']
 
@@ -192,9 +195,9 @@ def export(bundles, path, export_format, export_preset):
                 scene_objs = [x for x in bpy.data.objects]
                 # sometimes objects have already been deleted and it can produce more error to just delete from the export obj arrays
                 # so I loop through all the objects to see if they are the ones duplicated
-                for obj in scene_objs:
-                    if obj in all_meshes:
-                        bpy.data.objects.remove(obj, do_unlink=True)
+                #for obj in scene_objs:
+                #    if obj in all_meshes:
+                #        bpy.data.objects.remove(obj, do_unlink=True)
 
                 # Restore names
                 restore_defaults(orig_objects)

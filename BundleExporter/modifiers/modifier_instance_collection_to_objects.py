@@ -14,6 +14,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     type = 'HELPER'
     icon = 'OUTLINER_OB_GROUP_INSTANCE'
     priority = -999
+    tooltip = 'Instance collections will be treated as objects when exporting'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -45,15 +46,15 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
                 bpy.ops.object.select_all(action='DESELECT')
                 x.select_set(True)
-                bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=False)
+                bpy.ops.object.duplicates_make_real(use_base_parent=False, use_hierarchy=True)
                 new_nodes = [obj for obj in bpy.context.scene.objects if obj.select_get() and obj != x]
                 bpy.ops.object.make_local(type='SELECT_OBDATA')
                 bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
                 for y in new_nodes:
                     y['__orig_collection__'] = x.name
+                    y['__IS_COPY__'] = True
 
-                # if the collection instance was hidden, it should not be exported
                 exportable_nodes = [x for x in new_nodes if not '__do_export__' in x or x['__do_export__'] == 1]
                 
                 # remove helper from export
