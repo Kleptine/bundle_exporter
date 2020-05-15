@@ -48,7 +48,8 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
                         row.enabled = False
                         row.label(text=message)
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
+        objects = bundle_info['meshes']
         if self.source in bpy.data.objects:
             source = bpy.data.objects[self.source]
             print("Offset... " + source.name)
@@ -83,5 +84,3 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
             # Restore pivot & mode
             bpy.context.space_data.pivot_point = prev_cursor_mode
             bpy.context.scene.cursor.location = prev_cursor_location
-
-        return objects, helpers, armatures, []

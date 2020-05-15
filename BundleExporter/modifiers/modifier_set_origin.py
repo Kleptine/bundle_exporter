@@ -20,10 +20,8 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
     def draw(self, layout):
         super().draw(layout)
         if(self.active):
-            # Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
+            pass
 
-            row = layout.row(align=True)
-
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
         # TODO: needs to be implemented
-        return objects, helpers, armatures, []
+        pass

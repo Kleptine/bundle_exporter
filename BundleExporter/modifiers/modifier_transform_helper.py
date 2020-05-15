@@ -30,9 +30,8 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
 
             row.prop(self, "scale", text="Scale")
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
+        helpers = bundle_info['empties']
         for x in helpers:
             new_scale = mathutils.Vector((x.scale.x * self.scale.x, x.scale.y * self.scale.y, x.scale.z * self.scale.z))
             x.scale = new_scale
-
-        return objects, helpers, armatures, []

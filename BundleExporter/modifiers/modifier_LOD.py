@@ -57,17 +57,15 @@ class BGE_mod_lod(modifier.BGE_mod_default):
             # row_freeze.enabled = self.merge_active
             # row_freeze.prop( self , "merge_distance")
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
         # UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html
         # UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
         # 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
-
-        new_objects = []
+        objects = bundle_info['meshes']
         for obj in objects:
             prefix = obj.name
 
             obj.name = "{}_LOD{}".format(prefix, 0)
-            new_objects.append(obj)
 
             for i in range(1, self.levels):
 
@@ -82,6 +80,4 @@ class BGE_mod_lod(modifier.BGE_mod_default):
                 bpy.ops.object.modifier_add(type='DECIMATE')
                 bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
-                new_objects.append(bpy.context.object)
-
-        return new_objects, helpers, armatures, []
+                bundle_info['extras'].append(bpy.context.object)

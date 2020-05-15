@@ -46,21 +46,20 @@ class BGE_mod_rename(modifier.BGE_mod_default):
         val = val.replace("{scene}", bpy.context.scene.name)
         return self.remove_illegal_characters(val)
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
+        path = bundle_info['path']
+        name = bundle_info['name']
+        objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
         for obj in objects:
-            obj.name = self.remove_illegal_characters( self.format_object_name(name, obj.name) )
+            obj.name = self.remove_illegal_characters(self.format_object_name(name, obj.name))
 
-        return objects, helpers, armatures, []
+        new_name = self.file
+        new_name = new_name.replace("{bundle}", name)
+        new_name = new_name.replace("{scene}", bpy.context.scene.name)
+        bundle_info['name'] = self.remove_illegal_characters(new_name)
 
-    def process_name(self, name):
-        val = self.file
-        val = val.replace("{bundle}", name)
-        val = val.replace("{scene}", bpy.context.scene.name)
-        return self.remove_illegal_characters(val)
-
-    def process_path(self, name, path):
-        val = self.path
-        val = val.replace("{path}", path)
-        val = val.replace("{bundle}", name)
-        val = val.replace("{scene}", bpy.context.scene.name)
-        return self.remove_illegal_characters(val)
+        new_path = self.path
+        new_path = new_path.replace("{path}", path)
+        new_path = new_path.replace("{bundle}", name)
+        new_path = new_path.replace("{scene}", bpy.context.scene.name)
+        bundle_info['path'] = self.remove_illegal_characters(new_path)

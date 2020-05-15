@@ -35,8 +35,9 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
             row.separator()
             row.prop(self, "contrast", text="Contrast")
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
         contrast = self.contrast
+        objects = bundle_info['meshes']
 
         for obj in objects:
             bpy.ops.object.select_all(action="DESELECT")
@@ -52,5 +53,3 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
 
             # Back to object mode
             bpy.ops.object.mode_set(mode='OBJECT')
-
-        return objects, helpers, armatures, []

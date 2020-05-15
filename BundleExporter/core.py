@@ -3,15 +3,6 @@ import os
 import math
 import bpy.utils.previews
 
-from . import gp_draw
-
-from . import modifiers
-from . import operators
-
-from . import bundles
-
-from . import settings
-
 from bpy.props import (
     StringProperty,
     BoolProperty,
@@ -22,6 +13,11 @@ from bpy.props import (
     PointerProperty,
 )
 
+from . import gp_draw
+from . import modifiers
+from . import operators
+from . import bundles
+from . import settings
 from .settings import mode_bundle_types, mode_pivot_types
 
 
@@ -89,6 +85,10 @@ class BGE_Settings(bpy.types.PropertyGroup):
         default=False,
         description="Bundles"
     )
+    show_bundle_objects: bpy.props.BoolProperty(
+        name="Show bundle objects",
+        default=True,
+    )
 
     mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
@@ -113,8 +113,6 @@ class BGE_PT_core_panel(bpy.types.Panel):
         row = box.row(align=True)
         row.operator('bge.load_preferences', text='', icon='RECOVER_LAST')
         row.label(text='Settings', icon='PREFERENCES')
-
-        icon = 'EXPORT'
 
         col = box.column(align=True)
 
@@ -247,15 +245,27 @@ class BGE_PT_files_panel(bpy.types.Panel):
             col.operator(operators.BGE_OT_file_export_selected.bl_idname, text="Export {}".format(bundle_list[bundle_index].filename), icon=icon)
 
             sub_box = box.box()
-            sub_box = sub_box.column(align=True)
-            objs = bundle_list[bundle_index].objects
-            for x in objs:
-                icon = 'OUTLINER_OB_MESH'
-                if x.type == 'ARMATURE':
-                    icon = 'OUTLINER_OB_ARMATURE'
-                elif x.type == 'EMPTY':
-                    icon = 'OUTLINER_OB_EMPTY'
-                sub_box.label(text=x.name, icon=icon)
+            row = sub_box.row(align=True)
+            row.prop(
+                bpy.context.scene.BGE_Settings,
+                'show_bundle_objects',
+                icon="TRIA_DOWN" if bpy.context.scene.BGE_Settings.show_bundle_objects else "TRIA_RIGHT",
+                icon_only=True,
+                text='Bundle objects:',
+                emboss=False
+            )
+            if bpy.context.scene.BGE_Settings.show_bundle_objects:
+                sub_box = sub_box.column(align=True)
+                objs = bundle_list[bundle_index].objects
+                for x in objs:
+                    icon = 'OUTLINER_OB_MESH'
+                    if x.type == 'ARMATURE':
+                        icon = 'OUTLINER_OB_ARMATURE'
+                    elif x.type == 'EMPTY':
+                        icon = 'OUTLINER_OB_EMPTY'
+                    sub_box.label(text=x.name, icon=icon)
+
+            
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
             modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
 

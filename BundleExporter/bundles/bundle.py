@@ -33,10 +33,10 @@ class Bundle(bpy.types.PropertyGroup):
 
     def _get_objects(self, types=()):
         if self.is_key_valid():
-            if self.mode_bundle == 'NAME':#gets objects similar to the name of the key
+            if self.mode_bundle == 'NAME':# gets objects similar to the name of the key
                 yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit() )))
 
-            elif self.mode_bundle == 'PARENT': #gets the children of the obj of name 3key
+            elif self.mode_bundle == 'PARENT': # gets the children of the obj of name 3key
                 obj = bpy.context.scene.objects[self.key]
                 yield from (x for x in traverse_tree(obj) if x.type in types)
 
@@ -73,10 +73,10 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def objects(self):
-        return list(self._get_objects(types=mesh_types|empty_types|armature_types))
+        return list(self._get_objects(types=mesh_types | empty_types | armature_types))
 
     def is_bundle_obj_selected(self):
-        return any(x.select_get() for x in self._get_objects(types=mesh_types|empty_types|armature_types))
+        return any(x.select_get() for x in self._get_objects(types=mesh_types | empty_types | armature_types))
 
     @property
     def pivot(self):
@@ -110,7 +110,6 @@ class Bundle(bpy.types.PropertyGroup):
                 ordered = sorted(obj_bounds.items(), key=operator.itemgetter(1))
                 return ordered[0][0].location
 
-
             elif mode_pivot == 'SCENE':
                 return Vector((0,0,0))
 
@@ -141,15 +140,15 @@ class Bundle(bpy.types.PropertyGroup):
         override_mods = modifiers.get_modifiers(self.override_modifiers)
 
         mods = {}
-        num_scene_mods=0
+        num_scene_mods = 0
         for x in scene_mods:
             if x.active:
                 mods[x.id] = x
-                num_scene_mods+=1
+                num_scene_mods += 1
         for x in override_mods:
             if x.active:
                 if x.id in mods:
-                    num_scene_mods-=1
+                    num_scene_mods -= 1
                 mods[x.id] = x
 
         return sorted(mods.values())
@@ -157,7 +156,7 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def filename(self):
-        return self.key+'.'+settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
+        return self.key + '.' + settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
 
     def select(self, alone=True):
         if alone:
@@ -178,10 +177,10 @@ class Bundle(bpy.types.PropertyGroup):
 
 class ObjectBounds:
     obj = None
-    min = Vector((0,0,0))
-    max = Vector((0,0,0))
-    size = Vector((0,0,0))
-    center = Vector((0,0,0))
+    min = Vector((0, 0, 0))
+    max = Vector((0, 0, 0))
+    size = Vector((0, 0, 0))
+    center = Vector((0, 0, 0))
 
     def __init__(self, obj):
         self.obj = obj
@@ -198,7 +197,7 @@ class ObjectBounds:
             self.max.z = max(self.max.z, corner.z)
 
         self.size = self.max - self.min
-        self.center = self.min+(self.max-self.min)/2
+        self.center = self.min + (self.max - self.min) / 2
 
     def combine(self, other):
         self.min.x = min(self.min.x, other.min.x)
@@ -209,16 +208,16 @@ class ObjectBounds:
         self.max.z = max(self.max.z, other.max.z)
 
         self.size = self.max - self.min
-        self.center = self.min+(self.max-self.min)/2
+        self.center = self.min + (self.max - self.min) / 2
 
     def is_colliding(self, other):
         def is_collide_1D(A_min, A_max, B_min, B_max):
             # One line is inside the other
-            length_A = A_max-A_min
-            length_B = B_max-B_min
-            center_A = A_min + length_A/2
-            center_B = B_min + length_B/2
-            return abs(center_A - center_B) <= (length_A+length_B)/2
+            length_A = A_max - A_min
+            length_B = B_max - B_min
+            center_A = A_min + length_A / 2
+            center_B = B_min + length_B / 2
+            return abs(center_A - center_B) <= (length_A + length_B) / 2
 
         collide_x = is_collide_1D(self.min.x, self.max.x, other.min.x, other.max.x)
         collide_y = is_collide_1D(self.min.y, self.max.y, other.min.y, other.max.y)

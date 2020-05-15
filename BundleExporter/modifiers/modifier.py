@@ -60,14 +60,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
             source = bpy.data.objects[prefix_copy + name]
         return source
 
-    def process_objects(self, name, objects, helpers, armatures):
-        return objects, helpers, armatures, []
-
-    def process_name(self, name):
-        return name
-
-    def process_pivot(self, pivot, objects, helpers, armatures):
-        return pivot
-
-    def process_path(self, name, path):
-        return path
+    # TODO: process full bundle data as a dictionary ['name'],['meshes'],['pivot'],['extras'] etc...
+    def process(self, bundle_info):
+        # do changes to bundle
+        pass

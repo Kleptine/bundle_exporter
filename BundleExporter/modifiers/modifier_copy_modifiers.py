@@ -42,7 +42,9 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
                 count = len(bpy.data.objects[self.source].modifiers)
                 row.label(text="copies {}x modifiers".format(count))
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
+        objects = bundle_info['meshes']
+
         source = self.get_object_from_name(self.source)
 
         if source:
@@ -67,5 +69,3 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
             source.select_set(False)
         else:
             print('MODIFIER_COPY_MODIFIERS source not found')
-
-        return objects, helpers, armatures, []

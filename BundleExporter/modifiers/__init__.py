@@ -6,7 +6,7 @@ import importlib
 #                            AUTO LOAD ALL MODIFIERS                           #
 # ---------------------------------------------------------------------------- #
 # TODO: this should be cleaned out of unnecessary variables, the dictionary is probably not needed anymore
-# no need to have a reference to the module
+# ! no need to have a reference to the module
 
 tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py') and x != '__init__.py']
 
@@ -35,7 +35,9 @@ local_settings = []
 #                              REGISTER/UNREGISTER                             #
 # ---------------------------------------------------------------------------- #
 
-
+# creates a property group with all modifiers
+# BGE_modifiers is used by the addon preferences
+# BGE_modifiers_local is used by the bundles and scenes and it references the addon preferences for its default values
 modifier_annotations = {}
 for x in modifiers_dict:
     SettingsGlobal = type(modifiers_dict[x]['global'].__name__, (modifiers_dict[x]['global'],), modifiers_dict[x]['global'].__dict__.copy())
@@ -60,6 +62,7 @@ def create_local_settings(Settings, defaults_path, name):
     return SettingsScene
 
 
+# registers the modifiers referenced by the addon settings
 def register_globals():
     print('--> REGISTER_GLOBALS')
     global BGE_modifiers_global
@@ -70,6 +73,7 @@ def register_globals():
     register_class(BGE_modifiers)
 
 
+# registers the modifiers used by the scene and bundles (they are registered after the addon preferences because they need to reference it)
 def register_locals():
     print('--> REGISTER_LOCALS')
     global BGE_modifiers_local

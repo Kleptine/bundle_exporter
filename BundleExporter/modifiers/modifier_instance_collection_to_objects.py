@@ -11,7 +11,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     label = "Group Intstances to Objects"
     id = 'instance_collection_to_objects'
     url = "http://renderhjs.net/fbxbundle/"
-    type = 'HELPER'
+    type = 'GENERAL'
     icon = 'OUTLINER_OB_GROUP_INSTANCE'
     priority = -999
     tooltip = 'Instance collections will be treated as objects when exporting'
@@ -33,12 +33,12 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
             row.separator()
             row.prop(self, 'export_hidden')
 
-    def process_objects(self, name, objects, helpers, armatures):
-        objects_to_delete = []
+    def process(self, bundle_info):
+        helpers = bundle_info['empties']
         for i in reversed(range(0, len(helpers))):
             x = helpers[i]
             if x.instance_type == 'COLLECTION' and x.instance_collection:
-                
+
                 if not self.export_hidden:
                     for collection in traverse_tree(x.instance_collection):
                         for obj in collection.objects:
@@ -53,19 +53,13 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
                 for y in new_nodes:
                     y['__orig_collection__'] = x.name
-                    y['__IS_COPY__'] = True
+                    y['__IS_COPY__'] = True  # to automatically delete them after export
 
-                exportable_nodes = [x for x in new_nodes if not '__do_export__' in x or x['__do_export__'] == 1]
-                
+                exportable_nodes = [x for x in new_nodes if '__do_export__' not in x or x['__do_export__'] == 1]
+
                 # remove helper from export
-                helpers.pop(i)
-                objects_to_delete.append(x)
+                bundle_info['empties'].pop(i)
 
-                objects.extend(x for x in exportable_nodes if x.type in settings.mesh_types)
-                helpers.extend(x for x in exportable_nodes if x.type in settings.empty_types)
-                armatures.extend(x for x in exportable_nodes if x.type in settings.armature_types)
-
-                others = (x for x in new_nodes if x not in objects and x not in helpers and x not in armatures)
-                objects_to_delete.extend(others)
-
-        return objects, helpers, armatures, objects_to_delete
+                bundle_info['meshes'].extend(x for x in exportable_nodes if x.type in settings.mesh_types)
+                bundle_info['empties'].extend(x for x in exportable_nodes if x.type in settings.empty_types)
+                bundle_info['armatures'].extend(x for x in exportable_nodes if x.type in settings.armature_types)

@@ -54,7 +54,7 @@ class BGE_OT_file_export(bpy.types.Operator):
             return
 
         bundle_list = bundles.get_bundles(only_valid=True)
-        bundles.exporter.export(bundle_list,  bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset)
+        bundles.exporter.export(bundle_list, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset)
 
         return {'FINISHED'}
 

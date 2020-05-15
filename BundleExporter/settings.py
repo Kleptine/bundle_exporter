@@ -28,6 +28,7 @@ preset_folders = {'FBX': 'operator/export_scene.fbx/',
                   'GLTF': 'operator/export_scene.gltf/'}
 
 bge_presets_path = os.path.join(os.path.dirname(__file__), 'presets')
+
 BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), os.path.join(bge_presets_path, 'BGE_unity.py')},
                       'OBJ': {os.path.join(bge_presets_path, 'BGE_obj.py')},
                       'COLLADA': {os.path.join(bge_presets_path, 'BGE_collada.py')},
@@ -59,11 +60,6 @@ def get_presets_enum(export_format):
     presets = create_preset_enum(get_presets(export_format))
     return presets
 
-
-for x in export_formats:
-    print(x[0])
-    for file in get_presets(x[0]).values():
-        print(file)
 
 mode_bundle_types = [('NAME', 'Name', "Bundle by matching object names", 'SYNTAX_OFF', 0),
                      ('PARENT', 'Parent', "Bundle by the parent object", 'FILE_PARENT', 1),

@@ -79,7 +79,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             row = col.row(align=True)
             row.prop(self, "merge_by_material", text="Split by Material")
 
-    def process_objects(self, name, objects, helpers, armatures):
+            row = col.row(align=True)
+            row.prop(self, 'keep_armature_modifier', text="Try to keep armature")
+
+    def process(self, bundle_info):
+        name = bundle_info['name']
+        objects = bundle_info['meshes']
         if len(objects) > 1:
             if self.merge_type == 'ALL':
                 objects = self.merge_meshes(objects, name)
@@ -105,46 +110,50 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                     objects.extend(merged)
 
             elif self.merge_type == 'PARENT':
-                parent_collection = {}
+                parents = {}
 
                 for i in reversed(range(0, len(objects))):
                     parent = objects[i].parent
-                    if parent:
+                    if parent and parent in objects:
                         while parent and parent.parent in objects:
                             parent = parent.parent
-                        if parent not in parent_collection:
-                            parent_collection[parent] = []
+                        if parent not in parents:
+                            parents[parent] = []
 
-                        parent_collection[parent].append(objects[i])
+                        parents[parent].append(objects[i])
                     else:
-                        parent_collection[objects[i]] = []
+                        parents[objects[i]] = []
 
                 objects = []
 
-                for parent, children in parent_collection.items():
+                for parent, children in parents.items():
                     merged = self.merge_meshes([parent] + children, parent.name)
                     objects.extend(merged)
 
-        return objects, helpers, armatures, []
+        bundle_info['meshes'] = objects
 
     def merge_meshes(self, objects, name):
 
         if len(objects) < 2:
             return objects
 
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         bpy.ops.object.select_all(action='DESELECT')
 
         armature_dict = {}
-        for x in objects:
-            if self.keep_armature_modifier:
+        if self.keep_armature_modifier:
+            for x in objects:
                 for mod in x.modifiers:
                     if mod.type == 'ARMATURE':
-                        armature_dict = {x.identifier: getattr(mod, x.identifier) for x in mod.bl_rna.properties if not x.is_readonly}
+                        armature_dict = {y.identifier: getattr(mod, y.identifier) for y in mod.bl_rna.properties if not y.is_readonly}
                         break
 
-            x.select_set(True)
+                x.select_set(True)
+        else:
+            for x in objects:
+                x.select_set(True)
+            
         bpy.context.view_layer.objects.active = objects[0]
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         # Convert to mesh
         bpy.ops.object.convert(target='MESH')
@@ -247,8 +256,11 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         objects = new_objects
 
         if armature_dict:
+            print(armature_dict)
             for x in objects:
                 mod = x.modifiers.new('MergeArmature', 'ARMATURE')
+                print(x)
+                print(mod)
                 for prop, value in armature_dict.items():
                     setattr(mod, prop, value)
 

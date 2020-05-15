@@ -41,16 +41,14 @@ class BGE_mod_collider(modifier.BGE_mod_default):
             row.prop(self, "ratio", text="Ratio", icon='AUTOMERGE_ON')
             row.prop(self, "angle", text="Angle", icon='AUTOMERGE_ON')
 
-    def process_objects(self, name, objects, helpers, armatures):
+    def process(self, bundle_info):
         # UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html
         # UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
         # 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
 
-        new_objects = []
+        objects = bundle_info['meshes']
+
         for obj in objects:
-
-            new_objects.append(obj)
-
             # Select
             bpy.ops.object.select_all(action="DESELECT")
             obj.select_set(True)
@@ -90,6 +88,5 @@ class BGE_mod_collider(modifier.BGE_mod_default):
             # bpy.ops.object.modifier_add(type='DECIMATE')
             # bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
-            new_objects.append(bpy.context.object)
-
-        return new_objects, helpers, armatures, []
+            # add to export
+            bundle_info['extras'].append(bpy.context.object)

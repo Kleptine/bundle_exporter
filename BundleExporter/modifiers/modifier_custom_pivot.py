@@ -31,10 +31,9 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
 
             row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
-    def process_pivot(self, pivot, meshes, helpers, armatures):
+    def process(self, bundle_info):
         source = self.get_object_from_name(self.source)
         if source:
-            return source.location
-        return pivot
+            bundle_info['pivot'] = source.location
 
         

@@ -1,25 +1,5 @@
-from . import operators
-from . import modifiers
-
 import bpy
 import bpy.utils.previews
-
-from . import settings
-from .settings import mode_bundle_types, mode_pivot_types
-
-
-bl_info = {
-    "name": "Bundle Exporter",
-    "description": "Export objects in bundles",
-    "author": "renderhjs",
-    "blender": (2, 80, 0),
-    "version": (2, 0, 0),
-    "category": "3D View",
-    "location": "3D View > Tools Panel > Bundle Exporter",
-    "warning": "",
-    "wiki_url": "http://renderhjs.net/fbxbundle/",
-    "tracker_url": "",
-}
 
 from bpy.props import (
     StringProperty,
@@ -30,6 +10,25 @@ from bpy.props import (
     EnumProperty,
     PointerProperty,
 )
+
+from . import operators
+from . import modifiers
+from . import settings
+from .settings import mode_bundle_types, mode_pivot_types
+
+
+bl_info = {
+    "name": "Bundle Exporter",
+    "description": "Export objects in bundles",
+    "author": "AquaticNightmare",
+    "blender": (2, 80, 0),
+    "version": (2, 0, 0),
+    "category": "3D View",
+    "location": "3D View > Tools Panel > Bundle Exporter",
+    "warning": "",
+    "wiki_url": "http://renderhjs.net/fbxbundle/",
+    "tracker_url": "https://gitlab.com/AquaticNightmare/blender_game_exporter/-/issues",
+}
 
 
 # https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
@@ -45,7 +44,7 @@ def update_scene_export_preset(self, context):
 class BGE_preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default='NAME')
+    mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default='COLLECTION')
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
 
     modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
@@ -68,9 +67,7 @@ class BGE_preferences(bpy.types.AddonPreferences):
 
         modifiers.draw(col, context, self.modifier_preferences)
 
-        col.operator('bge.save_preferences', text='Save User Preferences' ,icon = 'FILE_TICK')
-
-addon_keymaps = []
+        col.operator('bge.save_preferences', text='Save User Preferences', icon='FILE_TICK')
 
 
 def register():

@@ -6,6 +6,7 @@ def traverse_tree(t, exclude_parent=False):
             yield child
         yield from traverse_tree(child, exclude_parent)
 
+
 def traverse_tree_from_iteration(iterator):
     for obj in iterator:
         yield obj
