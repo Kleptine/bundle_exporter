@@ -89,6 +89,10 @@ class BGE_Settings(bpy.types.PropertyGroup):
         name="Show bundle objects",
         default=True,
     )
+    show_bundle_info: bpy.props.BoolProperty(
+        name="Show bundle info",
+        default=True,
+    )
 
     mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
@@ -133,7 +137,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
         row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_bundle"
 
         row = col.row(align=True)
-        row.prop(context.scene.BGE_Settings, "mode_pivot", text="Pivot at", icon='OUTLINER_DATA_EMPTY', expand=False)
+        row.prop(context.scene.BGE_Settings, "mode_pivot", text="Pivot at", expand=False)
         row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_pivot"
 
         col = box.column(align=True)
@@ -182,6 +186,8 @@ class BGE_UL_bundles(bpy.types.UIList):
         row.operator(operators.op_bundles.BGE_OT_select.bl_idname, text='', icon=icon).index = index
         row.alert = not item.is_key_valid()
         row.label(text=item.filename, icon="FILE_3D")
+        row.label(text='', icon=next(x[3] for x in mode_bundle_types if x[0] == item.mode_bundle))
+        row.label(text='', icon=next(x[3] for x in mode_pivot_types if x[0] == item.mode_pivot))
 
         row.operator(operators.op_bundles.BGE_OT_remove.bl_idname, text='', icon='CANCEL').index = index
 
@@ -232,38 +238,60 @@ class BGE_PT_files_panel(bpy.types.Panel):
         bundle_index = bpy.context.scene.BGE_Settings.bundle_index
 
         if bpy.context.scene.BGE_Settings.bundle_index < len(bundle_list) and len(bundle_list) > 0:
+            num_objects=len(bundle_list[bundle_index].objects)
             box = layout.box()
-            box.label(text=bundle_list[bundle_index].filename, icon='FILE_3D')
-            col = box.column()
-            col.alert = not bundle_list[bundle_index].is_key_valid()
-            col.prop(bundle_list[bundle_index], "key", text="", expand=True)
-
-            split = col.split(factor=0.5, align=True)
-            split.prop(bundle_list[bundle_index], "mode_bundle", text="", icon='GROUP')
-            split.prop(bundle_list[bundle_index], "mode_pivot", text="", icon='OUTLINER_DATA_EMPTY')
-
-            col.operator(operators.BGE_OT_file_export_selected.bl_idname, text="Export {}".format(bundle_list[bundle_index].filename), icon=icon)
-
-            sub_box = box.box()
-            row = sub_box.row(align=True)
+            row = box.row(align=True)
             row.prop(
                 bpy.context.scene.BGE_Settings,
-                'show_bundle_objects',
-                icon="TRIA_DOWN" if bpy.context.scene.BGE_Settings.show_bundle_objects else "TRIA_RIGHT",
+                'show_bundle_info',
+                icon="TRIA_DOWN" if bpy.context.scene.BGE_Settings.show_bundle_info else "TRIA_RIGHT",
                 icon_only=True,
-                text='Bundle objects:',
+                text='',
                 emboss=False
             )
-            if bpy.context.scene.BGE_Settings.show_bundle_objects:
-                sub_box = sub_box.column(align=True)
-                objs = bundle_list[bundle_index].objects
-                for x in objs:
-                    icon = 'OUTLINER_OB_MESH'
-                    if x.type == 'ARMATURE':
-                        icon = 'OUTLINER_OB_ARMATURE'
-                    elif x.type == 'EMPTY':
-                        icon = 'OUTLINER_OB_EMPTY'
-                    sub_box.label(text=x.name, icon=icon)
+            row.label(text=bundle_list[bundle_index].filename, icon='FILE_3D')
+            row = row.row()
+            row.alignment='RIGHT'
+            row.label(text='x{}'.format(num_objects))
+            row.label(text='', icon=next(x[3] for x in mode_bundle_types if x[0] == bundle_list[bundle_index].mode_bundle))
+            row.label(text='', icon=next(x[3] for x in mode_pivot_types if x[0] == bundle_list[bundle_index].mode_pivot))
+            # TODO: add labels with collection and pivot icons
+            row.operator(operators.BGE_OT_file_export_selected.bl_idname, text="Export", icon=icon)
+            if bpy.context.scene.BGE_Settings.show_bundle_info:
+                row = box.row()
+                row.separator()
+                col = row.column()
+                row.separator()
+
+                
+                col = col.column()
+                col.alert = not bundle_list[bundle_index].is_key_valid()
+                col.prop(bundle_list[bundle_index], "key", text="", expand=True)
+
+                split = col.split(factor=0.5, align=True)
+                split.prop(bundle_list[bundle_index], "mode_bundle", text="")
+                split.prop(bundle_list[bundle_index], "mode_pivot", text="")
+
+                sub_box = col.box()
+                row = sub_box.row(align=True)
+                row.prop(
+                    bpy.context.scene.BGE_Settings,
+                    'show_bundle_objects',
+                    icon="TRIA_DOWN" if bpy.context.scene.BGE_Settings.show_bundle_objects else "TRIA_RIGHT",
+                    icon_only=True,
+                    text='Bundle objects: (x{})'.format(num_objects),
+                    emboss=False
+                )
+                if bpy.context.scene.BGE_Settings.show_bundle_objects:
+                    sub_box = sub_box.column(align=True)
+                    objs = bundle_list[bundle_index].objects
+                    for x in objs:
+                        icon = 'OUTLINER_OB_MESH'
+                        if x.type == 'ARMATURE':
+                            icon = 'OUTLINER_OB_ARMATURE'
+                        elif x.type == 'EMPTY':
+                            icon = 'OUTLINER_OB_EMPTY'
+                        sub_box.label(text=x.name, icon=icon)
 
             
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')

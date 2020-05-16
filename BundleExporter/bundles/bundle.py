@@ -132,7 +132,7 @@ class Bundle(bpy.types.PropertyGroup):
                             return obj.location
 
         # Default
-        return Vector((0,0,0))
+        return Vector((0, 0, 0))
 
     @property
     def modifiers(self):
