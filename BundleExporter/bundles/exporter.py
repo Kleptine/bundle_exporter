@@ -25,7 +25,7 @@ def copy_objects(objects):
     for collection in bpy.data.collections:
         collection['__orig_hide__'] = collection.hide_viewport
         collection['__orig_hide_select__'] = collection.hide_select
-        
+
         collection.hide_select = False
         collection.hide_viewport = False
 
@@ -108,7 +108,7 @@ def restore_defaults():
         del bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
 
     print('Deleting unused meshes...')
-    # remove unused meshes 
+    # remove unused meshes
     for block in bpy.data.meshes:
         if block.users == 0:
             bpy.data.meshes.remove(block)

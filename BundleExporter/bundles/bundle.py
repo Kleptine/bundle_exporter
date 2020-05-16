@@ -7,16 +7,12 @@ from .. import modifiers
 from .. import settings
 
 from ..settings import mesh_types, empty_types, armature_types, mode_bundle_types, mode_pivot_types
-
-def traverse_tree(t):
-    yield t
-    for child in t.children:
-        yield from traverse_tree(child)
+from ..utilities import traverse_tree
 
 
 class Bundle(bpy.types.PropertyGroup):
 
-    key: bpy.props.StringProperty (
+    key: bpy.props.StringProperty(
         default=''
     )
 
@@ -33,10 +29,10 @@ class Bundle(bpy.types.PropertyGroup):
 
     def _get_objects(self, types=()):
         if self.is_key_valid():
-            if self.mode_bundle == 'NAME':# gets objects similar to the name of the key
-                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit() )))
+            if self.mode_bundle == 'NAME':  # gets objects similar to the name of the key
+                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit() )))
 
-            elif self.mode_bundle == 'PARENT': # gets the children of the obj of name 3key
+            elif self.mode_bundle == 'PARENT':  # gets the children of the obj of name 3key
                 obj = bpy.context.scene.objects[self.key]
                 yield from (x for x in traverse_tree(obj) if x.type in types)
 
@@ -50,7 +46,7 @@ class Bundle(bpy.types.PropertyGroup):
 
     def is_key_valid(self):
         if self.mode_bundle == 'NAME':
-            return(any(x.name == self.key or (len(x.name)>= 4 and x.name[:-4]==self.key and x.name[-4] == '.' and x.name[-3:].isdigit()) for x in bpy.context.scene.objects))
+            return(any(x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit()) for x in bpy.context.scene.objects))
         elif self.mode_bundle == 'PARENT':
             return self.key in bpy.context.scene.objects
         elif self.mode_bundle == 'COLLECTION':
