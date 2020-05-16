@@ -42,7 +42,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     def _draw_info(self, layout):
         pass
 
-    def draw(self, layout):
+    def draw(self, layout, active_as_x=True):
         row = layout.row(align=True)
         row.prop(
             self,
@@ -61,7 +61,10 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 
         r = row.row(align=True)
         r.alignment = 'RIGHT'
-        r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
+        if active_as_x:
+            r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
+        else:
+            r.prop(self, "active", text="")
         # r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
 
         if(self.active and self.show_info):
