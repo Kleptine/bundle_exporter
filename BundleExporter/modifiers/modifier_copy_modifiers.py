@@ -19,28 +19,26 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+    
     source: bpy.props.StringProperty()
 
     replace_references: bpy.props.BoolProperty(default=True)
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            # Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
+    def _draw_info(self, layout):
+        row = layout.row(align=True)
+        row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
-            row = layout.row(align=True)
-            row.separator()
-            row.separator()
+        if self.source in bpy.data.objects:
+            row = layout.row()
+            row.enabled = False
 
-            row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
-
-            if self.source in bpy.data.objects:
-                row = layout.row()
-                row.enabled = False
-
-                row.separator()
-                count = len(bpy.data.objects[self.source].modifiers)
-                row.label(text="copies {}x modifiers".format(count))
+            count = len(bpy.data.objects[self.source].modifiers)
+            row.label(text="copies {}x modifiers".format(count))
 
     def process(self, bundle_info):
         objects = bundle_info['meshes']

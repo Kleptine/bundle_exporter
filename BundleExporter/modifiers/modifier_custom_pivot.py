@@ -18,22 +18,18 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     source: bpy.props.StringProperty()
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            # Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-
-            row = layout.row(align=True)
-            row.separator()
-            row.separator()
-
-            row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
+    def _draw_info(self, layout):
+        layout.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
     def process(self, bundle_info):
         source = self.get_object_from_name(self.source)
         if source:
             bundle_info['pivot'] = source.location
-
-        

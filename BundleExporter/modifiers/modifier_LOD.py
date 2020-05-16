@@ -22,6 +22,12 @@ class BGE_mod_lod(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+    
     levels: bpy.props.IntProperty(
         default=3,
         min=2,
@@ -36,26 +42,24 @@ class BGE_mod_lod(modifier.BGE_mod_default):
         subtype='FACTOR'
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if self.active:
-            row = layout.row(align=True)
-            row.prop(self, "levels", text="Steps", icon='AUTOMERGE_ON')
-            row.prop(self, "quality", text="Quality", icon='AUTOMERGE_ON')
+    def _draw_info(self, layout):
+        row = layout.row(align=True)
+        row.prop(self, "levels", text="Steps", icon='AUTOMERGE_ON')
+        row.prop(self, "quality", text="Quality", icon='AUTOMERGE_ON')
 
-            col = layout.column(align=True)
-            for i in range(0, self.levels):
-                r = col.row()
-                r.enabled = False
-                icon = 'MESH_UVSPHERE' if i == 0 else 'MESH_ICOSPHERE'
-                r.label(text="LOD{}".format(i), icon=icon)
-                r = r.row()
-                r.enabled = False
-                r.alignment = 'RIGHT'
-                r.label(text="{}%".format(math.ceil(get_quality(i, self.levels, self.quality) * 100)))
-            # row_freeze = row.row()
-            # row_freeze.enabled = self.merge_active
-            # row_freeze.prop( self , "merge_distance")
+        col = layout.column(align=True)
+        for i in range(0, self.levels):
+            r = col.row()
+            r.enabled = False
+            icon = 'MESH_UVSPHERE' if i == 0 else 'MESH_ICOSPHERE'
+            r.label(text="LOD{}".format(i), icon=icon)
+            r = r.row()
+            r.enabled = False
+            r.alignment = 'RIGHT'
+            r.label(text="{}%".format(math.ceil(get_quality(i, self.levels, self.quality) * 100)))
+        # row_freeze = row.row()
+        # row_freeze.enabled = self.merge_active
+        # row_freeze.prop( self , "merge_distance")
 
     def process(self, bundle_info):
         # UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html

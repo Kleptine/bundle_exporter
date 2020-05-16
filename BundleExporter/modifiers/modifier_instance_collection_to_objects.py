@@ -21,17 +21,18 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
         default=False
     )
 
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     export_hidden: bpy.props.BoolProperty(
         name="Export Hidden",
         default=False
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            row = layout.row()
-            row.separator()
-            row.prop(self, 'export_hidden')
+    def _draw_info(self, layout):
+        layout.prop(self, 'export_hidden')
 
     def process(self, bundle_info):
         helpers = bundle_info['empties']

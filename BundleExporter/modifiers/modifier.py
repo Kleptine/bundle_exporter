@@ -23,6 +23,11 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         default=False
     )
 
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     def __lt__(self, other):
         return self.priority < other.priority
 
@@ -34,9 +39,19 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     def settings_path_global(cls):
         return "bpy.context.preferences.addons['{}'].preferences.modifier_preferences.BGE_modifier_{}".format(__name__.split('.')[0], cls.id)
 
+    def _draw_info(self, layout):
+        pass
+
     def draw(self, layout):
         row = layout.row(align=True)
-        row.prop(self, "active", text="")
+        row.prop(
+            self,
+            'show_info',
+            icon="TRIA_DOWN" if self.show_info else "TRIA_RIGHT",
+            icon_only=True,
+            text='',
+            emboss=False
+        )
         row.label(text="{}".format(self.label), icon=self.icon)
 
         r = row.row(align=True)
@@ -46,7 +61,15 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 
         r = row.row(align=True)
         r.alignment = 'RIGHT'
-        r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
+        r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
+        # r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
+
+        if(self.active and self.show_info):
+            row = layout.row()
+            row.separator()
+            row.separator()
+            col = row.column(align=False)
+            self._draw_info(col)
 
     def print(self):
         pass

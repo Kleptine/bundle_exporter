@@ -18,6 +18,12 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+    
     ratio: bpy.props.FloatProperty(
         default=0.35,
         min=0.01,
@@ -34,12 +40,10 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         subtype='FACTOR'
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            row = layout.row(align=True)
-            row.prop(self, "ratio", text="Ratio", icon='AUTOMERGE_ON')
-            row.prop(self, "angle", text="Angle", icon='AUTOMERGE_ON')
+    def _draw_info(self, layout):
+        row = layout.row(align=True)
+        row.prop(self, "ratio", text="Ratio", icon='AUTOMERGE_ON')
+        row.prop(self, "angle", text="Angle", icon='AUTOMERGE_ON')
 
     def process(self, bundle_info):
         # UNITY 	https://docs.unity3d.com/Manual/LevelOfDetail.html

@@ -69,6 +69,7 @@ class BGE_OT_override_bundle_modifier(bpy.types.Operator):
         for x in mods:
             if x.id == self.option:
                 x.active = True
+                x.show_info = True
 
         return {'FINISHED'}
 
@@ -95,6 +96,7 @@ class BGE_OT_add_bundle_modifier(bpy.types.Operator):
         for x in mods:
             if x.id == self.option:
                 x.active = True
+                x.show_info = True
 
         return {'FINISHED'}
 

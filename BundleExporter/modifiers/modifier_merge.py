@@ -21,6 +21,11 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         default=False
     )
 
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     merge_verts: bpy.props.BoolProperty(
         name="Merge",
         description="Split meshes by material after merging.",
@@ -58,29 +63,26 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     # 	default=True
     # )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            row = layout.row()
-            row.separator()
+    def _draw_info(self, layout):
+        row = layout.row()
 
-            col = row.column(align=False)
+        col = row.column(align=False)
 
-            col.prop(self, 'merge_type')
+        col.prop(self, 'merge_type')
 
-            col = col.column(align=True)
+        col = col.column(align=True)
 
-            row = col.row(align=True)
-            row.prop(self, "merge_verts", text="Merge Verts")
-            row_freeze = row.row()
-            row_freeze.enabled = self.merge_verts
-            row_freeze.prop(self, "merge_distance")
+        row = col.row(align=True)
+        row.prop(self, "merge_verts", text="Merge Verts")
+        row_freeze = row.row()
+        row_freeze.enabled = self.merge_verts
+        row_freeze.prop(self, "merge_distance")
 
-            row = col.row(align=True)
-            row.prop(self, "merge_by_material", text="Split by Material")
+        row = col.row(align=True)
+        row.prop(self, "merge_by_material", text="Split by Material")
 
-            row = col.row(align=True)
-            row.prop(self, 'keep_armature_modifier', text="Try to keep armature")
+        row = col.row(align=True)
+        row.prop(self, 'keep_armature_modifier', text="Try to keep armature")
 
     def process(self, bundle_info):
         name = bundle_info['name']

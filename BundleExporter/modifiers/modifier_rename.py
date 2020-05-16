@@ -19,19 +19,21 @@ class BGE_mod_rename(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     path: bpy.props.StringProperty(default="{path}")
     file: bpy.props.StringProperty(default="{bundle}")
     obj: bpy.props.StringProperty(default="{object}")
 
-    def draw(self, layout):
-        super().draw(layout)
-        if self.active:
-            # row = layout.row(align=True)
-
-            col = layout.column(align=True)
-            col.prop(self, "path", text="Path")
-            col.prop(self, "file", text="File")
-            col.prop(self, "obj", text="Object")
+    def _draw_info(self, layout):
+        col = layout.column(align=True)
+        col.prop(self, "path", text="Path")
+        col.prop(self, "file", text="File")
+        col.prop(self, "obj", text="Object")
 
     def remove_illegal_characters(self, value):
         chars = '*?"<>|'

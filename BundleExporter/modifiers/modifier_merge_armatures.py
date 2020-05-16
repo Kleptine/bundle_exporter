@@ -24,6 +24,11 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default=False
     )
 
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     create_root_bone: bpy.props.BoolProperty(
         name="Create Root Bone",
         default=True
@@ -54,21 +59,17 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default="{armature.name}_{name}"
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            row = layout.row()
-            row.separator()
-            col = row.column(align=False)
-            row = col.row(align=True)
-            row.prop(self, 'create_root_bone')
-            row.prop(self, 'root_bone_name', text='')
-            col.prop(self, 'armature_name')
-            row = col.row(align=True)
-            row.prop(self, "rename_bones", text='')
-            if self.rename_bones:
-                row.prop(self, "new_name", text='Rename Data')
-            col.prop(self, 'merge_actions')
+    def _draw_info(self, layout):
+        col = layout.column(align=False)
+        row = col.row(align=True)
+        row.prop(self, 'create_root_bone')
+        row.prop(self, 'root_bone_name', text='')
+        col.prop(self, 'armature_name')
+        row = col.row(align=True)
+        row.prop(self, "rename_bones", text='Rename Data')
+        if self.rename_bones:
+            row.prop(self, "new_name", text='')
+        col.prop(self, 'merge_actions')
 
     def process(self, bundle_info):
         armatures = bundle_info['armatures']

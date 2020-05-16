@@ -17,18 +17,17 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     scale: bpy.props.FloatVectorProperty(default=(0.01, 0.01, 0.01), subtype='XYZ', size=3)
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            # Alternatively: https://blender.stackexchange.com/questions/75185/limit-prop-search-to-specific-types-of-objects
-
-            row = layout.row(align=True)
-            row.separator()
-            row.separator()
-
-            row.prop(self, "scale", text="Scale")
+    def _draw_info(self, layout):
+        row = layout.row(align=True)
+        row.prop(self, "scale", text="Scale")
 
     def process(self, bundle_info):
         helpers = bundle_info['empties']

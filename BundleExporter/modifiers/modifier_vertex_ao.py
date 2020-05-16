@@ -17,6 +17,12 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
         name="Active",
         default=False
     )
+
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+    
     contrast: bpy.props.FloatProperty(
         default=0.5,
         min=0,
@@ -25,15 +31,8 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
         subtype='FACTOR'
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if self.active:
-            col = layout.column(align=True)
-
-            row = col.row(align=True)
-            row.separator()
-            row.separator()
-            row.prop(self, "contrast", text="Contrast")
+    def _draw_info(self, layout):
+        layout.prop(self, "contrast", text="Contrast")
 
     def process(self, bundle_info):
         contrast = self.contrast

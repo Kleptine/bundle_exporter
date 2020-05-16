@@ -26,6 +26,11 @@ class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
         default=False
     )
 
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
     types: bpy.props.EnumProperty(
         name="Exclude types",
         options={'ENUM_FLAG'},
@@ -33,13 +38,8 @@ class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
         default={'HIDDEN', 'COLLECTION_HIDDEN'},
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-
-        row = layout.row(align=True)
-        row.separator()
-        row.separator()
-        row.prop(self, 'types')
+    def _draw_info(self, layout):
+        layout.prop(self, 'types')
 
     def process(self, bundle_info):
         def check_export(obj):

@@ -17,10 +17,13 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
         default=False
     )
 
-    def draw(self, layout):
-        super().draw(layout)
-        if(self.active):
-            pass
+    show_info: bpy.props.BoolProperty(
+        name="Show Info",
+        default=True
+    )
+
+    def _draw_info(self, layout):
+        pass
 
     def process(self, bundle_info):
         # TODO: needs to be implemented
