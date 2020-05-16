@@ -174,6 +174,18 @@ class Bundle(bpy.types.PropertyGroup):
             return bounds
         return False
 
+    def create_bundle_info(self):
+        bundle_info = {
+            'name': self.key,
+            'path': '',
+            'pivot': self.pivot,
+            'meshes': [],
+            'empties': [],
+            'armatures': [],
+            'extras': []  # extra objects that dont need to be processed (created colliders or LODs)
+        }
+        return bundle_info
+
 
 class ObjectBounds:
     obj = None

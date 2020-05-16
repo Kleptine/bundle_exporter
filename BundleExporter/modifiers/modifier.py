@@ -42,6 +42,9 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     def _draw_info(self, layout):
         pass
 
+    def _warning(self):
+        return False
+
     def draw(self, layout, active_as_x=True):
         row = layout.row(align=True)
         row.prop(
@@ -52,6 +55,9 @@ class BGE_mod_default(bpy.types.PropertyGroup):
             text='',
             emboss=False
         )
+        if self._warning():
+            row.alert = True
+
         row.label(text="{}".format(self.label), icon=self.icon)
 
         r = row.row(align=True)
@@ -60,6 +66,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         # r.operator( BGE_OT_modifier_apply.bl_idname, icon='FILE_TICK' ).modifier_id = self.id
 
         r = row.row(align=True)
+        r.alert = False
         r.alignment = 'RIGHT'
         if active_as_x:
             r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)

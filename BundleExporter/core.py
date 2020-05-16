@@ -253,8 +253,10 @@ class BGE_PT_files_panel(bpy.types.Panel):
             row = row.row()
             row.alignment='RIGHT'
             row.label(text='x{}'.format(num_objects))
-            row.label(text='', icon=next(x[3] for x in mode_bundle_types if x[0] == bundle_list[bundle_index].mode_bundle))
-            row.label(text='', icon=next(x[3] for x in mode_pivot_types if x[0] == bundle_list[bundle_index].mode_pivot))
+            row.prop(bundle_list[bundle_index], 'mode_bundle', icon_only=True,text='',emboss=False)
+            row.prop(bundle_list[bundle_index], 'mode_pivot', icon_only=True,text='',emboss=False)
+            # row.label(text='', icon=next(x[3] for x in mode_bundle_types if x[0] == bundle_list[bundle_index].mode_bundle))
+            # row.label(text='', icon=next(x[3] for x in mode_pivot_types if x[0] == bundle_list[bundle_index].mode_pivot))
             # TODO: add labels with collection and pivot icons
             row.operator(operators.BGE_OT_file_export_selected.bl_idname, text="Export", icon=icon)
             if bpy.context.scene.BGE_Settings.show_bundle_info:
@@ -262,8 +264,6 @@ class BGE_PT_files_panel(bpy.types.Panel):
                 row.separator()
                 col = row.column()
                 row.separator()
-
-                
                 col = col.column()
                 col.alert = not bundle_list[bundle_index].is_key_valid()
                 col.prop(bundle_list[bundle_index], "key", text="", expand=True)

@@ -23,18 +23,16 @@ class BGE_OT_fence_draw(bpy.types.Operator):
 
         bundle_list = bundles.get_bundles()
         for bundle in bundle_list:
-            name = bundle.key
             objects = bundle.objects
             if len(objects) > 0:
-                bounds_combined = bundle.get_bounds()
-                draw_bounds(name, bundle, bounds_combined)
+                draw_bounds(bundle)
 
         return {'FINISHED'}
 
 
-def draw_bounds(name, bundle, bounds):
+def draw_bounds(bundle):
+    bounds = bundle.get_bounds()
     objects = bundle.objects
-    print("Fence {}".format(name))
 
     padding = bpy.context.scene.BGE_Settings.padding
 
@@ -60,14 +58,19 @@ def draw_bounds(name, bundle, bounds):
     draw.add_line([_min + Vector((size.x, size.y, 0)), _min + Vector((size.x, size.y, padding))])
     draw.add_line([_min + Vector((0, size.y, 0)), _min + Vector((0, size.y, padding))])
 
+    bundle_info = bundle.create_bundle_info()
+    for x in bundle.modifiers:
+        x.process(bundle_info)
+
     # Draw Text
-    label = name
+    label = bundle_info['name']
     if len(objects) > 1:
-        label = "{} {}x".format(name, len(objects))
+        label = "{} {}x".format(label, len(objects))
     draw.add_text(label.upper(), _min, padding * 0.5)
 
     # Draw pole + Flag
-    pivot = bundle.pivot
+    pivot = bundle_info['pivot']
+
     height = max(padding, size.z) * 2.0
     draw.add_line([Vector((pivot.x, pivot.y, _min.z)), Vector((pivot.x, pivot.y, _min.z + height))], dash=padding * 0.25)
     # Flag

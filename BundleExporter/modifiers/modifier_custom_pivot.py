@@ -12,7 +12,7 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
     type = 'MESH'
     icon = 'EMPTY_ARROWS'
     priority = 10
-    tooltip = 'Assign a custom pivot based on the chosen source object'
+    tooltip = 'Assign a custom pivot by choosing a source object'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -25,6 +25,9 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
     )
 
     source: bpy.props.StringProperty()
+
+    def _warning(self):
+        return self.source not in bpy.context.scene.objects
 
     def _draw_info(self, layout):
         layout.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
