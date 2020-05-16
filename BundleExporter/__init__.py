@@ -27,7 +27,7 @@ bl_info = {
     "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
     "wiki_url": "http://renderhjs.net/fbxbundle/",
-    "tracker_url": "https://gitlab.com/AquaticNightmare/blender_game_exporter/-/issues",
+    "tracker_url": "https://gitlab.com/AquaticNightmare/bundle_exporter/-/issues",
 }
 
 
