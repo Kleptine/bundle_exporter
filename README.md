@@ -16,8 +16,8 @@ This project started as just a port of [**FBX Bundle**](https://bitbucket.org/re
 - The export path is now automatically stored as a relative path
 - Some features were removed (the unity script, the tools section...)
 
-![](images/modifiers_screenshot.png)
+![](img_03.png)
 
-![](images/bundle_exporter_example.png)
+![](img_01.png)
 
-![](images/modifiers_options_screenshot.png)
+![](img_02.png)
