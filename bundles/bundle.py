@@ -173,7 +173,7 @@ class Bundle(bpy.types.PropertyGroup):
     def create_bundle_info(self):
         bundle_info = {
             'name': self.key,
-            'path': '',
+            'path': bpy.context.scene.BGE_Settings.path,
             'pivot': self.pivot,
             'meshes': [],
             'empties': [],

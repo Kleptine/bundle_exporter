@@ -10,109 +10,105 @@ from ..utilities import traverse_tree, traverse_tree_from_iteration
 debug = False
 
 
-# copy all objects toguether to keep relations and store in them their original values
-def copy_objects(objects):
-    print('Gathering export objects...')
-    bpy.ops.object.select_all(action="DESELECT")
-    print('Collections...')
-    # we need to traverse the tree from child to parent or else the exclude property can be missed
-    layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
-    for layer_collection in layers_in_hierarchy:
+# https://preshing.com/20110920/the-python-with-statement-by-example/
+# instead of try finally
+class Exporter():
+    def __init__(self, bundle, path):
+        self.bundle = bundle
+        self.path = path
+
+    def __enter__(self):
+        objects = self.bundle.objects
+        bpy.ops.object.select_all(action="DESELECT")
+        # we need to traverse the tree from child to parent or else the exclude property can be missed
+        layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
+        for layer_collection in layers_in_hierarchy:
             bpy.data.collections[layer_collection.name]['__orig_exclude__'] = layer_collection.exclude
             bpy.data.collections[layer_collection.name]['__orig_hide_lc__'] = layer_collection.hide_viewport
             layer_collection.exclude = False
             layer_collection.hide_viewport = False
 
-    for collection in bpy.data.collections:
-        collection['__orig_hide__'] = collection.hide_viewport
-        collection['__orig_hide_select__'] = collection.hide_select
+        for collection in bpy.data.collections:
+            collection['__orig_hide__'] = collection.hide_viewport
+            collection['__orig_hide_select__'] = collection.hide_select
 
-        collection.hide_select = False
-        collection.hide_viewport = False
+            collection.hide_select = False
+            collection.hide_viewport = False
 
-    print('Objects...')
-    # when renaming objects bpy.data.objects changes?
-    objs = [x for x in bpy.data.objects]
-    for obj in objs:
-        obj['__orig_name__'] = obj.name
-        obj['__orig_hide__'] = obj.hide_viewport
-        obj['__orig_hide_select__'] = obj.hide_select
-        obj['__orig_collection__'] = obj.users_collection[0].name if obj.users_collection else '__NONE__'
+        # when renaming objects bpy.data.objects changes?
+        objs = [x for x in bpy.data.objects]
+        for obj in objs:
+            obj['__orig_name__'] = obj.name
+            obj['__orig_hide__'] = obj.hide_viewport
+            obj['__orig_hide_select__'] = obj.hide_select
+            obj['__orig_collection__'] = obj.users_collection[0].name if obj.users_collection else '__NONE__'
 
-        obj.hide_viewport = False
-        obj.hide_select = False
+            obj.hide_viewport = False
+            obj.hide_select = False
 
-        if obj in objects:
-            obj.select_set(True)
-            obj.name = prefix_copy + obj.name
-        else:
-            obj.select_set(False)
+            if obj in objects:
+                obj.select_set(True)
+                obj.name = prefix_copy + obj.name
+            else:
+                obj.select_set(False)
 
-    print('Duplicating...')
-    # duplicate the objects
-    bpy.ops.object.duplicate()
-    copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
-    bpy.ops.object.make_local(type='SELECT_OBDATA')
-    bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
+        # duplicate the objects
+        bpy.ops.object.duplicate()
+        copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
+        bpy.ops.object.make_local(type='SELECT_OBDATA')
+        bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
-    print('Renaming...')
-    for x in copied_objects:
-        x['__IS_COPY__'] = True
-        x.name = x['__orig_name__']
+        # mark copied objects for later deletion
+        for x in copied_objects:
+            x['__IS_COPY__'] = True
+            x.name = x['__orig_name__']
 
-    export_meshes = [x for x in copied_objects if x.type in mesh_types]
-    export_helpers = [x for x in copied_objects if x.type in empty_types]
-    export_armatures = [x for x in copied_objects if x.type in armature_types]
+        bundle_info = self.bundle.create_bundle_info()
+        bundle_info['meshes'] = [x for x in copied_objects if x.type in mesh_types]
+        bundle_info['empties'] = [x for x in copied_objects if x.type in empty_types]
+        bundle_info['armatures'] = [x for x in copied_objects if x.type in armature_types]
+        bundle_info['path'] = self.path
 
-    print('Done')
+        return bundle_info
 
-    return export_meshes, export_helpers, export_armatures
+    def __exit__(self, type, value, traceback):
+        # first delete duplicated objects
+        objs = [x for x in bpy.data.objects]
+        for obj in objs:
+            if '__IS_COPY__' in obj and obj['__IS_COPY__']:
+                bpy.data.objects.remove(obj, do_unlink=True)
 
+        # now restore original values
+        objs = [x for x in bpy.data.objects]
+        for obj in objs:
+            if obj.name is not obj['__orig_name__']:
+                obj.name = obj['__orig_name__']
+            obj.hide_viewport = obj['__orig_hide__']
+            obj.hide_select = obj['__orig_hide_select__']
 
-def restore_defaults():
-    # when renaming objects bpy.data.objects changes?
-    print('Restoring Scene...')
+            del obj['__orig_name__']
+            del obj['__orig_hide__']
+            del obj['__orig_hide_select__']
+            del obj['__orig_collection__']
 
-    print('Objects...')
-    # first delete duplicated objects
-    objs = [x for x in bpy.data.objects]
-    for obj in objs:
-        if '__IS_COPY__' in obj and obj['__IS_COPY__']:
-            bpy.data.objects.remove(obj, do_unlink=True)
+        for collection in bpy.data.collections:
+            collection.hide_viewport = collection['__orig_hide__']
+            collection.hide_select = collection['__orig_hide_select__']
 
-    # now restore original values
-    objs = [x for x in bpy.data.objects]
-    for obj in objs:
-        if obj.name is not obj['__orig_name__']:
-            obj.name = obj['__orig_name__']
-        obj.hide_viewport = obj['__orig_hide__']
-        obj.hide_select = obj['__orig_hide_select__']
+            del collection['__orig_hide__']
+            del collection['__orig_hide_select__']
 
-        del obj['__orig_name__']
-        del obj['__orig_hide__']
-        del obj['__orig_hide_select__']
-        del obj['__orig_collection__']
+        layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
+        for layer_collection in layers_in_hierarchy:
+            layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
+            layer_collection.hide_viewport = bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
+            del bpy.data.collections[layer_collection.name]['__orig_exclude__']
+            del bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
 
-    print('Collections...')
-    for collection in bpy.data.collections:
-        collection.hide_viewport = collection['__orig_hide__']
-        collection.hide_select = collection['__orig_hide_select__']
-
-        del collection['__orig_hide__']
-        del collection['__orig_hide_select__']
-
-    layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
-    for layer_collection in layers_in_hierarchy:
-        layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
-        layer_collection.hide_viewport = bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
-        del bpy.data.collections[layer_collection.name]['__orig_exclude__']
-        del bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
-
-    print('Deleting unused meshes...')
-    # remove unused meshes
-    for block in bpy.data.meshes:
-        if block.users == 0:
-            bpy.data.meshes.remove(block)
+        # remove unused meshes
+        for block in bpy.data.meshes:
+            if block.users == 0:
+                bpy.data.meshes.remove(block)
 
 
 # https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
@@ -134,6 +130,9 @@ def get_export_arguments(filepath, export_path):
 
 
 def export(bundles, path, export_format, export_preset):
+    export_format = bpy.context.scene.BGE_Settings.export_format
+    export_preset = bpy.context.scene.BGE_Settings.export_preset
+
     previous_selection = bpy.context.selected_objects.copy()
     previous_active = bpy.context.view_layer.objects.active
     previous_unit_system = bpy.context.scene.unit_settings.system
@@ -150,30 +149,14 @@ def export(bundles, path, export_format, export_preset):
     bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
 
     for bundle in bundles:
-        orig_objects = bundle.objects
-
-        export_meshes, export_helpers, export_armatures = copy_objects(orig_objects)
-
-        # TODO: change this dict into a class?
-        # Each modifier changes these values to their needs
-        bundle_info = {
-            'name': bundle.key,
-            'path': path,
-            'pivot': bundle.pivot,
-            'meshes': export_meshes,
-            'empties': export_helpers,
-            'armatures': export_armatures,
-            'extras': []  # extra objects that dont need to be processed (created colliders or LODs)
-        }
-
-        bpy.ops.object.select_all(action="DESELECT")
-
-        try:
+        with Exporter(bundle, path) as bundle_info:
+            bpy.ops.object.select_all(action="DESELECT")
             print('Start applying modifiers...')
             for modifier in bundle.modifiers:
                 print('Appliying modifier "{}" ...'.format(modifier.id))
                 modifier.process(bundle_info)
 
+            # apply the pivot
             for x in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
                 x.location -= bundle_info['pivot']
 
@@ -190,9 +173,6 @@ def export(bundles, path, export_format, export_preset):
 
             export_preset_path = settings.get_presets(export_format)[export_preset]
             settings.export_operators[export_format](**get_export_arguments(export_preset_path, path_full))
-        finally:
-            if not debug:
-                restore_defaults()
 
     # TODO: add this final part into a except/finally scope ?
     # Restore previous settings
@@ -206,6 +186,6 @@ def export(bundles, path, export_format, export_preset):
 
     # Show popup
     def draw(self, context):
-        self.layout.operator("wm.path_open", text=path, icon='FILE_FOLDER').filepath = path
+        self.layout.operator("wm.path_open", text=bpy.context.scene.BGE_Settings.path, icon='FILE_FOLDER').filepath = bpy.context.scene.BGE_Settings.path
 
     bpy.context.window_manager.popup_menu(draw, title="Exported {}x files".format(len(list(bundles))), icon='INFO')
