@@ -252,7 +252,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
             row.label(text=bundle_list[bundle_index].filename, icon='FILE_3D')
             row = row.row()
             row.alignment = 'RIGHT'
-            row.label(text='x{}'.format(num_objects))
+            row.operator(operators.op_bundles.BGE_OT_select.bl_idname, emboss=False, text='x{}'.format(num_objects)).index = bundle_index
             row.prop(bundle_list[bundle_index], 'mode_bundle', icon_only=True, text='', emboss=False)
             row.prop(bundle_list[bundle_index], 'mode_pivot', icon_only=True, text='', emboss=False)
             row.operator(operators.BGE_OT_file_export_selected.bl_idname, text="Export", icon=icon)

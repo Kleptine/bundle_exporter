@@ -7,10 +7,10 @@ from . import modifier
 from .. import settings
 from ..utilities import traverse_tree
 
-exclude_types = [('HIDDEN', 'OBJECTS', 'hidden objects', 'HIDE_OFF', 2),
-                 ('NOT_SELECTABLE', 'OBJECTS', 'not selectable objects', 'RESTRICT_SELECT_ON', 4),
-                 ('COLLECTION_HIDDEN', 'COLLECTIONS', 'hidden collections', 'HIDE_OFF', 8),
-                 ('COLLECTION_NOT_SELECTABLE', 'COLLECTIONS', 'not selectable collections', 'RESTRICT_SELECT_ON', 16)]
+exclude_types = [('HIDDEN', 'OBJECTS', 'only visible objects will be exported', 'HIDE_OFF', 2),
+                 ('NOT_SELECTABLE', 'OBJECTS', 'only selectable objects will be exported', 'RESTRICT_SELECT_ON', 4),
+                 ('COLLECTION_HIDDEN', 'COLLECTIONS', 'only visible collections will be exported', 'HIDE_OFF', 8),
+                 ('COLLECTION_NOT_SELECTABLE', 'COLLECTIONS', 'only selectable collections will be exported', 'RESTRICT_SELECT_ON', 16)]
 
 class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
     label = "Exclude From Export"

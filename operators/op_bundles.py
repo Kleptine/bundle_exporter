@@ -11,6 +11,14 @@ class BGE_OT_select(bpy.types.Operator):
 
     index: bpy.props.IntProperty(name="index")
 
+    @classmethod
+    def description(cls, context, properties):
+        ans = ''
+        bundle = bpy.context.scene.BGE_Settings.bundles[properties.index]
+        for x in bundle.objects:
+            ans += x.name + '\n'
+        return ans
+
     def invoke(self, context, event):
         if event.ctrl or event.shift:
             bpy.context.scene.BGE_Settings.bundles[self.index].select(alone = False)

@@ -47,14 +47,17 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 
     def draw(self, layout, active_as_x=True):
         row = layout.row(align=True)
-        row.prop(
-            self,
-            'show_info',
-            icon="TRIA_DOWN" if self.show_info else "TRIA_RIGHT",
-            icon_only=True,
-            text='',
-            emboss=False
-        )
+        if not active_as_x:
+            row.prop(self, "active", text="")
+        else:
+            row.prop(
+                self,
+                'show_info',
+                icon="TRIA_DOWN" if self.show_info else "TRIA_RIGHT",
+                icon_only=True,
+                text='',
+                emboss=False
+            )
         if self._warning():
             row.alert = True
 
@@ -68,10 +71,9 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         r = row.row(align=True)
         r.alert = False
         r.alignment = 'RIGHT'
+        
         if active_as_x:
             r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
-        else:
-            r.prop(self, "active", text="")
         # r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
 
         if(self.active and self.show_info):

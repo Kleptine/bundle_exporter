@@ -9,6 +9,7 @@ from ..utilities import traverse_tree, traverse_tree_from_iteration
 
 debug = False
 
+
 # copy all objects toguether to keep relations and store in them their original values
 def copy_objects(objects):
     print('Gathering export objects...')
@@ -207,4 +208,4 @@ def export(bundles, path, export_format, export_preset):
     def draw(self, context):
         self.layout.operator("wm.path_open", text=path, icon='FILE_FOLDER').filepath = path
 
-    bpy.context.window_manager.popup_menu(draw, title="Exported {}x files".format(len(bundles)), icon='INFO')
+    bpy.context.window_manager.popup_menu(draw, title="Exported {}x files".format(len(list(bundles))), icon='INFO')

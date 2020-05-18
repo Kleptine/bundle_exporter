@@ -29,11 +29,14 @@ class BGE_mod_rename(modifier.BGE_mod_default):
     file: bpy.props.StringProperty(default="{bundle}")
     obj: bpy.props.StringProperty(default="{object}")
 
+    remove_numbering: bpy.props.BoolProperty(name="Remove numbering from objects", default=True)
+
     def _draw_info(self, layout):
         col = layout.column(align=True)
         col.prop(self, "path", text="Path")
         col.prop(self, "file", text="File")
         col.prop(self, "obj", text="Object")
+        col.prop(self, 'remove_numbering')
 
     def remove_illegal_characters(self, value):
         chars = '*?"<>|'
@@ -48,12 +51,17 @@ class BGE_mod_rename(modifier.BGE_mod_default):
         val = val.replace("{scene}", bpy.context.scene.name)
         return self.remove_illegal_characters(val)
 
+    def process_name(self, name):
+        if self.remove_numbering and len(name) >= 4 and name[-4] == '.' and name[-3:].isdigit():
+            return name[:-4]
+        return name
+
     def process(self, bundle_info):
         path = bundle_info['path']
         name = bundle_info['name']
         objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
         for obj in objects:
-            obj.name = self.remove_illegal_characters(self.format_object_name(name, obj.name))
+            obj.name = self.remove_illegal_characters(self.format_object_name(name, self.process_name(obj.name)))
 
         new_name = self.file
         new_name = new_name.replace("{bundle}", name)
