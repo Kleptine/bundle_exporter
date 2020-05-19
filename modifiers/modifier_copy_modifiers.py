@@ -5,6 +5,7 @@ import imp
 from . import modifier
 
 from ..settings import prefix_copy
+from bl_ui.properties_data_modifier import DATA_PT_modifiers
 
 
 class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
@@ -24,7 +25,7 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
         name="Show Info",
         default=True
     )
-    
+
     source: bpy.props.StringProperty()
 
     replace_references: bpy.props.BoolProperty(default=True)
@@ -34,11 +35,19 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
         row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
         if self.source in bpy.data.objects:
+            mp = DATA_PT_modifiers(bpy.context)
             row = layout.row()
             row.enabled = False
 
-            count = len(bpy.data.objects[self.source].modifiers)
+            modifiers = bpy.data.objects[self.source].modifiers
+            count = len(modifiers)
             row.label(text="copies {}x modifiers".format(count))
+
+            for x in modifiers:
+                box = layout.template_modifier(x)
+                #box = layout.box()
+                if box:
+                    getattr(mp, x.type)(box, bpy.data.objects[self.source], x)
 
     def process(self, bundle_info):
         objects = bundle_info['meshes']
