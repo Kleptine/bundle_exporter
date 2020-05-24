@@ -103,17 +103,17 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                         armature.animation_data_create()
                         armature.animation_data.action = action
 
-                        for f in range(int(action.frame_range[0]), int(action.frame_range[1])):
+                        for f in range(int(action.frame_range[0]), int(action.frame_range[1]+1)):
                             if f not in actions_data:
                                 actions_data[f] = {}
                             bpy.context.scene.frame_set(f)
                             # gets the transform of all the deform bones for each frame
                             for bone in armature.pose.bones:
-                                if bone.bone.use_deform: # after disabling this check, the animation was correctly exported
+                                if bone.bone.use_deform:  # after disabling this check, the animation was correctly exported
                                     frame_data = {}
-                                    matrix = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='LOCAL')
-
-                                    frame_data['matrix'] = matrix
+                                    frame_data['matrix'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='LOCAL')
+                                    frame_data['matrix_pose'] = bone.matrix.copy()
+                                    frame_data['matrix_world'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='WORLD')
                                     frame_data['location'] = bone.location.copy()
                                     frame_data['scale'] = bone.scale.copy()
                                     frame_data['rotation'] = bone.rotation_quaternion.copy()
@@ -169,6 +169,10 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                 if 'subtarget' in data_to_change[x][y]:
                     mod.subtarget = data_to_change[x][y]['subtarget']
 
+        # ---------------------------------------------------------------------------- #
+        #                               ARMATURE CLEANUP                               #
+        # ---------------------------------------------------------------------------- #
+        
         # unhide all layers to select all bones and reset their transforms
         if merged_armature.animation_data:
             merged_armature.animation_data.action = None
@@ -176,11 +180,41 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         for x in range(0, 32):
             merged_armature.data.layers[x] = True
 
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        deleteBones = []
+        for eb in merged_armature.data.edit_bones:
+            if not eb.use_deform:
+                deleteBones.append(eb)
+        for db in deleteBones:
+            merged_armature.data.edit_bones.remove(db)
+
+
+
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         for x in merged_armature.data.bones:
             x.driver_remove('hide_select')
             x.hide_select = False
             x.driver_remove('hide')
             x.hide = False
+        
+        bpy.ops.object.mode_set(mode='POSE', toggle=False)
+        for x in merged_armature.pose.bones:
+            x.lock_location = [False, False, False]
+            x.lock_rotation = [False, False, False]
+            x.lock_rotation_w = False
+            x.lock_rotations_4d = False
+            x.lock_scale = [False, False, False]
+
+
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        for x in merged_armature.data.edit_bones:
+            x.parent = None
+            x.inherit_scale = 'NONE'
+            x.use_inherit_rotation = False
+            x.use_local_location = True
+            x.use_connect = False
+
+        bpy.ops.object.mode_set(mode='POSE', toggle=False)
         bpy.ops.pose.select_all(action='SELECT')
         bpy.ops.pose.loc_clear()
         bpy.ops.pose.rot_clear()
@@ -230,11 +264,18 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
                         for frame, frame_data in action_info.items():
                             if bone.name in frame_data.keys():
-                                matrix = frame_data[bone.name]['matrix']
-                                bone.matrix_basis = matrix.copy()
-
+                                matrix = merged_armature.convert_space(pose_bone=bone, matrix=frame_data[bone.name]['matrix_world'], from_space='WORLD', to_space='POSE')
+                                #bone.matrix_basis = frame_data[bone.name]['matrix'].copy()
+                                #bone.matrix = frame_data[bone.name]['matrix_pose'].copy()
+                                if frame < 1:
+                                    print('### {}'.format(bone.name))
+                                    print('0 -> {}'.format(bone.matrix))
+                                    print('1 -> {}'.format(matrix))
+                                bone.matrix = matrix
+                                #bone.matrix_basis = merged_armature.convert_space(pose_bone=bone, matrix=frame_data[bone.name]['matrix_world'], from_space='WORLD', to_space='LOCAL')
                                 bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options=options)
-
+                                if frame < 1:
+                                    print('2 -> {}'.format(bone.matrix))
                                 if quat_prev is not None:
                                     quat = bone.rotation_quaternion.copy()
                                     quat.make_compatible(quat_prev)

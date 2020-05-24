@@ -72,6 +72,8 @@ class Exporter():
         return bundle_info
 
     def __exit__(self, type, value, traceback):
+        if debug:
+            return
         # first delete duplicated objects
         objs = [x for x in bpy.data.objects]
         for obj in objs:

@@ -11,4 +11,4 @@ def traverse_tree_from_iteration(iterator):
     for obj in iterator:
         yield obj
         for child in obj.children:
-            yield from traverse_tree(child)
+            yield from traverse_tree(child, exclude_parent=False)
