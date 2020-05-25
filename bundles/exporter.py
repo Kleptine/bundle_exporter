@@ -7,7 +7,7 @@ from .. import settings
 from ..settings import prefix_copy, mesh_types, empty_types, armature_types
 from ..utilities import traverse_tree, traverse_tree_from_iteration
 
-debug = False
+debug = True
 
 
 # https://preshing.com/20110920/the-python-with-statement-by-example/

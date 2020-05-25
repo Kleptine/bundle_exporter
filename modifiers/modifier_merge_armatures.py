@@ -7,7 +7,7 @@ from mathutils import Vector
 
 from . import modifier
 
-from ..utilities import traverse_tree_from_iteration
+from ..utilities import traverse_tree_from_iteration, isclose_matrix
 
 
 class BGE_mod_merge_armatures(modifier.BGE_mod_default):
@@ -97,10 +97,8 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                         actions_data = baked_merge_actions[new_action_name][action.name]
 
                         # assign the action to record
-                        if armature.animation_data:
-                            armature.animation_data.action = None
-                            armature.animation_data_clear()
-                        armature.animation_data_create()
+                        if not armature.animation_data:
+                            armature.animation_data_create()
                         armature.animation_data.action = action
 
                         for f in range(int(action.frame_range[0]), int(action.frame_range[1]+1)):
@@ -146,12 +144,10 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             for armature in armatures:
                 for bone in armature.data.bones:
                     bone.name = self.new_name.format(armature=armature, name=bone.name)
-
         # join the armatures
         bpy.ops.object.select_all(action='DESELECT')
         bpy.context.view_layer.objects.active = armatures[0]
         for x in armatures:
-            print(x)
             x.select_set(True)
         bpy.ops.object.join()
 
@@ -172,7 +168,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         # ---------------------------------------------------------------------------- #
         #                               ARMATURE CLEANUP                               #
         # ---------------------------------------------------------------------------- #
-        
+
         # unhide all layers to select all bones and reset their transforms
         if merged_armature.animation_data:
             merged_armature.animation_data.action = None
@@ -208,9 +204,9 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
         for x in merged_armature.data.edit_bones:
-            x.parent = None
+            #x.parent = None
             x.inherit_scale = 'NONE'
-            x.use_inherit_rotation = False
+            x.use_inherit_rotation = True
             x.use_local_location = True
             x.use_connect = False
 
@@ -248,12 +244,15 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
             merged_armature.animation_data_create()
             for action_name, actions in baked_merge_actions.items():
+                print(action_name)
                 # if the merged action exists, delete it
                 if action_name in bpy.data.actions:
                     bpy.data.actions.remove(bpy.data.actions[action_name])
                 # create a new action with the merged name and assign it
                 new_action = bpy.data.actions.new(action_name)
                 merged_armature.animation_data.action = new_action
+
+                bpy.context.view_layer.update()
 
                 # loop though all the actions to merge
                 for action_info in actions.values():
@@ -264,18 +263,24 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
                         for frame, frame_data in action_info.items():
                             if bone.name in frame_data.keys():
+                                bpy.context.scene.frame_set(frame)  # when setting the matrix and doing the calculations, parent objects should have that frAMES TRANSFORMS, not necessary if we set the entire armature transforms each frame, instead of a bone each frame
+
                                 matrix = merged_armature.convert_space(pose_bone=bone, matrix=frame_data[bone.name]['matrix_world'], from_space='WORLD', to_space='POSE')
-                                #bone.matrix_basis = frame_data[bone.name]['matrix'].copy()
-                                #bone.matrix = frame_data[bone.name]['matrix_pose'].copy()
-                                if frame < 1:
-                                    print('### {}'.format(bone.name))
-                                    print('0 -> {}'.format(bone.matrix))
+                                old_matrix = bone.matrix.copy()
+                                bone.matrix = matrix.copy()
+                                merged_armature.update_tag(refresh={'OBJECT'})
+                                bpy.context.view_layer.update()
+
+                                if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
+                                    print('### INCORRECT ### f{} - {}'.format(frame, bone.name))
+                                    print('0 -> {}'.format(old_matrix))
                                     print('1 -> {}'.format(matrix))
-                                bone.matrix = matrix
+                                    print('0 -> {}'.format(bone.matrix))
+                                else:
+                                    print('*** CORRECT *** f{} - {}'.format(frame, bone.name))
                                 #bone.matrix_basis = merged_armature.convert_space(pose_bone=bone, matrix=frame_data[bone.name]['matrix_world'], from_space='WORLD', to_space='LOCAL')
                                 bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options=options)
-                                if frame < 1:
-                                    print('2 -> {}'.format(bone.matrix))
+
                                 if quat_prev is not None:
                                     quat = bone.rotation_quaternion.copy()
                                     quat.make_compatible(quat_prev)
@@ -289,6 +294,19 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                                 bone.keyframe_insert("scale", index=-1, frame=frame, group=bone.name, options=options)
                             else:
                                 pass
+                # for checking if the transforms were correctly applied
+                for action_info in actions.values():
+                    for bone in traverse_tree_from_iteration(bone for bone in merged_armature.pose.bones if not bone.parent):
+                        for frame, frame_data in action_info.items():
+                            if bone.name in frame_data.keys():
+                                matrix = merged_armature.convert_space(pose_bone=bone, matrix=frame_data[bone.name]['matrix_world'], from_space='WORLD', to_space='POSE')
+                                bpy.context.scene.frame_set(frame)
+                                if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
+                                    print('DOUBLE CHECK ### INCORRECT ### f{} - {}'.format(frame, bone.name))
+                                    print('1 -> {}'.format(matrix))
+                                    print('0 -> {}'.format(bone.matrix))
+                                else:
+                                    print('DOUBLE CHECK *** CORRECT *** f{} - {}'.format(frame, bone.name))
 
         # clear all transform data
         if merged_armature.animation_data:
