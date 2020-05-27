@@ -40,6 +40,8 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
             x = helpers[i]
             if x.instance_type == 'COLLECTION' and x.instance_collection:
 
+                orig_collection = x.instance_collection
+
                 if not self.export_hidden:
                     for collection in traverse_tree(x.instance_collection):
                         for obj in collection.objects:
@@ -52,9 +54,42 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 bpy.ops.object.make_local(type='SELECT_OBDATA')
                 bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
-                for y in new_nodes:
-                    y['__orig_collection__'] = x.name
-                    y['__IS_COPY__'] = True  # to automatically delete them after export
+                for new_node in new_nodes:
+                    new_node['__orig_collection__'] = x.name
+                    new_node['__IS_COPY__'] = True  # to automatically delete them after export
+
+                    #  time to copy drivers, they are lost when making collections real (https://developer.blender.org/T70551)
+                    try:
+                        orig_node = next(obj for obj in orig_collection.objects if obj['__orig_name__'] == new_node['__orig_name__'])
+                    except StopIteration:
+                        continue
+                    if orig_node.animation_data:
+                        if not new_node.animation_data:
+                            new_node.animation_data_create()
+                        for orig_driver in orig_node.animation_data.drivers:
+                            try:
+                                new_driver = new_node.driver_add(orig_driver.data_path, orig_driver.array_index) if orig_driver.array_index > 0 else new_node.driver_add(orig_driver.data_path)
+                            except TypeError:
+                                continue
+                            new_driver.driver.expression = orig_driver.driver.expression
+                            new_driver.driver.type = orig_driver.driver.type
+                            new_driver.driver.use_self = orig_driver.driver.use_self
+                            for orig_var in orig_driver.driver.variables:
+                                new_var = new_driver.driver.variables.new()
+                                new_var.type = orig_var.type
+                                new_var.name = orig_var.name
+
+                                for var_index in range(0, len(orig_var.targets)):
+                                    new_var.targets[var_index].data_path = orig_var.targets[var_index].data_path
+                                    #new_var.targets[var_index].id_type = orig_var.targets[var_index].id_type
+
+                                    orig_id = orig_var.targets[var_index].id
+
+                                    new_id = next(obj for obj in new_nodes if obj['__orig_name__'] == orig_id['__orig_name__'])
+                                    new_var.targets[var_index].id = new_id
+                                    new_var.targets[var_index].bone_target = orig_var.targets[var_index].bone_target
+                                    new_var.targets[var_index].transform_space = orig_var.targets[var_index].transform_space
+                                    new_var.targets[var_index].transform_type = orig_var.targets[var_index].transform_type
 
                 exportable_nodes = [x for x in new_nodes if '__do_export__' not in x or x['__do_export__'] == 1]
 
