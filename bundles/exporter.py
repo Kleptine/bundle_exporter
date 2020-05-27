@@ -1,5 +1,7 @@
 import os
 import pathlib
+import time
+import datetime
 
 import bpy
 from .. import settings
@@ -132,6 +134,8 @@ def get_export_arguments(filepath, export_path):
 
 
 def export(bundles, path, export_format, export_preset):
+    start_time = time.time()
+    
     export_format = bpy.context.scene.BGE_Settings.export_format
     export_preset = bpy.context.scene.BGE_Settings.export_preset
 
@@ -191,3 +195,5 @@ def export(bundles, path, export_format, export_preset):
         self.layout.operator("wm.path_open", text=bpy.context.scene.BGE_Settings.path, icon='FILE_FOLDER').filepath = bpy.context.scene.BGE_Settings.path
 
     bpy.context.window_manager.popup_menu(draw, title="Exported {}x files".format(len(list(bundles))), icon='INFO')
+
+    print("Exported in {} seconds".format(str(datetime.timedelta(seconds=(time.time() - start_time)))))
