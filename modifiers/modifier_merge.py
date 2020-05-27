@@ -16,6 +16,9 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     priority = 0
     tooltip = 'Merges meshes when exporting'
 
+    # TODO if different objects have UV maps with different names the merge may result on missing uvs
+    # add an option to rename all maps by index
+
     active: bpy.props.BoolProperty(
         name="Active",
         default=False

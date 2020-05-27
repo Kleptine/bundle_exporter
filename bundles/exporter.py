@@ -9,9 +9,6 @@ from .. import settings
 from ..settings import prefix_copy, mesh_types, empty_types, armature_types
 from ..utilities import traverse_tree, traverse_tree_from_iteration
 
-debug = True
-
-
 # https://preshing.com/20110920/the-python-with-statement-by-example/
 # instead of try finally
 class Exporter():
@@ -74,7 +71,7 @@ class Exporter():
         return bundle_info
 
     def __exit__(self, type, value, traceback):
-        if debug:
+        if settings.debug:
             return
         # first delete duplicated objects
         objs = [x for x in bpy.data.objects]

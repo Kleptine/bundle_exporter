@@ -8,12 +8,11 @@ from ..settings import prefix_copy
 
 
 class BGE_mod_default(bpy.types.PropertyGroup):
-    unique_num = 0
+    unique_num = 0  # this is used by the "add modifier" operator for creating the enum
     label = "Modifier"
-    id = 'modifier'
+    id = 'modifier'  # unique id for each modifier
     url = ""
-    type = "MESH"
-    global_settings = True
+    type = "MESH"  # HELPER / MESH / ARMATURE / GENERAL
     icon = 'MODIFIER'
     priority = 200  # lower number will be executed earlier
     tooltip = 'Default modifier'
@@ -39,9 +38,11 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     def settings_path_global(cls):
         return "bpy.context.preferences.addons['{}'].preferences.modifier_preferences.BGE_modifier_{}".format(__name__.split('.')[0], cls.id)
 
+    # children of this class should implement this function to draw their settings
     def _draw_info(self, layout):
         pass
-
+    
+    # to make the modifier appear red return true
     def _warning(self):
         return False
 

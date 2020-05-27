@@ -91,6 +91,8 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                                     new_var.targets[var_index].transform_space = orig_var.targets[var_index].transform_space
                                     new_var.targets[var_index].transform_type = orig_var.targets[var_index].transform_type
 
+                # TODO: import textures from linked files aswell
+
                 exportable_nodes = [x for x in new_nodes if '__do_export__' not in x or x['__do_export__'] == 1]
 
                 # remove helper from export

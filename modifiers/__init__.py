@@ -123,5 +123,4 @@ def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERA
         if modifier.type in types:
             if not draw_only_active or modifier.active:
                 box = col.box()
-                # box.label(text=str(modifier.global_settings))
                 modifier.draw(box, active_as_x=draw_only_active)

@@ -73,3 +73,5 @@ mode_pivot_types = [('OBJECT_FIRST', 'First Name', "Pivot at the first object so
                     ('PARENT', 'Parent', "Pivot from the parent object", 'FILE_PARENT', 5),
                     ('EMPTY', 'Empty Gizmo', "Empty gizmo object of: Arrow, Plain Axes, Single Arrow>; global for all bundles (must be selected)", 'EMPTY_AXIS', 6),
                     ('EMPTY_LOCAL', 'Empty Local Gizmo', "You need to have an empty of type Arrow, Plain Axes or Single Arrow located inside the bundle and its name needs to start with 'pivot'; for example 'pivot.001'", 'EMPTY_ARROWS', 7)]
+
+debug = False
