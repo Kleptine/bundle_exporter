@@ -90,9 +90,10 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     def process(self, bundle_info):
         name = bundle_info['name']
         objects = bundle_info['meshes']
+        armatures = bundle_info['armatures']
         if len(objects) > 1:
             if self.merge_type == 'ALL':
-                objects = self.merge_meshes(objects, name)
+                objects = self.merge_meshes(objects, armatures, name)
 
             elif self.merge_type == 'COLLECTION':
                 # gather all collections
@@ -106,7 +107,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 objects = []
                 # merge by gathered objects
                 for collection_name, objs in collections_dict.items():
-                    merged = self.merge_meshes(objs, collection_name)
+                    merged = self.merge_meshes(objs, armatures, collection_name)
                     # rename all merged objects to the name of the collection
                     for obj in merged:
                         obj.name = collection_name
@@ -131,12 +132,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 objects = []
 
                 for parent, children in parents.items():
-                    merged = self.merge_meshes([parent] + children, parent.name)
+                    merged = self.merge_meshes([parent] + children, armatures, parent.name)
                     objects.extend(merged)
 
         bundle_info['meshes'] = objects
 
-    def merge_meshes(self, objects, name):
+    def merge_meshes(self, objects, armatures, name):
 
         if len(objects) < 2:
             return objects
@@ -267,6 +268,8 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                 print(mod)
                 for prop, value in armature_dict.items():
                     setattr(mod, prop, value)
+                if armatures and mod.object not in armatures:
+                    mod.object = armatures[0]
 
         return objects
 

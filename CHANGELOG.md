@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Option to remove duplicate numbering (".001", ".002", ".003"...) for the "Rename" modifier
 - "Copy modifiers" modifier now shows the modifiers in a list
+- "Merge Meshes" modifier searches for exportable armatures if a mesh being exported has an invalid "Armature" modifier and tries to fix it
 - Changelog
 
 ### Fixed
