@@ -84,4 +84,5 @@ class BGE_mod_lod(modifier.BGE_mod_default):
                 bpy.ops.object.modifier_add(type='DECIMATE')
                 bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
 
+                # add them to "extras" so other modifiers won't process them
                 bundle_info['extras'].append(bpy.context.object)

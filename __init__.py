@@ -21,12 +21,13 @@ bl_info = {
     "name": "Bundle Exporter",
     "description": "Export objects in bundles",
     "author": "AquaticNightmare",
-    "blender": (2, 80, 0),
-    "version": (2, 0, 0),
+    "blender": (2, 82, 0),
+    "version": (2, 0, 1),
     "category": "3D View",
     "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
     "wiki_url": "http://renderhjs.net/fbxbundle/",
+    "doc_url": "http://renderhjs.net/fbxbundle/",
     "tracker_url": "https://gitlab.com/AquaticNightmare/bundle_exporter/-/issues",
 }
 

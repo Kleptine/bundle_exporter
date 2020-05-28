@@ -94,12 +94,11 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             if self.merge_type == 'ALL':
                 objects = self.merge_meshes(objects, name)
 
-            # TODO: change this to ['__orig_collection__']
             elif self.merge_type == 'COLLECTION':
                 # gather all collections
                 collections_dict = {}
                 for x in objects:
-                    obj_collection = x.users_collection[0].name
+                    obj_collection = x['__orig_collection__']
                     if obj_collection not in collections_dict:
                         collections_dict[obj_collection] = []
                     collections_dict[obj_collection].append(x)

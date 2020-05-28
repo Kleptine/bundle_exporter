@@ -54,8 +54,11 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 bpy.ops.object.make_local(type='SELECT_OBDATA')
                 bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
+                # search custom attribs on empty and apply them to the objects
+                coll_dict = {key: x[key] for key in x.keys() if not key.startswith('_')}
                 for new_node in new_nodes:
-                    new_node['__orig_collection__'] = x.name
+                    for key in coll_dict:
+                        new_node[key] = coll_dict[key]
                     new_node['__IS_COPY__'] = True  # to automatically delete them after export
 
                     #  time to copy drivers, they are lost when making collections real (https://developer.blender.org/T70551)
