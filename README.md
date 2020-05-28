@@ -6,8 +6,8 @@ The main difference from the original addon is that the bundles are stored in th
 To see all the new features and changes take a look at the [***changelog***](CHANGELOG.md)
 
 
-![](img_03.png)
+![](images/img_03.png)
 
-![](img_01.png)
+![](images/img_01.png)
 
-![](img_02.png)
+![](images/img_02.png)
