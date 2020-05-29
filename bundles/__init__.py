@@ -10,7 +10,7 @@ def get_key(obj, mode_bundle):
     if mode_bundle == 'NAME':
         name = obj.name
         # Remove blender naming digits, e.g. cube.001, cube.002,...
-        if len(name)>= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
+        if len(name) >= 4 and name[-4] == '.' and name[-3].isdigit() and name[-2].isdigit() and name[-1].isdigit():
             name = name[:-4]
         return name
 

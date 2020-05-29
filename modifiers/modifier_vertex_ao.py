@@ -22,7 +22,7 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
         name="Show Info",
         default=True
     )
-    
+
     contrast: bpy.props.FloatProperty(
         default=0.5,
         min=0,

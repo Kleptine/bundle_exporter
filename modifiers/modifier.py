@@ -41,7 +41,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     # children of this class should implement this function to draw their settings
     def _draw_info(self, layout):
         pass
-    
+
     # to make the modifier appear red return true
     def _warning(self):
         return False
@@ -72,7 +72,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         r = row.row(align=True)
         r.alert = False
         r.alignment = 'RIGHT'
-        
+
         if active_as_x:
             r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
         # r.operator("wm.url_open", text="", icon='QUESTION').url = self.url

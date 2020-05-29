@@ -11,7 +11,7 @@ import importlib
 tree = [x[:-3] for x in os.listdir(os.path.dirname(__file__)) if x.endswith('.py') and x != '__init__.py']
 
 for i in tree:
-    importlib.import_module('.'+i, package=__package__)
+    importlib.import_module('.' + i, package=__package__)
 
 __globals = globals().copy()
 
@@ -22,11 +22,11 @@ for x in [x for x in __globals if x.startswith('modifier_')]:
     for y in [item for item in dir(__globals[x]) if item.startswith('BGE_')]:
         mod = getattr(__globals[x], y)
         mod.unique_num = num_id
-        num_id +=1
+        num_id += 1
         modifiers_dict[mod.id] = {
-                                    'module': __globals[x],
-                                    'global': mod,
-                                    'local': ''
+            'module': __globals[x],
+            'global': mod,
+            'local': ''
         }
 
 local_settings = []
@@ -54,11 +54,11 @@ def create_local_settings(Settings, defaults_path, name):
 
     for key in Settings.__annotations__:
         preferences_val = eval("{}.{}".format(defaults_path, key))
-        prop_data = Settings.__annotations__[key][1] #copy the original dictionary
+        prop_data = Settings.__annotations__[key][1]  # copy the original dictionary
         prop_data['default'] = preferences_val
         new_annotattions[key] = (Settings.__annotations__[key][0], prop_data)
-        #new_annotattions[key]['default']=preferences_val
-    SettingsScene = type(name, (Settings,), {'__annotations__':new_annotattions})
+        # new_annotattions[key]['default']=preferences_val
+    SettingsScene = type(name, (Settings,), {'__annotations__': new_annotattions})
     return SettingsScene
 
 
@@ -116,7 +116,7 @@ def get_modifiers(modifier_group):
     return [getattr(modifier_group, x) for x in modifier_group.keys() if x.startswith('BGE_modifier_')]
 
 
-def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL','MESH', 'HELPER', 'ARMATURE'}):
+def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL', 'MESH', 'HELPER', 'ARMATURE'}):
     col = layout.column()
     for x in modifiers_dict:
         modifier = getattr(modifier_group, modifiers_dict[x]['global'].settings_name())

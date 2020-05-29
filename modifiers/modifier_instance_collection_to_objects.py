@@ -7,6 +7,7 @@ from . import modifier
 from .. import settings
 from ..utilities import traverse_tree
 
+
 class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     label = "Group Intstances to Objects"
     id = 'instance_collection_to_objects'

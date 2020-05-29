@@ -156,7 +156,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         else:
             for x in objects:
                 x.select_set(True)
-            
+
         bpy.context.view_layer.objects.active = objects[0]
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
@@ -223,7 +223,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                         bpy.ops.mesh.select_all(action='DESELECT')
                         bpy.context.object.active_material_index = i
                         bpy.ops.object.material_slot_select()
-                        if len( [v for v in bpy.context.active_object.data.vertices if v.select] ) > 0:
+                        if len([v for v in bpy.context.active_object.data.vertices if v.select]) > 0:
                             bpy.ops.mesh.separate(type='SELECTED')
 
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -249,7 +249,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 
                     if prefix_mat in obj.name:
 
-                        for i in range( len(obj.material_slots)-1 ):
+                        for i in range(len(obj.material_slots) - 1):
                             bpy.ops.object.material_slot_remove()
                         obj.material_slots[0].material = mat
 

@@ -117,8 +117,8 @@ class SortedGridAxis:
                         b0[1] = max(b0[1], b1[1])
                         self.groups.remove(g1)
                         self.bounds.remove(b1)
-                        j-=1
-                        print("    Grp @ {} {} = {}x".format(i,j,len(self.groups)))
+                        j -= 1
+                        print("    Grp @ {} {} = {}x".format(i, j, len(self.groups)))
                         # break
                         # j-=1
                         # i-=1
@@ -130,7 +130,7 @@ class SortedGridAxis:
         print("Final {} x {}".format(len(self.groups), len(self.bounds)))
 
         # Sort
-        values = {(self.bounds.index(b)):(b[0]) for b in self.bounds}
+        values = {(self.bounds.index(b)): (b[0]) for b in self.bounds}
         ordered = sorted(values.items(), key=operator.itemgetter(1))
         if len(self.groups) > 1:
             copy_groups = self.groups.copy()

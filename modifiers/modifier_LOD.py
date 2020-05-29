@@ -27,7 +27,7 @@ class BGE_mod_lod(modifier.BGE_mod_default):
         name="Show Info",
         default=True
     )
-    
+
     levels: bpy.props.IntProperty(
         default=3,
         min=2,

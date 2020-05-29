@@ -38,7 +38,7 @@ BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), o
 def get_preset_files(export_format):
     for x in BGE_export_presets[export_format]:
         if os.path.isfile(x):
-            yield os.path.split(x)[1][:-3],x
+            yield os.path.split(x)[1][:-3], x
     paths = bpy.utils.preset_paths(preset_folders[export_format])
     for x in paths:
         for file in os.listdir(x):

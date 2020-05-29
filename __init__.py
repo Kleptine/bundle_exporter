@@ -26,8 +26,8 @@ bl_info = {
     "category": "3D View",
     "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
-    "wiki_url": "http://renderhjs.net/fbxbundle/",
-    "doc_url": "http://renderhjs.net/fbxbundle/",
+    "wiki_url": "https://gitlab.com/AquaticNightmare/bundle_exporter",
+    "doc_url": "https://gitlab.com/AquaticNightmare/bundle_exporter",
     "tracker_url": "https://gitlab.com/AquaticNightmare/bundle_exporter/-/issues",
 }
 

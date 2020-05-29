@@ -22,6 +22,7 @@ file_formats_enum = {
     'FFMPEG': '.mkv'
 }
 
+
 class BGE_mod_export_textures(modifier.BGE_mod_default):
     label = "Export Textures"
     id = 'export_textures'
@@ -50,8 +51,6 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
         col.prop(self, "file", text="File")
 
         layout.template_image_settings(bpy.context.scene.render.image_settings, color_management=False)
-
-        #col.prop(self, "format", text="Format")
 
     def process(self, bundle_info):
         meshes = bundle_info['meshes']

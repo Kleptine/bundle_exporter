@@ -11,6 +11,8 @@ from ..utilities import traverse_tree, traverse_tree_from_iteration
 
 # https://preshing.com/20110920/the-python-with-statement-by-example/
 # instead of try finally
+
+
 class Exporter():
     def __init__(self, bundle, path):
         self.bundle = bundle
@@ -132,7 +134,7 @@ def get_export_arguments(filepath, export_path):
 
 def export(bundles, path, export_format, export_preset):
     start_time = time.time()
-    
+
     export_format = bpy.context.scene.BGE_Settings.export_format
     export_preset = bpy.context.scene.BGE_Settings.export_preset
 

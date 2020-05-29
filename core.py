@@ -99,8 +99,8 @@ class BGE_Settings(bpy.types.PropertyGroup):
 
     scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)  # sometimes this variable may point to an old version, maybe force reload modules will fix it
 
-    export_format: bpy.props.EnumProperty(items = settings.export_formats, default = bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
-    export_preset: bpy.props.EnumProperty(items = get_preset_enum)
+    export_format: bpy.props.EnumProperty(items=settings.export_formats, default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
+    export_preset: bpy.props.EnumProperty(items=get_preset_enum)
 
 
 class BGE_PT_core_panel(bpy.types.Panel):
@@ -129,7 +129,7 @@ class BGE_PT_core_panel(bpy.types.Panel):
             row.operator("wm.path_open", text="", icon='FILE_TICK').filepath = context.scene.BGE_Settings.path
 
         row = col.row(align=True)
-        row.prop(context.scene.BGE_Settings, "export_format", text='', icon = 'FILE_CACHE')
+        row.prop(context.scene.BGE_Settings, "export_format", text='', icon='FILE_CACHE')
         row.prop(context.scene.BGE_Settings, "export_preset", text='', icon='PRESET')
 
         row = col.row(align=True)
@@ -238,7 +238,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
         bundle_index = bpy.context.scene.BGE_Settings.bundle_index
 
         if bpy.context.scene.BGE_Settings.bundle_index < len(bundle_list) and len(bundle_list) > 0:
-            num_objects=len(bundle_list[bundle_index].objects)
+            num_objects = len(bundle_list[bundle_index].objects)
             box = layout.box()
             row = box.row(align=True)
             row.prop(
@@ -290,7 +290,6 @@ class BGE_PT_files_panel(bpy.types.Panel):
                             icon = 'OUTLINER_OB_EMPTY'
                         sub_box.label(text=x.name, icon=icon)
 
-            
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
             modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
 

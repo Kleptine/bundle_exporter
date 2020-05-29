@@ -10,6 +10,7 @@ from . import modifier
 from ..utilities import traverse_tree_from_iteration, isclose_matrix, matrix_to_list
 from .. import settings
 
+
 class BGE_mod_merge_armatures(modifier.BGE_mod_default):
     label = "Merge Armatures"
     id = 'merge_armatures'
@@ -85,7 +86,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             # for each armature search corresponding actions
             for armature in armatures:
                 # loop though actions to search the ones to merge
-                action_match_pattern = self.new_name.format(armature=armature, name='') # for example: 'myarmature@hand' will search for 'myarmature@' and therefore 'hand' is the name of the action
+                action_match_pattern = self.new_name.format(armature=armature, name='')  # for example: 'myarmature@hand' will search for 'myarmature@' and therefore 'hand' is the name of the action
                 for action in bpy.data.actions:
                     match = re.search(action_match_pattern, action.name)
                     if match:
@@ -121,7 +122,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                                         loc_mat = Matrix.Translation(created_base_matrix.to_translation()).to_4x4()
 
                                         # depending on the inherit scale / rotation/ scale we should create a new base matrrix below
-                                        # in this case I chose every bone to inherit location and rotation but not scale (done below after the merge) 
+                                        # in this case I chose every bone to inherit location and rotation but not scale (done below after the merge)
                                         created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
                                         # all this should be equal to bone.matrix_basis
                                         frame_data['created_matrix_basis'] = created_base_matrix.inverted() @ bone.matrix
@@ -203,7 +204,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             x.hide_select = False
             x.driver_remove('hide')
             x.hide = False
-        
+
         # unlocking all transformations (probably not necessary)
         bpy.ops.object.mode_set(mode='POSE', toggle=False)
         for x in merged_armature.pose.bones:

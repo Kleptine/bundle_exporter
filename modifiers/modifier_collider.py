@@ -23,7 +23,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         name="Show Info",
         default=True
     )
-    
+
     ratio: bpy.props.FloatProperty(
         default=0.35,
         min=0.01,

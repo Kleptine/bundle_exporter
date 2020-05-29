@@ -21,7 +21,7 @@ class BGE_OT_select(bpy.types.Operator):
 
     def invoke(self, context, event):
         if event.ctrl or event.shift:
-            bpy.context.scene.BGE_Settings.bundles[self.index].select(alone = False)
+            bpy.context.scene.BGE_Settings.bundles[self.index].select(alone=False)
         else:
             bpy.context.scene.BGE_Settings.bundles[self.index].select()
         return {'FINISHED'}
@@ -60,7 +60,7 @@ class BGE_OT_override_bundle_modifier(bpy.types.Operator):
     bl_idname = "bge.override_bundle_modifier"
     bl_label = "Add Override Modifier"
 
-    option: bpy.props.EnumProperty(items= modifier_enum)
+    option: bpy.props.EnumProperty(items=modifier_enum)
 
     @classmethod
     def description(cls, context, properties):

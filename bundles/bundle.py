@@ -16,11 +16,13 @@ class Bundle(bpy.types.PropertyGroup):
         default=''
     )
 
-    mode_bundle: bpy.props.EnumProperty(items= mode_bundle_types, name = "Bundle Mode", default = 'NAME')
-    mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name = "Pivot From", default = 'OBJECT_FIRST')
+    mode_bundle: bpy.props.EnumProperty(
+        items=mode_bundle_types, name="Bundle Mode", default='NAME')
+    mode_pivot: bpy.props.EnumProperty(
+        items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
     override_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
-    #https://stackoverflow.com/questions/3942303/how-does-a-python-set-check-if-two-objects-are-equal-what-methods-does-an-o
+    # https://stackoverflow.com/questions/3942303/how-does-a-python-set-check-if-two-objects-are-equal-what-methods-does-an-o
     def __hash__(self):
         return hash(self.key)
 
@@ -30,13 +32,13 @@ class Bundle(bpy.types.PropertyGroup):
     def _get_objects(self, types=()):
         if self.is_key_valid():
             if self.mode_bundle == 'NAME':  # gets objects similar to the name of the key
-                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit() )))
+                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit())))
 
             elif self.mode_bundle == 'PARENT':  # gets the children of the obj of name 3key
                 obj = bpy.context.scene.objects[self.key]
                 yield from (x for x in traverse_tree(obj) if x.type in types)
 
-            elif self.mode_bundle == 'COLLECTION':#gets objects under the collection named #key
+            elif self.mode_bundle == 'COLLECTION':  # gets objects under the collection named #key
                 collection = next(x for x in bpy.data.collections if self.key == x.name)
                 for coll in traverse_tree(collection):
                     yield from (x for x in coll.objects if x.type in types)
@@ -87,12 +89,12 @@ class Bundle(bpy.types.PropertyGroup):
             elif mode_pivot == 'BOUNDS_BOTTOM':
                 bounds = ObjectBounds(objects[0])
                 if len(objects) > 1:
-                    for i in range(1,len(objects)):
-                        bounds.combine( ObjectBounds(objects[i]) )
+                    for i in range(1, len(objects)):
+                        bounds.combine(ObjectBounds(objects[i]))
 
                 return Vector((
-                    bounds.min.x + bounds.size.x/2,
-                    bounds.min.y + bounds.size.y/2,
+                    bounds.min.x + bounds.size.x / 2,
+                    bounds.min.y + bounds.size.y / 2,
                     bounds.min.z
                 ))
             elif mode_pivot == 'OBJECT_LOWEST':
@@ -107,7 +109,7 @@ class Bundle(bpy.types.PropertyGroup):
                 return ordered[0][0].location
 
             elif mode_pivot == 'SCENE':
-                return Vector((0,0,0))
+                return Vector((0, 0, 0))
 
             elif mode_pivot == 'PARENT':
                 if len(objects) > 0:
@@ -132,7 +134,8 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def modifiers(self):
-        scene_mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.scene_modifiers)
+        scene_mods = modifiers.get_modifiers(
+            bpy.context.scene.BGE_Settings.scene_modifiers)
         override_mods = modifiers.get_modifiers(self.override_modifiers)
 
         mods = {}
@@ -149,7 +152,6 @@ class Bundle(bpy.types.PropertyGroup):
 
         return sorted(mods.values())
 
-
     @property
     def filename(self):
         return self.key + '.' + settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
@@ -165,8 +167,8 @@ class Bundle(bpy.types.PropertyGroup):
         if objects:
             bounds = ObjectBounds(objects[0])
             if len(objects) > 1:
-                for i in range(1,len(objects)):
-                    bounds.combine( ObjectBounds(objects[i]) )
+                for i in range(1, len(objects)):
+                    bounds.combine(ObjectBounds(objects[i]))
             return bounds
         return False
 
