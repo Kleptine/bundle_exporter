@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed issues when baking actions with the "Merge armatures" modifier
 - Drawing fences now takes into account modifiers (for pivots and names for example)
 - Drivers are now kept when using the "Instanced collections to objects" modifier
+- Error when using the "Exclude from export" modifier
 
 ### Changed
 - More UI changes for the bundles (more compact and easier to read)

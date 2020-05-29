@@ -3,6 +3,24 @@ import bpy
 
 from . import modifier
 
+file_formats_enum = {
+    'BMP': '.bmp',
+    'IRIS': '.sgi',
+    'PNG': '.png',
+    'JPEG': '.jpg',
+    'JPEG2000': '.jp2',
+    'TARGA': '.tga',
+    'TARGA_RAW': '.tga',
+    'CINEON': '.cin',
+    'DPX': '.dpx',
+    'OPEN_EXR_MULTILAYER': '.exr',
+    'OPEN_EXR': '.exr',
+    'HDR': '.hdr',
+    'TIFF': '.tiff',
+    'AVI_JPEG': '.avi',  # why not
+    'AVI_RAW': '.avi',
+    'FFMPEG': '.mkv'
+}
 
 class BGE_mod_export_textures(modifier.BGE_mod_default):
     label = "Export Textures"
@@ -11,7 +29,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
     type = 'GENERAL'
     icon = 'FILE_IMAGE'
     priority = 99999
-    tooltip = 'Assign a custom pivot by choosing a source object'
+    tooltip = 'Exports all textures being used by the exported objects to the same folder'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -23,8 +41,17 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
         default=True
     )
 
+    path: bpy.props.StringProperty(default="{bundle_path}")
+    file: bpy.props.StringProperty(default="{texture_name}")
+
     def _draw_info(self, layout):
-        pass
+        col = layout.column(align=True)
+        col.prop(self, "path", text="Path")
+        col.prop(self, "file", text="File")
+
+        layout.template_image_settings(bpy.context.scene.render.image_settings, color_management=False)
+
+        #col.prop(self, "format", text="Format")
 
     def process(self, bundle_info):
         meshes = bundle_info['meshes']
@@ -42,9 +69,12 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
         orig_file_format = bpy.context.scene.render.image_settings.file_format
 
         bpy.context.scene.view_settings.view_transform = 'Standard'
-        bpy.context.scene.render.image_settings.file_format = 'PNG'
+
         for x in textures:
-            path = os.path.join(bpy.path.abspath(bundle_info['path']), x.name) + '.png'
+            bundle_path = bpy.path.abspath(bundle_info['path'])
+            folderpath = self.path.format(bundle_path=bundle_path)
+            filename = self.file.format(texture_name=x.name) + file_formats_enum[orig_file_format]
+            path = os.path.join(folderpath, filename)
             x.save_render(path, scene=bpy.context.scene)
 
         bpy.context.scene.view_settings.view_transform = orig_view_transform

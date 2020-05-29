@@ -14,7 +14,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
     type = 'GENERAL'
     icon = 'OUTLINER_OB_GROUP_INSTANCE'
     priority = -999
-    tooltip = 'Instance collections will be treated as objects when exporting'
+    tooltip = 'Instance collections will be converted to objects when exporting'
 
     active: bpy.props.BoolProperty(
         name="Active",
