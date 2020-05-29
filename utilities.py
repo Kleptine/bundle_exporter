@@ -22,6 +22,7 @@ def matrix_to_list(matrix):
     return [x for lis in [x[:] for x in [list(y) for y in matrix[:]]] for x in lis]
 
 
+# used for testing if the bake tool worked
 def isclose_matrix(matrix_a, matrix_b, rel_tol=1e-09, abs_tol=0.001):
     floats_a = matrix_to_list(matrix_a)
     floats_b = matrix_to_list(matrix_b)

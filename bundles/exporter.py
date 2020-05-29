@@ -44,6 +44,10 @@ class Exporter():
             obj['__orig_hide_select__'] = obj.hide_select
             obj['__orig_collection__'] = obj.users_collection[0].name if obj.users_collection else '__NONE__'
 
+            if obj.animation_data and obj.animation_data.action:
+                obj['__orig_action__'] = obj.animation_data.action
+                obj.animation_data.action = None
+
             obj.hide_viewport = False
             obj.hide_select = False
 
@@ -88,6 +92,10 @@ class Exporter():
                 obj.name = obj['__orig_name__']
             obj.hide_viewport = obj['__orig_hide__']
             obj.hide_select = obj['__orig_hide_select__']
+
+            if '__orig_action__' in obj:
+                obj.animation_data.action = obj['__orig_action__']
+                del obj['__orig_action__']
 
             del obj['__orig_name__']
             del obj['__orig_hide__']
@@ -178,6 +186,10 @@ def export(bundles, path, export_format, export_preset):
 
             export_preset_path = settings.get_presets(export_format)[export_preset]
             settings.export_operators[export_format](**get_export_arguments(export_preset_path, path_full))
+
+            for modifier in bundle.modifiers:
+                print('Clean up modifier "{}" ...'.format(modifier.id))
+                modifier.post_export()
 
     # TODO: add this final part into a except/finally scope ?
     # Restore previous settings

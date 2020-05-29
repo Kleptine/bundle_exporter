@@ -6,10 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/tree/2.0.1) - 2020-05-30
 ### Added
-- "Export textures" modifier. It will export all textures being used by the materials of the exported objects to the export path.
+- New modifiers:
+    - "Keep action names". For exporting actions in FBX, it avoids adding the object name before the action name.
+    - "Export textures". It will export all textures being used by the materials of the exported objects to the export path (useful when they are embeded).
 - Option to remove duplicate numbering (".001", ".002", ".003"...) for the "Rename" modifier
 - "Copy modifiers" modifier now shows the modifiers in a list
 - "Merge Meshes" modifier searches for exportable armatures if a mesh being exported has an invalid "Armature" modifier and tries to fix it
+- Easy access to scene unit system and scale in the main panel
+- New button that shows the modifier tooltip (It can be disabled in the addon preferences)
 - Changelog
 
 ### Fixed
@@ -17,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drawing fences now takes into account modifiers (for pivots and names for example)
 - Drivers are now kept when using the "Instanced collections to objects" modifier
 - Error when using the "Exclude from export" modifier
+- Actions are no longer duplicated when exporting an object with an active action
 
 ### Changed
 - More UI changes for the bundles (more compact and easier to read)
@@ -28,11 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Defaults for modifiers can now be saved in the addon preferences
 - Each bundle has its own **Override modifiers**. These have preference over the modifiers added to the scene
 - New modifiers:
-    - "Custom pivot"
-    - "Transform empties"
+    - "Custom pivot": uses the origin of the provided source object as the new pivot for the bundle
+    - "Transform empties": lets you apply a scale to all the empties (useful for exporting into unreal)
     - "Instance collections to objects" (support for **instanced collections**)
     - "Merge armatures" (and actions)
-    - "Exclude from export" (lets you choose if non-selectable/invisible objects or collections should be exported)
+    - "Exclude from export": lets you choose if non-selectable/invisible objects or collections should be exported
 - Modifiers now show a description when hovering over them inside the dropdown
 - Modifiers now show an icon to better identify them
 - Each bundle has its own "Bundle by" and "Pivot from" options

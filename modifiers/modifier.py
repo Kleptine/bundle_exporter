@@ -73,6 +73,9 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         r.alert = False
         r.alignment = 'RIGHT'
 
+        if bpy.context.preferences.addons[__name__.split('.')[0]].preferences.show_help:
+            r.operator('bge.modifier_info', emboss=False, icon='INFO', text='').modifier_name = self.id
+
         if active_as_x:
             r.prop(self, "active", text="", icon='X', icon_only=True, emboss=False)
         # r.operator("wm.url_open", text="", icon='QUESTION').url = self.url
@@ -98,4 +101,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
 
     def process(self, bundle_info):
         # do changes to bundle
+        pass
+
+    def post_export(self):
         pass

@@ -129,6 +129,10 @@ class BGE_PT_core_panel(bpy.types.Panel):
             row.operator("wm.path_open", text="", icon='FILE_TICK').filepath = context.scene.BGE_Settings.path
 
         row = col.row(align=True)
+        row.prop(bpy.context.scene.unit_settings, "system", text='')
+        row.prop(bpy.context.scene.unit_settings, "scale_length", text='')
+
+        row = col.row(align=True)
         row.prop(context.scene.BGE_Settings, "export_format", text='', icon='FILE_CACHE')
         row.prop(context.scene.BGE_Settings, "export_preset", text='', icon='PRESET')
 
