@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/tree/2.0.1) - 2020-05-30
 ### Added
+- "Export textures" modifier. It will export all textures being used by the materials of the exported objects to the export path.
 - Option to remove duplicate numbering (".001", ".002", ".003"...) for the "Rename" modifier
 - "Copy modifiers" modifier now shows the modifiers in a list
 - "Merge Meshes" modifier searches for exportable armatures if a mesh being exported has an invalid "Armature" modifier and tries to fix it
