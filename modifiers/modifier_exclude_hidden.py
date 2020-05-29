@@ -48,7 +48,7 @@ class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
             if 'NOT_SELECTABLE' in self.types and obj['__orig_hide_select__']:
                 return False
             coll = bpy.data.collections.get(obj['__orig_collection__'])
-            if 'COLLECTION_HIDDEN' in self.types and coll and (coll['__orig_hide__'] or coll['__orig_hide_lc__'] or coll['__orig_exclude__']):
+            if 'COLLECTION_HIDDEN' in self.types and coll and (coll['__orig_hide__'] or ('__orig_hide_lc__' in coll and coll['__orig_hide_lc__']) or ('__orig_exclude__' in coll and coll['__orig_exclude__'])):
                 return False
             if 'COLLECTION_NOT_SELECTABLE' in self.types and coll and coll['__orig_hide_select__']:
                 return False
