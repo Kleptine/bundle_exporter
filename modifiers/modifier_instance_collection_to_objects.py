@@ -42,6 +42,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
             if x.instance_type == 'COLLECTION' and x.instance_collection:
 
                 orig_collection = x.instance_collection
+                orig_objects = [x for x in bpy.data.objects]
 
                 if not self.export_hidden:
                     for collection in traverse_tree(x.instance_collection):
@@ -64,16 +65,22 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
                     #  time to copy drivers, they are lost when making collections real (https://developer.blender.org/T70551)
                     try:
-                        orig_node = next(obj for obj in orig_collection.objects if obj['__orig_name__'] == new_node['__orig_name__'])
+                        orig_node = next(obj for obj in orig_objects if obj['__orig_name__'] == new_node['__orig_name__'])
                     except StopIteration:
+                        print('COULD NOT COPY DRIVERS FOR {}'.format(new_node['__orig_name__']))
                         continue
                     if orig_node.animation_data:
                         if not new_node.animation_data:
                             new_node.animation_data_create()
                         for orig_driver in orig_node.animation_data.drivers:
+                            # copying this driver makes blender crash when using merge armatures modifier, it does not change the export result so lets just ignore it
+                            if 'hide_viewport' in orig_driver.data_path:
+                                continue
                             try:
                                 new_driver = new_node.driver_add(orig_driver.data_path, orig_driver.array_index) if orig_driver.array_index > 0 else new_node.driver_add(orig_driver.data_path)
+                                print('found: {} -> {}'.format(new_node['__orig_name__'], orig_driver.data_path))
                             except TypeError:
+                                print('DATAPATH NOT FOUND: {} -> {}'.format(new_node['__orig_name__'], orig_driver.data_path))
                                 continue
                             new_driver.driver.expression = orig_driver.driver.expression
                             new_driver.driver.type = orig_driver.driver.type
