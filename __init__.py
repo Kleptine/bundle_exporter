@@ -16,13 +16,15 @@ from . import modifiers
 from . import settings
 from .settings import mode_bundle_types, mode_pivot_types
 
+from . import addon_updater_ops
+
 
 bl_info = {
     "name": "Bundle Exporter",
     "description": "Export objects in bundles",
     "author": "AquaticNightmare",
     "blender": (2, 82, 0),
-    "version": (2, 0, 1),
+    "version": (2, 0, 0),
     "category": "3D View",
     "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
@@ -55,8 +57,45 @@ class BGE_preferences(bpy.types.AddonPreferences):
 
     show_help: bpy.props.BoolProperty(default=True)
 
+    # addon updater preferences
+
+    auto_check_update: bpy.props.BoolProperty(
+        name="Auto-check for Update",
+        description="If enabled, auto-check for updates using an interval",
+        default=True,
+    )
+    updater_intrval_months: bpy.props.IntProperty(
+        name='Months',
+        description="Number of months between checking for updates",
+        default=0,
+        min=0
+    )
+    updater_intrval_days: bpy.props.IntProperty(
+        name='Days',
+        description="Number of days between checking for updates",
+        default=7,
+        min=0,
+        max=31
+    )
+    updater_intrval_hours: bpy.props.IntProperty(
+        name='Hours',
+        description="Number of hours between checking for updates",
+        default=0,
+        min=0,
+        max=23
+    )
+    updater_intrval_minutes: bpy.props.IntProperty(
+        name='Minutes',
+        description="Number of minutes between checking for updates",
+        default=0,
+        min=0,
+        max=59
+    )
+
     def draw(self, context):
         layout = self.layout
+
+        addon_updater_ops.update_settings_ui(self, context)
 
         box = layout.box()
         row = box.row(align=True)
@@ -77,6 +116,8 @@ class BGE_preferences(bpy.types.AddonPreferences):
 def register():
     print('--> REGISTER INIT')
     from bpy.utils import register_class
+
+    addon_updater_ops.register(bl_info)
 
     modifiers.register_globals()
 
@@ -107,3 +148,5 @@ def unregister():
     unregister_class(BGE_preferences)
 
     modifiers.unregister_globals()
+
+    addon_updater_ops.unregister()

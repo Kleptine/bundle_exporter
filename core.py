@@ -20,6 +20,8 @@ from . import bundles
 from . import settings
 from .settings import mode_bundle_types, mode_pivot_types
 
+from . import addon_updater_ops
+
 
 def set_path(self, value):
     # checks if the provided path is inside a subdirectory of the current file to save it as a relative path
@@ -111,6 +113,9 @@ class BGE_PT_core_panel(bpy.types.Panel):
     bl_category = "Bundle Exporter"
 
     def draw(self, context):
+        addon_updater_ops.check_for_update_background()
+        addon_updater_ops.update_notice_box_ui(self, context)
+
         layout = self.layout
         box = layout.box()
 

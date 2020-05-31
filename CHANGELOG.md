@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New modifiers:
     - "Export actions as files" (only FBX) creates separate fbx files with an armature and an animation each (for game development)
 - "Merge Armatures" modifier now deletes the created actions after exporting
+- Added auto updater
 
 ### Fixed
 - Drivers from sub collections are now kept when using "Instanced collections to objects" modifier
