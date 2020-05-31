@@ -160,7 +160,11 @@ class Bundle(bpy.types.PropertyGroup):
         if alone:
             bpy.ops.object.select_all(action='DESELECT')
         for x in self.objects:
-            x.select_set(True)
+            try:
+                x.select_set(True)
+            except RuntimeError:
+                # the object can't be selected (maybe it is hidden)
+                pass
 
     def get_bounds(self):
         objects = self.objects
@@ -180,7 +184,9 @@ class Bundle(bpy.types.PropertyGroup):
             'meshes': [],
             'empties': [],
             'armatures': [],
-            'extras': []  # extra objects that dont need to be processed (created colliders or LODs)
+            'extras': [],  # extra objects that dont need to be processed (created colliders or LODs)
+            'export_format': '',
+            'export_preset': ''
         }
         return bundle_info
 

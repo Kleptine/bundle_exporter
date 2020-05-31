@@ -14,9 +14,11 @@ from ..utilities import traverse_tree, traverse_tree_from_iteration
 
 
 class Exporter():
-    def __init__(self, bundle, path):
+    def __init__(self, bundle, path, export_format, export_preset):
         self.bundle = bundle
         self.path = path
+        self.export_format = export_format
+        self.export_preset = export_preset
 
     def __enter__(self):
         objects = self.bundle.objects
@@ -73,6 +75,9 @@ class Exporter():
         bundle_info['empties'] = [x for x in copied_objects if x.type in empty_types]
         bundle_info['armatures'] = [x for x in copied_objects if x.type in armature_types]
         bundle_info['path'] = self.path
+        bundle_info['export_format'] = self.export_format
+        export_preset_path = settings.get_presets(self.export_format)[self.export_preset]
+        bundle_info['export_preset'] = get_export_arguments(export_preset_path)
 
         return bundle_info
 
@@ -123,7 +128,7 @@ class Exporter():
 
 
 # https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
-def get_export_arguments(filepath, export_path):
+def get_export_arguments(filepath):
     class Container(object):
         __slots__ = ('__dict__',)
 
@@ -134,25 +139,19 @@ def get_export_arguments(filepath, export_path):
     for line in file.readlines()[3::]:
         exec(line, globals(), locals())
 
-    op.filepath = export_path
     kwargs = op.__dict__
 
     return kwargs
 
 
-def export(bundles, path, export_format, export_preset):
+def export(bundles):
     start_time = time.time()
-
-    export_format = bpy.context.scene.BGE_Settings.export_format
-    export_preset = bpy.context.scene.BGE_Settings.export_preset
 
     previous_selection = bpy.context.selected_objects.copy()
     previous_active = bpy.context.view_layer.objects.active
     previous_unit_system = bpy.context.scene.unit_settings.system
     previous_pivot = bpy.context.scene.tool_settings.transform_pivot_point
     previous_cursor = bpy.context.scene.cursor.location
-
-    extension = settings.export_format_extensions[export_format]
 
     if bpy.context.view_layer.objects.active:
         bpy.context.view_layer.objects.active = None
@@ -162,7 +161,7 @@ def export(bundles, path, export_format, export_preset):
     bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
 
     for bundle in bundles:
-        with Exporter(bundle, path) as bundle_info:
+        with Exporter(bundle, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset) as bundle_info:
             bpy.ops.object.select_all(action="DESELECT")
             print('Start applying modifiers...')
             for modifier in bundle.modifiers:
@@ -173,9 +172,8 @@ def export(bundles, path, export_format, export_preset):
             for x in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
                 x.location -= bundle_info['pivot']
 
-            path_full = os.path.join(bpy.path.abspath(bundle_info['path']), bundle_info['name']) + "." + extension
-
-            # Create path if not yet available
+            # create path
+            path_full = os.path.join(bpy.path.abspath(bundle_info['path']), bundle_info['name']) + "." + settings.export_format_extensions[bundle_info['export_format']]
             directory = os.path.dirname(path_full)
             pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
@@ -184,12 +182,12 @@ def export(bundles, path, export_format, export_preset):
             for obj in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
                 obj.select_set(True)
 
-            export_preset_path = settings.get_presets(export_format)[export_preset]
-            settings.export_operators[export_format](**get_export_arguments(export_preset_path, path_full))
+            bundle_info['export_preset']['filepath'] = path_full
+            settings.export_operators[bundle_info['export_format']](**bundle_info['export_preset'])
 
             for modifier in bundle.modifiers:
                 print('Clean up modifier "{}" ...'.format(modifier.id))
-                modifier.post_export()
+                modifier.post_export(bundle_info)
 
     # TODO: add this final part into a except/finally scope ?
     # Restore previous settings

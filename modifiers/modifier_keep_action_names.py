@@ -43,7 +43,7 @@ class BGE_mod_keep_action_names(modifier.BGE_mod_default):
                 return get_bid_name(bid)
         fbx.get_blenderID_name = get_blenderID_name
 
-    def post_export(self):
+    def post_export(self, bundle_info):
         if self._warning():
             return
         import io_scene_fbx.export_fbx_bin as fbx

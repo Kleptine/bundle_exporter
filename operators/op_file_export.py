@@ -54,7 +54,7 @@ class BGE_OT_file_export(bpy.types.Operator):
             return
 
         bundle_list = bundles.get_bundles(only_valid=True)
-        bundles.exporter.export(bundle_list, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset)
+        bundles.exporter.export(bundle_list)
 
         return {'FINISHED'}
 
@@ -97,7 +97,7 @@ class BGE_OT_file_export_scene_selected(bpy.types.Operator):
         return "Export selected bundles"
 
     def execute(self, context):
-        bundles.exporter.export((x for x in bundles.get_bundles() if x.is_bundle_obj_selected()), bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset)
+        bundles.exporter.export((x for x in bundles.get_bundles() if x.is_bundle_obj_selected()))
 
         return {'FINISHED'}
 
@@ -140,6 +140,6 @@ class BGE_OT_file_export_selected(bpy.types.Operator):
         return "Export {}".format(bundles.get_bundles()[bpy.context.scene.BGE_Settings.bundle_index].filename)
 
     def execute(self, context):
-        bundles.exporter.export([bundles.get_bundles()[bpy.context.scene.BGE_Settings.bundle_index]], bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset)
+        bundles.exporter.export([bundles.get_bundles()[bpy.context.scene.BGE_Settings.bundle_index]])
 
         return {'FINISHED'}

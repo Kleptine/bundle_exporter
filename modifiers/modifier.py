@@ -87,21 +87,15 @@ class BGE_mod_default(bpy.types.PropertyGroup):
             col = row.column(align=False)
             self._draw_info(col)
 
-    def print(self):
-        pass
-        # print("Modifier '{}'' mode: {}".format(label, mode))
-
     def get_object_from_name(self, name):
-        source = None
-        if name in bpy.data.objects.keys():
-            source = bpy.data.objects[name]
-        if prefix_copy + name in bpy.data.objects.keys():
-            source = bpy.data.objects[prefix_copy + name]
-        return source
+        try:
+            return next(x for x in bpy.data.objects if x.name == name or ('__orig_name__' in x and x['__orig_name__'] == name))
+        except StopIteration:
+            return None
 
     def process(self, bundle_info):
         # do changes to bundle
         pass
 
-    def post_export(self):
+    def post_export(self, bundle_info):
         pass

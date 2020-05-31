@@ -73,6 +73,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         col.prop(self, 'merge_actions')
 
     def process(self, bundle_info):
+        created_actions = []
         armatures = bundle_info['armatures']
         objects = bundle_info['meshes']
         if not len(armatures) > 1:
@@ -258,6 +259,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             #  https://developer.blender.org/T70551
             for action_name, actions in baked_merge_actions.items():
                 print(action_name)
+                created_actions.append(action_name)
                 # if the merged action exists, delete it
                 if action_name in bpy.data.actions:
                     bpy.data.actions.remove(bpy.data.actions[action_name])
@@ -323,4 +325,11 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             else:
                 print('NO ERROR BONES')
 
+        # https://blenderartists.org/t/understanding-lists-in-blender/667968
+        self['created_actions'] = created_actions
+
         bundle_info['armatures'] = [merged_armature]
+
+    def post_export(self, bundle_info):
+        for x in self['created_actions']:
+            bpy.data.actions.remove(bpy.data.actions[x])
