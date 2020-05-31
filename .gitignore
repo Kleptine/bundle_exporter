@@ -4,3 +4,5 @@
 .DS_Store
 *.code-workspace
 *updater_status.json
+*updater/backup/
+*updater/source/
