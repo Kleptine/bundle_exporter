@@ -20,6 +20,24 @@ class Exporter():
         self.export_format = export_format
         self.export_preset = export_preset
 
+    # https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
+    def get_export_arguments(self):
+        filepath = settings.get_presets(self.export_format)[self.export_preset]
+
+        class Container(object):
+            __slots__ = ('__dict__',)
+
+        op = Container()
+        file = open(filepath, 'r')
+
+        # storing the values from the preset on the class
+        for line in file.readlines()[3::]:
+            exec(line, globals(), locals())
+
+        kwargs = op.__dict__
+
+        return kwargs
+
     def __enter__(self):
         objects = self.bundle.objects
         bpy.ops.object.select_all(action="DESELECT")
@@ -76,8 +94,7 @@ class Exporter():
         bundle_info['armatures'] = [x for x in copied_objects if x.type in armature_types]
         bundle_info['path'] = self.path
         bundle_info['export_format'] = self.export_format
-        export_preset_path = settings.get_presets(self.export_format)[self.export_preset]
-        bundle_info['export_preset'] = get_export_arguments(export_preset_path)
+        bundle_info['export_preset'] = self.get_export_arguments()
 
         return bundle_info
 
@@ -127,23 +144,6 @@ class Exporter():
                 bpy.data.meshes.remove(block)
 
 
-# https://blenderartists.org/t/using-fbx-export-presets-when-exporting-from-a-script/1162914
-def get_export_arguments(filepath):
-    class Container(object):
-        __slots__ = ('__dict__',)
-
-    op = Container()
-    file = open(filepath, 'r')
-
-    # storing the values from the preset on the class
-    for line in file.readlines()[3::]:
-        exec(line, globals(), locals())
-
-    kwargs = op.__dict__
-
-    return kwargs
-
-
 def export(bundles):
     start_time = time.time()
 
@@ -162,6 +162,9 @@ def export(bundles):
 
     for bundle in bundles:
         with Exporter(bundle, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset) as bundle_info:
+            all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
+            print('objects before modifiers: {}'.format(all_objects))
+
             bpy.ops.object.select_all(action="DESELECT")
             print('Start applying modifiers...')
             for modifier in bundle.modifiers:
@@ -169,7 +172,11 @@ def export(bundles):
                 modifier.process(bundle_info)
 
             # apply the pivot
-            for x in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
+            all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
+            print(all_objects)
+            for x in all_objects:
+                if x.parent and x.parent in all_objects:
+                    continue
                 x.location -= bundle_info['pivot']
 
             # create path

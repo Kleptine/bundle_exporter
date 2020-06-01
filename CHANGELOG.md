@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.1) - 2020-05-06
+### Fixed
+- Children of objects are now correctly exported (the bundle pivot was being applied to both parents and children)
+- Error when drawing fences when "Export actions as files" is active
+
 ## [2.1.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.0) - 2020-05-31
 ### Added
 - New modifiers:

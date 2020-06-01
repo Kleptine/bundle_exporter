@@ -30,21 +30,23 @@ class Bundle(bpy.types.PropertyGroup):
         return isinstance(other.__class__, Bundle) and self.key == other.key
 
     def _get_objects(self, types=()):
-        if self.is_key_valid():
-            if self.mode_bundle == 'NAME':  # gets objects similar to the name of the key
-                yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit())))
+        if not self.is_key_valid():
+            return
 
-            elif self.mode_bundle == 'PARENT':  # gets the children of the obj of name 3key
-                obj = bpy.context.scene.objects[self.key]
-                yield from (x for x in traverse_tree(obj) if x.type in types)
+        if self.mode_bundle == 'NAME':  # gets objects similar to the name of the key
+            yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit())))
 
-            elif self.mode_bundle == 'COLLECTION':  # gets objects under the collection named #key
-                collection = next(x for x in bpy.data.collections if self.key == x.name)
-                for coll in traverse_tree(collection):
-                    yield from (x for x in coll.objects if x.type in types)
+        elif self.mode_bundle == 'PARENT':  # gets the children of the obj of name 3key
+            obj = bpy.context.scene.objects[self.key]
+            yield from (x for x in traverse_tree(obj) if x.type in types)
 
-            elif self.mode_bundle == 'SCENE':
-                yield from (x for x in bpy.context.scene.objects if x.type in types)
+        elif self.mode_bundle == 'COLLECTION':  # gets objects under the collection named #key
+            collection = next(x for x in bpy.data.collections if self.key == x.name)
+            for coll in traverse_tree(collection):
+                yield from (x for x in coll.objects if x.type in types)
+
+        elif self.mode_bundle == 'SCENE':
+            yield from (x for x in bpy.context.scene.objects if x.type in types)
 
     def is_key_valid(self):
         if self.mode_bundle == 'NAME':
@@ -52,7 +54,7 @@ class Bundle(bpy.types.PropertyGroup):
         elif self.mode_bundle == 'PARENT':
             return self.key in bpy.context.scene.objects
         elif self.mode_bundle == 'COLLECTION':
-            return any([x.name == self.key for x in traverse_tree(bpy.context.scene.collection)])
+            return any(x.name == self.key for x in traverse_tree(bpy.context.scene.collection))
         elif self.mode_bundle == 'SCENE':
             return True
         return False
@@ -134,8 +136,7 @@ class Bundle(bpy.types.PropertyGroup):
 
     @property
     def modifiers(self):
-        scene_mods = modifiers.get_modifiers(
-            bpy.context.scene.BGE_Settings.scene_modifiers)
+        scene_mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.scene_modifiers)
         override_mods = modifiers.get_modifiers(self.override_modifiers)
 
         mods = {}
@@ -186,7 +187,7 @@ class Bundle(bpy.types.PropertyGroup):
             'armatures': [],
             'extras': [],  # extra objects that dont need to be processed (created colliders or LODs)
             'export_format': '',
-            'export_preset': ''
+            'export_preset': {}
         }
         return bundle_info
 
