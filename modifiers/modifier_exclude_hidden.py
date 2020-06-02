@@ -46,7 +46,7 @@ class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
 
     def process(self, bundle_info):
         def check_export(obj):
-            if 'HIDDEN' in self.types and obj['__orig_hide__']:
+            if 'HIDDEN' in self.types and (obj['__orig_hide__'] or obj['__orig_hide_vl__']):
                 return False
             if 'NOT_SELECTABLE' in self.types and obj['__orig_hide_select__']:
                 return False

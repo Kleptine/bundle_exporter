@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Children of objects are now correctly exported (the bundle pivot was being applied to both parents and children)
 - Error when drawing fences when "Export actions as files" is active
+- Objects hidden in the view layer are now correclty exported
 
 ## [2.1.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.0) - 2020-05-31
 ### Added

@@ -63,6 +63,7 @@ class Exporter():
             obj['__orig_hide__'] = obj.hide_viewport
             obj['__orig_hide_select__'] = obj.hide_select
             obj['__orig_collection__'] = obj.users_collection[0].name if obj.users_collection else '__NONE__'
+            obj['__orig_hide_vl__'] = obj.hide_get()
 
             if obj.animation_data and obj.animation_data.action:
                 obj['__orig_action__'] = obj.animation_data.action
@@ -70,6 +71,7 @@ class Exporter():
 
             obj.hide_viewport = False
             obj.hide_select = False
+            obj.hide_set(False)
 
             if obj in objects:
                 obj.select_set(True)
@@ -114,6 +116,7 @@ class Exporter():
                 obj.name = obj['__orig_name__']
             obj.hide_viewport = obj['__orig_hide__']
             obj.hide_select = obj['__orig_hide_select__']
+            obj.hide_set(bool(obj['__orig_hide_vl__']))
 
             if '__orig_action__' in obj:
                 obj.animation_data.action = obj['__orig_action__']
