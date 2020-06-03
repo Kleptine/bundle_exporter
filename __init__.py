@@ -54,9 +54,6 @@ class BGE_preferences(bpy.types.AddonPreferences):
 
     export_format: bpy.props.EnumProperty(items=settings.export_formats)
     export_preset: bpy.props.EnumProperty(items=export_presets_getter, update=update_scene_export_preset)
-
-    show_help: bpy.props.BoolProperty(default=True)
-
     # addon updater preferences
 
     auto_check_update: bpy.props.BoolProperty(
@@ -106,7 +103,6 @@ class BGE_preferences(bpy.types.AddonPreferences):
         col.prop(self, 'export_preset', text="Export Preset")
         col.prop(self, "mode_bundle", text="Bundle by")
         col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
-        col.prop(self, "show_help", text="Show Help?", icon="INFO")
 
         modifiers.draw(col, context, self.modifier_preferences)
 

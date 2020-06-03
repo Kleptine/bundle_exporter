@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Error when drawing fences when "Export actions as files" is active
 - Objects hidden in the view layer are now correclty exported
 
+### Changed
+- Some UI changes
+
 ## [2.1.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.0) - 2020-05-31
 ### Added
 - New modifiers:

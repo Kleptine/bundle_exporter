@@ -154,8 +154,12 @@ class Bundle(bpy.types.PropertyGroup):
         return sorted(mods.values())
 
     @property
+    def filextension(self):
+        return '.' + settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
+
+    @property
     def filename(self):
-        return self.key + '.' + settings.export_format_extensions[bpy.context.scene.BGE_Settings.export_format]
+        return self.key + self.filextension
 
     def select(self, alone=True):
         if alone:

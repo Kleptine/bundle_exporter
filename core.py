@@ -93,7 +93,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
     )
     show_bundle_info: bpy.props.BoolProperty(
         name="Show bundle info",
-        default=True,
+        default=False,
     )
 
     mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
@@ -118,12 +118,11 @@ class BGE_PT_core_panel(bpy.types.Panel):
 
         layout = self.layout
         box = layout.box()
+        #row = box.row(align=True)
+        #row.operator('bge.load_preferences', text='', icon='RECOVER_LAST')
+        #row.label(text='Settings', icon='PREFERENCES')
 
-        row = box.row(align=True)
-        row.operator('bge.load_preferences', text='', icon='RECOVER_LAST')
-        row.label(text='Settings', icon='PREFERENCES')
-
-        col = box.column(align=True)
+        col = box.column(align=False)
 
         row = col.row(align=True)
         if context.scene.BGE_Settings.path == "":
@@ -133,13 +132,9 @@ class BGE_PT_core_panel(bpy.types.Panel):
             row = row.row(align=True)
             row.operator("wm.path_open", text="", icon='FILE_TICK').filepath = context.scene.BGE_Settings.path
 
-        row = col.row(align=True)
-        row.prop(bpy.context.scene.unit_settings, "system", text='')
-        row.prop(bpy.context.scene.unit_settings, "scale_length", text='')
-
-        row = col.row(align=True)
-        row.prop(context.scene.BGE_Settings, "export_format", text='', icon='FILE_CACHE')
-        row.prop(context.scene.BGE_Settings, "export_preset", text='', icon='PRESET')
+        #row = col.split(factor=0.3, align=True)
+        col.prop(context.scene.BGE_Settings, "export_format", text='Format', icon='FILE_CACHE')
+        col.prop(context.scene.BGE_Settings, "export_preset", text='Preset', icon='PRESET')
 
         row = col.row(align=True)
         row.prop(context.scene.BGE_Settings, "mode_bundle", text="Bundle by")
@@ -150,6 +145,11 @@ class BGE_PT_core_panel(bpy.types.Panel):
         row.operator("wm.url_open", text="", icon='QUESTION').url = "http://renderhjs.net/fbxbundle/#settings_pivot"
 
         col = box.column(align=True)
+
+        row = col.row(align=True)
+        row.prop(bpy.context.scene.unit_settings, "system", text='')
+        row.prop(bpy.context.scene.unit_settings, "scale_length", text='')
+
         row = col.row(align=True)
         row.prop(context.scene.BGE_Settings, "padding", text="Padding", expand=True)
 
@@ -194,7 +194,7 @@ class BGE_UL_bundles(bpy.types.UIList):
             icon = 'RESTRICT_SELECT_OFF'
         row.operator(operators.op_bundles.BGE_OT_select.bl_idname, text='', icon=icon).index = index
         row.alert = not item.is_key_valid()
-        row.label(text=item.filename, icon="FILE_3D")
+        row.prop(item, 'key', text='', icon="FILE_3D", emboss=False)
         row.label(text='', icon=next(x[3] for x in mode_bundle_types if x[0] == item.mode_bundle))
         row.label(text='', icon=next(x[3] for x in mode_pivot_types if x[0] == item.mode_pivot))
 
@@ -232,17 +232,12 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
         row = col.row(align=True)
 
-        split = row.split(factor=0.4, align=True)
+        split = row.split(factor=0.2, align=True)
+        split.scale_y = 1.4
 
-        c = split.column(align=True)
-        c.scale_y = 1.85
-        c.operator(operators.BGE_OT_create_bundle.bl_idname, text="Create", icon='IMPORT')
-
-        c = split.column(align=True)
-        c.scale_y = 1.85
-        c.operator(operators.BGE_OT_file_export_scene_selected.bl_idname, text="Export Selected ({}x)".format(len(selected_bundles)), icon=icon)
-
-        col.operator(operators.BGE_OT_file_export.bl_idname, text="Export All ({}x)".format(len(bundles.get_bundles(only_valid=True))), icon=icon)
+        split.operator(operators.BGE_OT_create_bundle.bl_idname, text="", icon='ADD')
+        split.operator(operators.BGE_OT_file_export_scene_selected.bl_idname, text="Selected ({}x)".format(len(selected_bundles)), icon=icon)
+        split.operator(operators.BGE_OT_file_export.bl_idname, text="All ({}x)".format(len(bundles.get_bundles(only_valid=True))), icon=icon)
 
         bundle_index = bpy.context.scene.BGE_Settings.bundle_index
 
@@ -268,36 +263,15 @@ class BGE_PT_files_panel(bpy.types.Panel):
             if bpy.context.scene.BGE_Settings.show_bundle_info:
                 row = box.row()
                 row.separator()
-                col = row.column()
-                row.separator()
-                col = col.column()
-                col.alert = not bundle_list[bundle_index].is_key_valid()
-                col.prop(bundle_list[bundle_index], "key", text="", expand=True)
-
-                split = col.split(factor=0.5, align=True)
-                split.prop(bundle_list[bundle_index], "mode_bundle", text="")
-                split.prop(bundle_list[bundle_index], "mode_pivot", text="")
-
-                sub_box = col.box()
-                row = sub_box.row(align=True)
-                row.prop(
-                    bpy.context.scene.BGE_Settings,
-                    'show_bundle_objects',
-                    icon="TRIA_DOWN" if bpy.context.scene.BGE_Settings.show_bundle_objects else "TRIA_RIGHT",
-                    icon_only=True,
-                    text='Bundle objects: (x{})'.format(num_objects),
-                    emboss=False
-                )
-                if bpy.context.scene.BGE_Settings.show_bundle_objects:
-                    sub_box = sub_box.column(align=True)
-                    objs = bundle_list[bundle_index].objects
-                    for x in objs:
-                        icon = 'OUTLINER_OB_MESH'
-                        if x.type == 'ARMATURE':
-                            icon = 'OUTLINER_OB_ARMATURE'
-                        elif x.type == 'EMPTY':
-                            icon = 'OUTLINER_OB_EMPTY'
-                        sub_box.label(text=x.name, icon=icon)
+                sub_box = row.column(align=True)
+                objs = bundle_list[bundle_index].objects
+                for x in objs:
+                    icon = 'OUTLINER_OB_MESH'
+                    if x.type == 'ARMATURE':
+                        icon = 'OUTLINER_OB_ARMATURE'
+                    elif x.type == 'EMPTY':
+                        icon = 'OUTLINER_OB_EMPTY'
+                    sub_box.label(text=x.name, icon=icon)
 
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
             modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
