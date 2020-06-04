@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.1) - 2020-05-06
+## [2.1.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_2)
+### Fixed
+- Unity export preset fixed
+
+## [2.1.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_1) - 2020-06-03
 ### Fixed
 - Children of objects are now correctly exported (the bundle pivot was being applied to both parents and children)
 - Error when drawing fences when "Export actions as files" is active
@@ -13,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Some UI changes
 
-## [2.1.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.1.0) - 2020-05-31
+## [2.1.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_0) - 2020-05-31
 ### Added
 - New modifiers:
     - "Export actions as files" (only FBX) creates separate fbx files with an armature and an animation each (for game development)
@@ -24,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drivers from sub collections are now kept when using "Instanced collections to objects" modifier
 - Fixed error when trying to select a bundle with one of its objects hidden by an excluded collection
 
-## [2.0.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.0.1) - 2020-05-30
+## [2.0.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_0_1) - 2020-05-30
 ### Added
 - New modifiers:
     - "Keep action names". For exporting actions in FBX, it avoids adding the object name before the action name.
@@ -46,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - More UI changes for the bundles (more compact and easier to read)
 
-## [2.0.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2.0.0) - 2020-05-16
+## [2.0.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_0_0) - 2020-05-16
 ### Added
 - Support for exporting **empties**
 - Support for exporting **armatures**
