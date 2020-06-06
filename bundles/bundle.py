@@ -41,7 +41,8 @@ class Bundle(bpy.types.PropertyGroup):
             yield from (x for x in traverse_tree(obj) if x.type in types)
 
         elif self.mode_bundle == 'COLLECTION':  # gets objects under the collection named #key
-            collection = next(x for x in bpy.data.collections if self.key == x.name)
+            collection = next(x for x in traverse_tree(bpy.context.scene.collection) if self.key == x.name)
+
             for coll in traverse_tree(collection):
                 yield from (x for x in coll.objects if x.type in types)
 
@@ -76,7 +77,10 @@ class Bundle(bpy.types.PropertyGroup):
         return list(self._get_objects(types=mesh_types | empty_types | armature_types))
 
     def is_bundle_obj_selected(self):
-        return any(x.select_get() for x in self._get_objects(types=mesh_types | empty_types | armature_types))
+        try:
+            return any(x.select_get() for x in self._get_objects(types=mesh_types | empty_types | armature_types))
+        except StopIteration:
+            return False
 
     @property
     def pivot(self):
