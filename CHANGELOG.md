@@ -6,8 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_3)
 ### Fixed
-- UI stopped working when adding the Master Collection as a bundle
-
+- UI stopped working when adding the Master Collection as a bundle (Master Collection bundles are deliberately not supported)
 
 ## [2.1.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_2)
 ### Fixed

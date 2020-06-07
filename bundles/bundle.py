@@ -29,19 +29,21 @@ class Bundle(bpy.types.PropertyGroup):
     def __eq__(self, other):
         return isinstance(other.__class__, Bundle) and self.key == other.key
 
-    def _get_objects(self, types=()):
-        if not self.is_key_valid():
-            return
-
+    def _get_objects(self, types=mesh_types | empty_types | armature_types):
         if self.mode_bundle == 'NAME':  # gets objects similar to the name of the key
             yield from (x for x in bpy.context.scene.objects if x.type in types and (x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit())))
 
         elif self.mode_bundle == 'PARENT':  # gets the children of the obj of name 3key
-            obj = bpy.context.scene.objects[self.key]
+            obj = bpy.context.scene.objects.get(self.key)
+            if not obj:
+                return
             yield from (x for x in traverse_tree(obj) if x.type in types)
 
         elif self.mode_bundle == 'COLLECTION':  # gets objects under the collection named #key
-            collection = next(x for x in traverse_tree(bpy.context.scene.collection) if self.key == x.name)
+            try:
+                collection = next(x for x in traverse_tree(bpy.context.scene.collection, exclude_parent=True) if self.key == x.name)
+            except StopIteration:
+                return
 
             for coll in traverse_tree(collection):
                 yield from (x for x in coll.objects if x.type in types)
@@ -50,15 +52,10 @@ class Bundle(bpy.types.PropertyGroup):
             yield from (x for x in bpy.context.scene.objects if x.type in types)
 
     def is_key_valid(self):
-        if self.mode_bundle == 'NAME':
-            return(any(x.name == self.key or (len(x.name) >= 4 and x.name[:-4] == self.key and x.name[-4] == '.' and x.name[-3:].isdigit()) for x in bpy.context.scene.objects))
-        elif self.mode_bundle == 'PARENT':
-            return self.key in bpy.context.scene.objects
-        elif self.mode_bundle == 'COLLECTION':
-            return any(x.name == self.key for x in traverse_tree(bpy.context.scene.collection))
-        elif self.mode_bundle == 'SCENE':
-            return True
-        return False
+        try:
+            return any(self._get_objects())
+        except StopIteration:
+            return False
 
     @property
     def meshes(self):

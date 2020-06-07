@@ -29,12 +29,14 @@ def get_key(obj, mode_bundle):
 
     elif mode_bundle == 'COLLECTION':
         if len(obj.users_collection) >= 1:
+            if obj.users_collection[0] == bpy.context.scene.collection:
+                return None
             return obj.users_collection[0].name
 
     elif mode_bundle == 'SCENE':
         return bpy.context.scene.name
 
-    return "UNDEFINED"
+    return None
 
 
 def create_bundles_from_selection():
@@ -43,7 +45,9 @@ def create_bundles_from_selection():
     objects = [obj for obj in bpy.context.selected_objects]
     keys = set()
     for x in objects:
-        keys.add(get_key(x, mode_bundle))
+        key = get_key(x, mode_bundle)
+        if key:
+            keys.add(key)
 
     for key in keys:
         if not any([x.key == key for x in get_bundles()]):
