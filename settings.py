@@ -79,4 +79,6 @@ mode_pivot_types = [
     ('COLLECTION', 'Collection', "Pivot from the collection instance offset parameter (Object Properties->Collection->X,Y,Z)", 'GROUP', 8)
 ]
 
+ue4_collider_prefixes = {'UBX', 'UCP', 'USP', 'UCX'}
+
 debug = False
