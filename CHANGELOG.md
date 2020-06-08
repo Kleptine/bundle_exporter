@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.3](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_3)
 ### Added
 - Option for merge meshes to merge UVs by index instead of by name
+- New Pivot option "From Collection" it will get the pivot from the collection instance_offset parameter (Properties->Object->Collection->X,Y,Z)
 
 ### Fixed
 - Fixed error using the "Export Textures" modifier (it would cause error when finding a texture node without an image applied to it)

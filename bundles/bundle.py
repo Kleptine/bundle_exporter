@@ -16,10 +16,8 @@ class Bundle(bpy.types.PropertyGroup):
         default=''
     )
 
-    mode_bundle: bpy.props.EnumProperty(
-        items=mode_bundle_types, name="Bundle Mode", default='NAME')
-    mode_pivot: bpy.props.EnumProperty(
-        items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
+    mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default='NAME')
+    mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
     override_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
     # https://stackoverflow.com/questions/3942303/how-does-a-python-set-check-if-two-objects-are-equal-what-methods-does-an-o
@@ -117,20 +115,23 @@ class Bundle(bpy.types.PropertyGroup):
             elif mode_pivot == 'PARENT':
                 if len(objects) > 0:
                     if objects[0].parent:
-                        return objects[0].parent.location
+                        return objects[0].parent.location.copy()
                     else:
-                        return objects[0].location
+                        return objects[0].location.copy()
 
             elif mode_pivot == 'EMPTY':
                 for obj in self.helpers:
                     if obj.empty_display_type == 'SINGLE_ARROW' or obj.empty_display_type == 'PLAIN_AXES' or obj.empty_display_type == 'ARROWS':
-                        return obj.location
+                        return obj.location.copy()
 
             elif mode_pivot == 'EMPTY_LOCAL':
                 for obj in self.helpers:
                     if obj.empty_display_type == 'SINGLE_ARROW' or obj.empty_display_type == 'PLAIN_AXES' or obj.empty_display_type == 'ARROWS':
                         if obj.name.lower().startswith('pivot') or obj.name.lower() == self.key.lower() + '.pivot':
-                            return obj.location
+                            return obj.location.copy()
+
+            elif mode_pivot == 'COLLECTION':
+                return objects[0].users_collection[0].instance_offset.copy()
 
         # Default
         return Vector((0, 0, 0))
