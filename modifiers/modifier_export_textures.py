@@ -60,7 +60,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
                 if mat_slot.material:
                     if mat_slot.material.node_tree:
                         for x in mat_slot.material.node_tree.nodes:
-                            if x.type == 'TEX_IMAGE':
+                            if x.type == 'TEX_IMAGE' and x.image:
                                 textures.add(x.image)
 
         # https://devtalk.blender.org/t/saving-an-image-makes-it-darker-in-2-80/8525

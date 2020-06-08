@@ -61,6 +61,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     keep_armature_modifier: bpy.props.BoolProperty(
         default=True
     )
+
+    merge_uvs_by_index: bpy.props.BoolProperty(
+        name="Merge UVs by index",
+        description="Merges UVs by index instead of by name",
+        default=False
+    )
     # consistent_normals = bpy.props.BoolProperty (
     # 	name="Make consistent Normals",
     # 	default=True
@@ -86,6 +92,9 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 
         row = col.row(align=True)
         row.prop(self, 'keep_armature_modifier', text="Try to keep armature")
+
+        row = col.row(align=True)
+        row.prop(self, 'merge_uvs_by_index', text="Merge UVs by index")
 
     def process(self, bundle_info):
         name = bundle_info['name']
@@ -156,6 +165,18 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         else:
             for x in objects:
                 x.select_set(True)
+
+        if self.merge_uvs_by_index:
+            uv_names = []
+            for x in objects:
+                for index, uv in enumerate(x.data.uv_layers):
+                    if len(uv_names) < index:
+                        uv_names.append(uv.name)
+                    uv.name = '__{}__'.format(index)
+            print(uv_names)
+            # for x in objects:
+            #    for index, uv in enumerate(x.data.uv_layers):
+            #        uv.name = uv_names[index]
 
         bpy.context.view_layer.objects.active = objects[0]
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
