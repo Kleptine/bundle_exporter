@@ -91,6 +91,10 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         except StopIteration:
             return None
 
+    def pre_process(self, bundle_info):
+        # don't change objects but gather data
+        pass
+
     def process(self, bundle_info):
         # do changes to bundle
         pass

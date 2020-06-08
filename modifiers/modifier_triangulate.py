@@ -11,6 +11,7 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
     type = 'MESH'
     icon = 'MOD_TRIANGULATE'
     tooltip = 'Applies the triangulate modifier (keeping normals)'
+    priority = -1  # before the merge modifier
 
     active: bpy.props.BoolProperty(
         name="Active",

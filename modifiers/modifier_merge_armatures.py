@@ -17,7 +17,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_merge"
     type = 'ARMATURE'
     icon = 'CON_ARMATURE'
-    priority = -1
+    priority = -2
     tooltip = 'Joins armatures and actions when exporting'
 
     active: bpy.props.BoolProperty(
@@ -326,6 +326,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                 print('NO ERROR BONES')
 
         # https://blenderartists.org/t/understanding-lists-in-blender/667968
+        # for deleting merged actions after export
         self['created_actions'] = created_actions
 
         bundle_info['armatures'] = [merged_armature]

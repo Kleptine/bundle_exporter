@@ -10,7 +10,7 @@ class BGE_mod_keep_action_names(modifier.BGE_mod_default):
     id = 'keep_action_names'
     url = "http://renderhjs.net/fbxbundle/"
     type = 'ARMATURE'
-    icon = 'ACTION'
+    icon = 'ACTION_TWEAK'
     priority = 0
     tooltip = 'Modifies the FBX exporter to keep action names (it will break the export if you are exporting multiple objects that share the same action)'
 

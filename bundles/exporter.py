@@ -169,7 +169,10 @@ def export(bundles):
             print('objects before modifiers: {}'.format(all_objects))
 
             bpy.ops.object.select_all(action="DESELECT")
-            print('Start applying modifiers...')
+            for modifier in bundle.modifiers:
+                print('Pre-processing modifier "{}" ...'.format(modifier.id))
+                modifier.pre_process(bundle_info)
+
             for modifier in bundle.modifiers:
                 print('Appliying modifier "{}" ...'.format(modifier.id))
                 modifier.process(bundle_info)
