@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option for merge meshes to merge UVs by index instead of by name
 - New Pivot option "From Collection" it will get the pivot from the collection instance_offset parameter (Properties->Object->Collection->X,Y,Z)
 - Option to exclude collisions from the merge operation
+### Changed
+- Modifiers are now displayed in the order they are applied
 
 ### Fixed
 - Fixed error using the "Export Textures" modifier (it would cause error when finding a texture node without an image applied to it)

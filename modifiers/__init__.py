@@ -118,9 +118,14 @@ def get_modifiers(modifier_group):
 
 def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL', 'MESH', 'HELPER', 'ARMATURE'}):
     col = layout.column()
+
+    modifiers_to_draw = []
     for x in modifiers_dict:
         modifier = getattr(modifier_group, modifiers_dict[x]['global'].settings_name())
         if modifier.type in types:
             if not draw_only_active or modifier.active:
-                box = col.box()
-                modifier.draw(box, active_as_x=draw_only_active)
+                modifiers_to_draw.append(modifier)
+    modifiers_to_draw = sorted(modifiers_to_draw)
+    for x in modifiers_to_draw:
+        box = col.box()
+        x.draw(box, active_as_x=draw_only_active)
