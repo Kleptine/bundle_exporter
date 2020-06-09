@@ -46,12 +46,7 @@ class BGE_OT_file_export(bpy.types.Operator):
         # Warnings
         if bpy.context.scene.BGE_Settings.path == "":
             self.report({'ERROR_INVALID_INPUT'}, "Export path not set")
-            return
-
-        folder = bpy.path.abspath(bpy.context.scene.BGE_Settings.path)
-        if not os.path.exists(folder):
-            self.report({'ERROR_INVALID_INPUT'}, "Path doesn't exist")
-            return
+            return {'CANCELLED'}
 
         bundle_list = bundles.get_bundles(only_valid=True)
         bundles.exporter.export(bundle_list)

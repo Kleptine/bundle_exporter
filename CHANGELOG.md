@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed error using the "Export Textures" modifier (it would cause error when finding a texture node without an image applied to it)
 - UI stopped working when adding the Master Collection as a bundle (Master Collection bundles are deliberately not supported)
+- Exporting to a path that doesnt exists now works
 
 ## [2.1.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_2)
 ### Fixed
