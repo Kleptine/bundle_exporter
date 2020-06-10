@@ -185,6 +185,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             for x in objects:
                 x.select_set(True)
 
+        bpy.context.view_layer.objects.active = objects[0]
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        # Convert to mesh
+        bpy.ops.object.convert(target='MESH')
+
         if self.merge_uvs_by_index:
             uv_names = []
             for x in objects:
@@ -196,12 +202,6 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             # for x in objects:
             #    for index, uv in enumerate(x.data.uv_layers):
             #        uv.name = uv_names[index]
-
-        bpy.context.view_layer.objects.active = objects[0]
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        # Convert to mesh
-        bpy.ops.object.convert(target='MESH')
 
         # Merge objects into single item
         bpy.ops.object.join()
