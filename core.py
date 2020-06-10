@@ -178,7 +178,7 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Bundle Exporter"
-    bl_context = "objectmode"
+    #bl_context = "objectmode"
 
     def draw(self, context):
         self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
@@ -210,7 +210,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Bundle Exporter"
-    bl_context = "objectmode"
+    #bl_context = "objectmode"
     # bl_options = {'HIDE_HEADER'}
 
     def draw(self, context):

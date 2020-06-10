@@ -7,6 +7,11 @@ mesh_types = {'MESH', 'FONT', 'CURVE'}
 empty_types = {'EMPTY'}
 armature_types = {'ARMATURE'}
 
+engines = [
+    ('UNREAL', 'Unreal', 'Unreal Engine'),
+    ('UNITY', 'Unity', 'Unity')
+]
+
 export_formats = [('FBX', 'FBX', 'fbx format'),
                   ('COLLADA', 'Collada ', 'collada format'),
                   ('GLTF', 'GLTF', 'gltf export'),
