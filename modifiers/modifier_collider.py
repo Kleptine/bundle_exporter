@@ -55,9 +55,9 @@ class BGE_mod_collider(modifier.BGE_mod_default):
     label = "Collider"
     id = 'collider'
     url = "http://renderhjs.net/fbxbundle/#modifier_collider"
-    type = 'MESH'
+    type = 'GENERAL'
     icon = 'CUBE'
-    priority = 999
+    priority = 999  # just after rename
     tooltip = 'This modifier will create extra collision meshes based on the exported meshes'
 
     active: bpy.props.BoolProperty(
@@ -134,7 +134,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
             emboss=False
         )
         if self.show_extras:
-            box.operator('bge.create_box_collider')
+            box.operator('bge.create_box_collider').engine = self.engine
 
     def _get_ue_collider_prefix(self, name):
         for prefix in ue4_collider_prefixes:
@@ -155,6 +155,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
                         break
         return colliders
 
+    # TODO: do the same with lods
     def pre_process(self, bundle_info):
         bundle_info['extras'] = self._get_colliders(bundle_info['meshes'], pop=True)
 
@@ -171,6 +172,8 @@ class BGE_mod_collider(modifier.BGE_mod_default):
             if parent_object:
                 colliders = self._get_colliders(bundle_info['extras'], pop=False)
                 for index, x in enumerate(colliders):
+                    if x.parent and x.parent in bundle_info['meshes']:
+                        parent_object = x.parent
                     prefix = self._get_ue_collider_prefix(x.name)
                     x.name = '{}_{}_{}'.format(prefix, parent_object.name, index)
                     x.parent = parent_object

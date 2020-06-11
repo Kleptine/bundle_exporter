@@ -12,7 +12,7 @@ class BGE_mod_rename(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_rename"
     type = "GENERAL"
     icon = 'SYNTAX_OFF'
-    priority = 999
+    priority = 998
     tooltip = 'Customize the export path, file name and objects name'
 
     active: bpy.props.BoolProperty(

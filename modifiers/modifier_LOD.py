@@ -15,7 +15,7 @@ class BGE_mod_lod(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_lod"
     type = 'MESH'
     icon = 'MOD_DECIM'
-    priority = 999
+    priority = 999  # just after rename
     tooltip = 'Creates automatic LODs for all export meshes'
 
     active: bpy.props.BoolProperty(

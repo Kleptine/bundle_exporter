@@ -24,7 +24,7 @@ bl_info = {
     "description": "Export objects in bundles",
     "author": "AquaticNightmare",
     "blender": (2, 82, 0),
-    "version": (2, 1, 1),
+    "version": (2, 2, 0),
     "category": "3D View",
     "location": "3D View > Tools Panel > Bundle Exporter",
     "warning": "",
