@@ -95,12 +95,8 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         items=engines,
     )
 
-    collider_creation: bpy.props.EnumProperty(
-        name='',
-        items=[
-            ('SEARCH', 'Search', 'Search compatible colliders inside the bundle'),
-            ('GENERATE', 'Generate', 'Create a custom colliders based on the bundle objects')
-        ]
+    collider_creation: bpy.props.BoolProperty(
+        default=False
     )
 
     generate_process: bpy.props.EnumProperty(
@@ -157,6 +153,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 
     # TODO: do the same with lods
     def pre_process(self, bundle_info):
+        # remove possible colliders from being treated as a mesh
         bundle_info['extras'] = self._get_colliders(bundle_info['meshes'], pop=True)
 
     def process(self, bundle_info):
@@ -167,19 +164,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         if not objects:
             return
 
-        if self.collider_creation == 'SEARCH':
-            parent_object = bundle_info['meshes'][0]
-            if parent_object:
-                colliders = self._get_colliders(bundle_info['extras'], pop=False)
-                for index, x in enumerate(colliders):
-                    if x.parent and x.parent in bundle_info['meshes']:
-                        parent_object = x.parent
-                    prefix = self._get_ue_collider_prefix(x.name)
-                    x.name = '{}_{}_{}'.format(prefix, parent_object.name, index)
-                    x.parent = parent_object
-                    x.matrix_parent_inverse = parent_object.matrix_world.inverted()
-
-        elif self.collider_creation == 'GENERATE':
+        if self.collider_creation:
             if self.generate_process == 'BOX':
                 for obj in objects:
                     col = create_box_collider(obj, self.engine)
@@ -229,3 +214,14 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 
                     # add them to "extras" so other modifiers won't process them
                     bundle_info['extras'].append(copy)
+
+        parent_object = bundle_info['meshes'][0]
+        if parent_object:
+            colliders = self._get_colliders(bundle_info['extras'], pop=False)
+            for index, x in enumerate(colliders):
+                if x.parent and x.parent in bundle_info['meshes']:
+                    parent_object = x.parent
+                prefix = self._get_ue_collider_prefix(x.name)
+                x.name = '{}_{}_{}'.format(prefix, parent_object.name, index)
+                x.parent = parent_object
+                x.matrix_parent_inverse = parent_object.matrix_world.inverted()

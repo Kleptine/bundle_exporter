@@ -100,4 +100,5 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         pass
 
     def post_export(self, bundle_info):
+        # for deleting generated data that is not automatically deleted by the clean-up process after each export
         pass

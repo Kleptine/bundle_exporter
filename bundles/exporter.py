@@ -98,6 +98,7 @@ class Exporter():
         bundle_info['export_format'] = self.export_format
         bundle_info['export_preset'] = self.get_export_arguments()
 
+        self.bundle_info = bundle_info
         return bundle_info
 
     def __exit__(self, type, value, traceback):
@@ -145,6 +146,10 @@ class Exporter():
         for block in bpy.data.meshes:
             if block.users == 0:
                 bpy.data.meshes.remove(block)
+
+        for modifier in self.bundle.modifiers:
+            print('Clean up modifier "{}" ...'.format(modifier.id))
+            modifier.post_export(self.bundle_info)
 
 
 def export(bundles):
@@ -197,10 +202,6 @@ def export(bundles):
 
             bundle_info['export_preset']['filepath'] = path_full
             settings.export_operators[bundle_info['export_format']](**bundle_info['export_preset'])
-
-            for modifier in bundle.modifiers:
-                print('Clean up modifier "{}" ...'.format(modifier.id))
-                modifier.post_export(bundle_info)
 
     # TODO: add this final part into a except/finally scope ?
     # Restore previous settings

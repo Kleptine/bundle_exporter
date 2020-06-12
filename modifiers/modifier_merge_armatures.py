@@ -331,6 +331,3 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
         bundle_info['armatures'] = [merged_armature]
 
-    def post_export(self, bundle_info):
-        for x in self['created_actions']:
-            bpy.data.actions.remove(bpy.data.actions[x])

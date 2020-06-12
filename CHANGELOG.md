@@ -8,10 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Option for merge meshes to merge UVs by index instead of by name
 - New Pivot option "From Collection" it will get the pivot from the collection instance_offset parameter (Properties->Object->Collection->X,Y,Z)
-- Option to exclude collisions from the merge operation
 - New modifiers:
-    - Bake animations (Necessary for processing other armature modifiers)
-    - Delete bones (option to delete bones by name or if they don't use deform)
+    - Triangulate
+    - Bake animations (to enable exporting animations)
+    - Purge Bones (option to delete bones by name or if they don't use deform)
+    - Collision modifier rework:
+        - Search: it will search possible colliders inside the bundle and set them up correctly for unreal or unity (parent them or rename them if necessary)
+        - Generate:
+            - Box: it will create a box collider with the shape of the bounding box for each object in the bundle
+            - Decimate: it will create collider the old way (applying decimation modifiers etc)
+        - Helper operators:
+            - Create box collider from selected object:
+                - in object mode, it will cover the entire object
+                - in edit mode it will create a collision based on the vertex selection
 
 ### Changed
 - Modifiers are now displayed in the order they are applied
@@ -19,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed error using the "Export Textures" modifier (it would cause error when finding a texture node without an image applied to it)
 - UI stopped working when adding the Master Collection as a bundle (Master Collection bundles are deliberately not supported)
-- Exporting to a path that doesnt exists now works
+- Exporting to a path that doesnt exists now works (it gets created)
 
 ## [2.1.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_1_2)
 ### Fixed
