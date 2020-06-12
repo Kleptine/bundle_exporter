@@ -63,7 +63,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                             action_data[f] = []
                         bpy.context.scene.frame_set(f)
                         bpy.context.view_layer.update()
-                        # gets the transform of all the deform bones for each frame
+                        # gets the transform of all the bones for each frame
                         # order from root to children here, make array with tuple (bone.name, frame_data) instead of a dictionary for each frame values
                         for bone in traverse_tree_from_iteration(bone for bone in armature.pose.bones if not bone.parent):
                             frame_data = {}
@@ -80,6 +80,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                                 created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
                                 # all this should be equal to bone.matrix_basis
                                 frame_data['created_matrix_basis'] = created_base_matrix.inverted() @ bone.matrix
+                                frame_data['original_parent'] = parent.name
                                 # if the bone has no parent, this is the matrix that should be applied
                                 frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
                             else:  # TODO: this needs to be deleted
@@ -91,7 +92,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
             armature['__baked_action_data__'] = baked_actions
 
-        # now that we stored all the bones positions, we delete all animation data
+        # now that we stored all the bones transforms, we delete all animation data
         for armature in bundle_info['armatures']:
             # remove all animation data
             armature.animation_data_clear()
@@ -155,14 +156,14 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
             for action_name, action_data in baked_actions.items():
                 print(action_name)
-                # if the merged action exists, delete it
+                # if the action exists, rename it
                 if action_name in bpy.data.actions:
                     temp_name = '_TEMP_{}'.format(action_name)
                     bpy.data.actions[action_name].name = temp_name
                     renamed_actions[temp_name] = action_name
                     self['renamed_actions'] = renamed_actions
 
-                # create a new action with the merged name and assign it
+                # create a new action
                 new_action = bpy.data.actions.new(action_name)
                 armature.animation_data.action = new_action
                 created_actions.append(action_name)
@@ -170,14 +171,16 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
                 bpy.context.view_layer.update()
 
-                # loop though all the actions to merge
-                for action_name, action_info in actions.items():
+                # loop though all the actions
+                for action_name, action_info in baked_actions.items():
                     for frame, frame_tuples in action_info.items():
                         for bone_name, frame_data in frame_tuples:
                             bone = armature.pose.bones[bone_name]
                             bone.rotation_mode = 'QUATERNION'
                             bone.matrix_basis = frame_data['created_matrix_basis'].copy()
 
+                            # for storing last frame quaternion
+                            # uses action_name to store different quaternions for each animation
                             if action_name in bone.keys():
                                 quat = bone.rotation_quaternion.copy()
                                 quat.make_compatible(bone[action_name])
@@ -199,12 +202,10 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                                 bone = armature.pose.bones[bone_name]
                                 matrix = armature.convert_space(pose_bone=bone, matrix=frame_data['matrix_world'], from_space='WORLD', to_space='POSE')
                                 if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
-                                    error_bones.add(bone.name)
                                     print('DOUBLE CHECK ### INCORRECT ### f{} - {}'.format(frame, bone.name))
                                     print('W-{}'.format(matrix))
                                     print('CW-{}'.format(bone.matrix))
                                 if not isclose_matrix(bone.matrix_basis, frame_data['created_matrix_basis'], abs_tol=0.01):
-                                    error_bones.add(bone.name)
                                     print('CB-{}'.format(bone.matrix_basis))
                                     print('B-{}'.format(frame_data['created_matrix_basis']))
 
@@ -215,6 +216,6 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             del self['created_actions']
 
         if 'renamed_actions' in self:
-            for temp_name, new_name in self['renamed_actions'].items:
+            for temp_name, new_name in self['renamed_actions'].items():
                 bpy.data.actions[temp_name].name = new_name
             del self['renamed_actions']
