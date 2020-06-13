@@ -12,7 +12,7 @@ from .. import settings
 
 
 class BGE_mod_bake_actions(modifier.BGE_mod_default):
-    label = "Bake Actions"
+    label = "Export Actions"
     id = 'bake_actions'
     url = "http://renderhjs.net/fbxbundle/#modifier_merge"
     type = 'ARMATURE'
@@ -30,8 +30,36 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
         default=True
     )
 
+    actions_as_separate_files: bpy.props.BoolProperty(
+        name='Export as separate files',
+        description='Exports each compatible action for each armature into a separate file. Only works with fbx',
+        default=True
+    )
+    try_keep_action_names: bpy.props.BoolProperty(
+        name='Try to keep action names',
+        description='The FBX exporter by default adds the object name to the animation when it is exported (my_object_name|my_action_name). This option disables that feature. When importing into other game engines the correct action names will appear',
+        default=True
+    )
+
+    path: bpy.props.StringProperty(default="{bundle_path}")
+    file: bpy.props.StringProperty(default="{action_name}")
+
+    def _is_using_fbx(self, format):
+        return format == 'FBX'
+
+    def _warning(self):
+        return not self._is_using_fbx(bpy.context.scene.BGE_Settings.export_format)
+
     def _draw_info(self, layout):
-        pass
+        layout.prop(self, 'actions_as_separate_files')
+        if self.actions_as_separate_files:
+            row = layout.row()
+            row.separator()
+            col = row.column(align=True)
+            col.prop(self, "path", text="Path")
+            col.prop(self, "file", text="File")
+
+            col.prop(self, 'try_keep_action_names')
 
     def pre_process(self, bundle_info):
         def validate_actions(act, path_resolve):
@@ -177,7 +205,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                         for bone_name, frame_data in frame_tuples:
                             bone = armature.pose.bones[bone_name]
                             bone.rotation_mode = 'QUATERNION'
-                            bone.matrix_basis = frame_data['created_matrix_basis'].copy()
+                            matrix = frame_data['created_matrix_basis'] if bone.parent and bone.parent.name == frame_data['original_parent'] else frame_data['created_matrix_basis_no_parent']
+                            bone.matrix_basis = matrix.copy()
 
                             # for storing last frame quaternion
                             # uses action_name to store different quaternions for each animation
@@ -209,13 +238,80 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                                     print('CB-{}'.format(bone.matrix_basis))
                                     print('B-{}'.format(frame_data['created_matrix_basis']))
 
+        # modifify the way the fbx exporter names actions
+        if self.actions_as_separate_files and self.try_keep_action_names and self._is_using_fbx(bundle_info['export_format']):
+            from collections.abc import Iterable
+            import io_scene_fbx.export_fbx_bin as fbx
+            from io_scene_fbx.fbx_utils import get_bid_name
+
+            def get_blenderID_name(bid):
+                if isinstance(bid, Iterable):
+                    for i, e in enumerate(bid):
+                        if i == len(bid) - 1:
+                            return get_bid_name(e)
+                else:
+                    return get_bid_name(bid)
+            fbx.get_blenderID_name = get_blenderID_name
+
+        # export actions as files
+        if self.actions_as_separate_files and self._is_using_fbx(bundle_info['export_format']):
+            # from fbx addon exporter:
+            def validate_actions(act, path_resolve):
+                for fc in act.fcurves:
+                    data_path = fc.data_path
+                    if fc.array_index:
+                        data_path = data_path + "[%d]" % fc.array_index
+                    try:
+                        path_resolve(data_path)
+                    except ValueError:
+                        return False
+                return True
+
+            export_preset = bundle_info['export_preset'].copy()
+
+            export_preset['bake_anim'] = True
+            export_preset['bake_anim_use_all_actions'] = False
+            export_preset['bake_anim_use_nla_strips'] = False
+            export_preset['use_selection'] = True
+
+            for armature in bundle_info['armatures']:
+                for act in bpy.data.actions:
+                    if validate_actions(act, armature.path_resolve):
+                        bpy.context.scene.frame_start = act.frame_range[0]
+                        bpy.context.scene.frame_end = act.frame_range[1]
+                        folder = self.path.format(bundle_path=bundle_info['path'])
+                        file = self.file.format(action_name=act.name)
+
+                        path_full = os.path.join(bpy.path.abspath(folder), file) + "." + settings.export_format_extensions[bundle_info['export_format']]
+                        directory = os.path.dirname(path_full)
+                        pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+
+                        export_preset['filepath'] = path_full
+
+                        bpy.ops.object.select_all(action="DESELECT")
+                        armature.select_set(True)
+                        armature.animation_data.action = act
+                        settings.export_operators[bundle_info['export_format']](**export_preset)
+
+            # animations are already exported, there is no use in exporting them again for the main fbx file
+            bundle_info['export_preset']['bake_anim'] = False
+
     def post_export(self, bundle_info):
+        # remove created actions
         if 'created_actions' in self:
             for x in self['created_actions']:
                 bpy.data.actions.remove(bpy.data.actions[x])
             del self['created_actions']
 
+        # if the action already existed, rename it to the original name
         if 'renamed_actions' in self:
             for temp_name, new_name in self['renamed_actions'].items():
                 bpy.data.actions[temp_name].name = new_name
             del self['renamed_actions']
+
+        # restore the fbx exporter
+        if self.actions_as_separate_files and self.try_keep_action_names:
+            if self._is_using_fbx(bundle_info['export_format']):
+                import io_scene_fbx.export_fbx_bin as fbx
+                import io_scene_fbx.fbx_utils as utils
+                fbx.get_blenderID_name = utils.get_blenderID_name

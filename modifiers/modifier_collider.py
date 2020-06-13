@@ -52,7 +52,7 @@ def create_box_collider(obj, engine):
 
 
 class BGE_mod_collider(modifier.BGE_mod_default):
-    label = "Collider"
+    label = "Export Colliders"
     id = 'collider'
     url = "http://renderhjs.net/fbxbundle/#modifier_collider"
     type = 'GENERAL'

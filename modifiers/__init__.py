@@ -112,8 +112,18 @@ def unregister_locals():
 # ---------------------------------------------------------------------------- #
 
 
+def get_modifiers_iter(modifier_group):
+    for x in modifier_group.keys():
+        if x.startswith('BGE_modifier_'):
+            try:
+                attr = getattr(modifier_group, x)
+                yield attr
+            except AttributeError:
+                pass
+
+
 def get_modifiers(modifier_group):
-    return [getattr(modifier_group, x) for x in modifier_group.keys() if x.startswith('BGE_modifier_')]
+    return [x for x in get_modifiers_iter(modifier_group)]
 
 
 def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL', 'MESH', 'HELPER', 'ARMATURE'}):

@@ -68,12 +68,6 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         description="Merges UVs by index instead of by name",
         default=True
     )
-
-    avoid_unreal_colliders: bpy.props.BoolProperty(
-        name="Avoid UE4 colliders",
-        description="Avoids merging meshes that start with UBX, UCP, USP, UCX",
-        default=True
-    )
     # consistent_normals = bpy.props.BoolProperty (
     # 	name="Make consistent Normals",
     # 	default=True
@@ -103,21 +97,9 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         row = col.row(align=True)
         row.prop(self, 'merge_uvs_by_index', text="Merge UVs by index")
 
-        row = col.row(align=True)
-        row.prop(self, 'avoid_unreal_colliders')
-
     def process(self, bundle_info):
         name = bundle_info['name']
         objects = bundle_info['meshes']
-        colliders = []
-        if self.avoid_unreal_colliders:
-            for i in reversed(range(0, len(objects))):
-                for prefix in ue4_collider_prefixes:
-                    if objects[i].name.startswith(prefix):
-                        colliders.append(objects[i])
-                        objects.pop(i)
-                        break
-
         armatures = bundle_info['armatures']
         if len(objects) > 1:
             if self.merge_type == 'ALL':
@@ -163,7 +145,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                     merged = self.merge_meshes([parent] + children, armatures, parent.name)
                     objects.extend(merged)
 
-        bundle_info['meshes'] = objects + colliders
+        bundle_info['meshes'] = objects
 
     def merge_meshes(self, objects, armatures, name):
 
