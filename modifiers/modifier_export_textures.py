@@ -54,6 +54,8 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
 
     def process(self, bundle_info):
         meshes = bundle_info['meshes']
+        if not meshes:
+            return
         textures = set()
         for ob in meshes:
             for mat_slot in ob.material_slots:

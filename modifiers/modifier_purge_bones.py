@@ -46,6 +46,9 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
     def process(self, bundle_info):
         armatures = bundle_info['armatures']
 
+        if not armatures:
+            return
+
         # export all bones by default, this will remove unnecessary ones anyway
         if bundle_info['export_format'] == 'FBX':
             bundle_info['export_preset']['use_armature_deform_only'] = False

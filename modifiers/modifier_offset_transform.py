@@ -52,7 +52,11 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
                     row.label(text=message)
 
     def process(self, bundle_info):
-        objects = bundle_info['meshes']
+        objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures']
+
+        if not objects:
+            return
+
         if self.source in bpy.data.objects:
             source = bpy.data.objects[self.source]
             print("Offset... " + source.name)

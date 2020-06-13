@@ -3,7 +3,7 @@ import imp
 
 from . import modifier
 
-
+'''
 class BGE_mod_set_origin(modifier.BGE_mod_default):
     label = "Set Origin"
     id = 'set_origin'
@@ -28,3 +28,4 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
     def process(self, bundle_info):
         # TODO: needs to be implemented
         pass
+'''

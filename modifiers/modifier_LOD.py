@@ -66,6 +66,10 @@ class BGE_mod_lod(modifier.BGE_mod_default):
         # UNREAL 	https://docs.unrealengine.com/en-us/Engine/Content/Types/StaticMeshes/HowTo/LODs
         # 			https://answers.unrealengine.com/questions/416995/how-to-import-lods-as-one-fbx-blender.html
         objects = bundle_info['meshes']
+
+        if not objects:
+            return
+
         for obj in objects:
             prefix = obj.name
 

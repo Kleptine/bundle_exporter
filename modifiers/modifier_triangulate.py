@@ -29,6 +29,9 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
     def process(self, bundle_info):
         meshes = bundle_info['meshes']
 
+        if not meshes:
+            return
+
         for mesh in meshes:
             mod = mesh.modifiers.new('export_triangulate', type='TRIANGULATE')
             mod.keep_custom_normals = True

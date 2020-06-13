@@ -37,6 +37,8 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
 
     def process(self, bundle_info):
         helpers = bundle_info['empties']
+        if not helpers:
+            return
         for i in reversed(range(0, len(helpers))):
             x = helpers[i]
             if x.instance_type == 'COLLECTION' and x.instance_collection:

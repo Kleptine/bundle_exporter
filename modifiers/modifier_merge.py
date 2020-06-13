@@ -101,49 +101,51 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         name = bundle_info['name']
         objects = bundle_info['meshes']
         armatures = bundle_info['armatures']
-        if len(objects) > 1:
-            if self.merge_type == 'ALL':
-                objects = self.merge_meshes(objects, armatures, name)
+        if len(objects) < 2:
+            return
 
-            elif self.merge_type == 'COLLECTION':
-                # gather all collections
-                collections_dict = {}
-                for x in objects:
-                    obj_collection = x['__orig_collection__']
-                    if obj_collection not in collections_dict:
-                        collections_dict[obj_collection] = []
-                    collections_dict[obj_collection].append(x)
-                # empty the result list
-                objects = []
-                # merge by gathered objects
-                for collection_name, objs in collections_dict.items():
-                    merged = self.merge_meshes(objs, armatures, collection_name)
-                    # rename all merged objects to the name of the collection
-                    for obj in merged:
-                        obj.name = collection_name
-                    # repopulate export list
-                    objects.extend(merged)
+        if self.merge_type == 'ALL':
+            objects = self.merge_meshes(objects, armatures, name)
 
-            elif self.merge_type == 'PARENT':
-                parents = {}
+        elif self.merge_type == 'COLLECTION':
+            # gather all collections
+            collections_dict = {}
+            for x in objects:
+                obj_collection = x['__orig_collection__']
+                if obj_collection not in collections_dict:
+                    collections_dict[obj_collection] = []
+                collections_dict[obj_collection].append(x)
+            # empty the result list
+            objects = []
+            # merge by gathered objects
+            for collection_name, objs in collections_dict.items():
+                merged = self.merge_meshes(objs, armatures, collection_name)
+                # rename all merged objects to the name of the collection
+                for obj in merged:
+                    obj.name = collection_name
+                # repopulate export list
+                objects.extend(merged)
 
-                for i in reversed(range(0, len(objects))):
-                    parent = objects[i].parent
-                    if parent and parent in objects:
-                        while parent and parent.parent in objects:
-                            parent = parent.parent
-                        if parent not in parents:
-                            parents[parent] = []
+        elif self.merge_type == 'PARENT':
+            parents = {}
 
-                        parents[parent].append(objects[i])
-                    else:
-                        parents[objects[i]] = []
+            for i in reversed(range(0, len(objects))):
+                parent = objects[i].parent
+                if parent and parent in objects:
+                    while parent and parent.parent in objects:
+                        parent = parent.parent
+                    if parent not in parents:
+                        parents[parent] = []
 
-                objects = []
+                    parents[parent].append(objects[i])
+                else:
+                    parents[objects[i]] = []
 
-                for parent, children in parents.items():
-                    merged = self.merge_meshes([parent] + children, armatures, parent.name)
-                    objects.extend(merged)
+            objects = []
+
+            for parent, children in parents.items():
+                merged = self.merge_meshes([parent] + children, armatures, parent.name)
+                objects.extend(merged)
 
         bundle_info['meshes'] = objects
 

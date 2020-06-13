@@ -168,10 +168,12 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
     def process(self, bundle_info):
 
+        armatures = bundle_info['armatures']
+        if not armatures:
+            return
+
         if bpy.context.scene.BGE_Settings.export_format != 'FBX':
             bundle_info['export_preset']['bake_anim'] = True
-
-        armatures = bundle_info['armatures']
 
         created_actions = []
         renamed_actions = {}

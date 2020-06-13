@@ -63,7 +63,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
 
     action_match_name: bpy.props.StringProperty(
         name='Action Names',
-        description='Actions matching this pattern will be merged',
+        description='Actions matching this pattern will be merged e.g. "horse_galop" and "human_galop" will be merge into a new animation named "galop"',
         default="{armature.name}_{name}"
     )
 
@@ -74,10 +74,13 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         row.prop(self, 'root_bone_name', text='')
         col.prop(self, 'armature_name')
         row = col.row(align=True)
-        row.prop(self, "rename_bones", text='Rename Data')
+        row.prop(self, "rename_bones", text='Rename Bones')
+
         if self.rename_bones:
             row.prop(self, "new_name", text='')
         col.prop(self, 'merge_actions')
+        if self.merge_actions:
+            col.prop(self, "action_match_name")
 
     def get_new_bone_name(self, armature, bone_name):
         if self.rename_bones:
@@ -89,7 +92,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         objects = bundle_info['meshes']  # for re assigning the armature modfiier
         if not len(armatures) > 1:
             print('Only one armature to merge, process skipped')
-            return False
+            return
 
         # merge the baked data of all armatures and actions
         baked_merge_actions = {}

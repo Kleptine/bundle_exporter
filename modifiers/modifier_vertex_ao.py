@@ -38,6 +38,9 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
         contrast = self.contrast
         objects = bundle_info['meshes']
 
+        if not objects:
+            return
+
         for obj in objects:
             bpy.ops.object.select_all(action="DESELECT")
             obj.select_set(True)

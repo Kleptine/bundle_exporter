@@ -51,6 +51,8 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 
     def process(self, bundle_info):
         objects = bundle_info['meshes']
+        if not objects:
+            return
 
         source = self.get_object_from_name(self.source)
 
