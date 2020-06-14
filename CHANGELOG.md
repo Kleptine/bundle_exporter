@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Export Animations
         - option to export each action as a separate file
         - option to disable renaming the actions when exported
-    - Purge Bones (lets the user delete specific bones)
+    - Purge Bones (lets the user delete or keep specific bones)
     - Collision modifier rework:
         - it will search possible colliders inside the bundle and set them up correctly for unreal or unity (parent them or rename them if necessary)
         - Option to create colliders:

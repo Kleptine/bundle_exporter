@@ -103,18 +103,16 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
             # for each armature search corresponding actions
             for armature in armatures:
                 if armature.name in modifier_bake_animations.bake_data:
-                    print('armature was baked')
                     # loop though actions to search the ones to merge
                     action_match_pattern = self.action_match_name.format(armature=armature, name='')  # for example: 'myarmature@hand' will search for 'myarmature@' and therefore 'hand' is the name of the action
                     for action_name, action_bake_data in modifier_bake_animations.bake_data[armature.name].items():
-                        print(action_name)
                         match = re.search(action_match_pattern, action_name)
                         if match:
                             match = action_name[match.start():match.end()]
                             new_action_name = action_name.replace(match, '')
                             if new_action_name not in baked_merge_actions:
                                 baked_merge_actions[new_action_name] = {}
-                            print('valid action to merge: {}'.format(new_action_name))
+                            print('valid action to merge: {} -> {}'.format(action_name, new_action_name))
                             actions_data = baked_merge_actions[new_action_name]
 
                             for frame, frame_data in action_bake_data.items():

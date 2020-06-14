@@ -62,8 +62,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             col = row.column(align=True)
             col.prop(self, "path", text="Path")
             col.prop(self, "file", text="File")
-
-            col.prop(self, 'try_keep_action_names')
+        else:
+            layout.prop(self, 'try_keep_action_names')
 
     def pre_process(self, bundle_info):
         print('hi')
@@ -269,7 +269,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
         bundle_info['export_preset']['bake_anim'] = True
 
         # modifify the way the fbx exporter names actions
-        if self.actions_as_separate_files and self.try_keep_action_names:
+        # only useful if not exporting as separate files
+        if not self.actions_as_separate_files and self.try_keep_action_names:
             from collections.abc import Iterable
             import io_scene_fbx.export_fbx_bin as fbx
             from io_scene_fbx.fbx_utils import get_bid_name
@@ -342,7 +343,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             del self['renamed_actions']
 
         # restore the fbx exporter
-        if self.actions_as_separate_files and self.try_keep_action_names:
+        if not self.actions_as_separate_files and self.try_keep_action_names:
             if self._is_using_fbx(bundle_info['export_format']):
                 import io_scene_fbx.export_fbx_bin as fbx
                 import io_scene_fbx.fbx_utils as utils

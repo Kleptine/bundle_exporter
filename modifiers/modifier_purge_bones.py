@@ -35,13 +35,33 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
         default=True
     )
 
+    exclude_prefix: bpy.props.StringProperty(
+        name="Prefix",
+        description='Any bone with the specified prefix will NOT be deleted',
+        default=''
+    )
+
     def _draw_info(self, layout):
-        layout.prop(self, 'delete_non_deforming')
+        layout.label(text='Delete:')
+        row = layout.row()
+        row.separator()
+        col = row.column()
+        col.prop(self, 'delete_non_deforming')
+        layout.label(text='Keep:')
+        row = layout.row()
+        row.separator()
+        col = row.column()
+        col.prop(self, 'exclude_prefix')
         pass
 
     def _check_delete_bone(self, bone):
+        if self.exclude_prefix and bone.name.startswith(self.exclude_prefix):
+            return False
+
         if not bone.use_deform and self.delete_non_deforming:
             return True
+
+        return False
 
     def process(self, bundle_info):
         armatures = bundle_info['armatures']
