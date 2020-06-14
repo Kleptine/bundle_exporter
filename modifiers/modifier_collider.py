@@ -112,7 +112,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 
         layout.prop(self, "collider_creation")
 
-        if self.collider_creation == 'GENERATE':
+        if self.collider_creation:
             layout.prop(self, "generate_process")
             if self.generate_process == 'DECIMATION':
                 row = layout.row(align=True)

@@ -9,7 +9,7 @@ armature_types = {'ARMATURE'}
 
 engines = [
     ('UNREAL', 'Unreal', 'Unreal Engine'),
-    ('UNITY', 'Unity', 'Unity')
+    #('UNITY', 'Unity', 'Unity')
 ]
 
 export_formats = [('FBX', 'FBX', 'fbx format'),
