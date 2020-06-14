@@ -10,6 +10,8 @@ from . import modifier
 from ..utilities import traverse_tree_from_iteration, isclose_matrix, matrix_to_list
 from .. import settings
 
+from . import modifier_bake_animations
+
 
 class BGE_mod_merge_armatures(modifier.BGE_mod_default):
     label = "Merge Armatures"
@@ -70,14 +72,15 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
     def _draw_info(self, layout):
         col = layout.column(align=False)
         row = col.row(align=True)
+        col.prop(self, 'armature_name')
+
         row.prop(self, 'create_root_bone')
         row.prop(self, 'root_bone_name', text='')
-        col.prop(self, 'armature_name')
-        row = col.row(align=True)
-        row.prop(self, "rename_bones", text='Rename Bones')
+
+        col.prop(self, "rename_bones", text='Rename Bones')
 
         if self.rename_bones:
-            row.prop(self, "new_name", text='')
+            col.prop(self, "new_name")
         col.prop(self, 'merge_actions')
         if self.merge_actions:
             col.prop(self, "action_match_name")
@@ -99,10 +102,12 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         if self.merge_actions:
             # for each armature search corresponding actions
             for armature in armatures:
-                if '__baked_action_data__' in armature:
+                if armature.name in modifier_bake_animations.bake_data:
+                    print('armature was baked')
                     # loop though actions to search the ones to merge
                     action_match_pattern = self.action_match_name.format(armature=armature, name='')  # for example: 'myarmature@hand' will search for 'myarmature@' and therefore 'hand' is the name of the action
-                    for action_name, action_bake_data in armature['__baked_action_data__']:
+                    for action_name, action_bake_data in modifier_bake_animations.bake_data[armature.name].items():
+                        print(action_name)
                         match = re.search(action_match_pattern, action_name)
                         if match:
                             match = action_name[match.start():match.end()]
@@ -110,14 +115,16 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                             if new_action_name not in baked_merge_actions:
                                 baked_merge_actions[new_action_name] = {}
                             baked_merge_actions[new_action_name] = {}
-
+                            print('valid action to merge: {}'.format(new_action_name))
                             actions_data = baked_merge_actions[new_action_name]
 
-                            for frame, frame_data in action_bake_data:
+                            for frame, frame_data in action_bake_data.items():
                                 if frame not in actions_data:
                                     actions_data[frame] = []
                                 for bone_data in frame_data:
-                                    actions_data[frame].append(self.new_name.format(armature=armature, name=bone_data[0]), bone_data[1])
+                                    new_parent_name = self.new_name.format(armature=armature, name=bone_data[1]['original_parent'])
+                                    bone_data[1]['original_parent'] = new_parent_name
+                                    actions_data[frame].append((self.new_name.format(armature=armature, name=bone_data[0]), bone_data[1]))
 
         # clear the animations data of all the armatures and select them
         bpy.ops.object.select_all(action='DESELECT')
@@ -147,16 +154,16 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                     bone.name = self.new_name.format(armature=armature, name=bone.name)
 
         # join the armatures
+        bpy.context.view_layer.objects.active = None
         bpy.ops.object.select_all(action='DESELECT')
         bpy.context.view_layer.objects.active = armatures[0]
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
         for x in armatures:
             x.select_set(True)
         bpy.ops.object.join()
 
         merged_armature = armatures[0]
-
-        if self.merge_actions:
-            merged_armature['__baked_action_data__'] = baked_merge_actions
 
         # make the old obj modifiers (like armatures) point to the new armature
         for x in data_to_change:
@@ -187,5 +194,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         # rename armature
         merged_armature.name = self.armature_name
         merged_armature.data.name = self.armature_name + '.data'
+
+        modifier_bake_animations.bake_data[merged_armature.name] = baked_merge_actions
 
         bundle_info['armatures'] = [merged_armature]

@@ -200,7 +200,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         # Merge Vertices?
         if self.merge_verts and self.merge_distance > 0:
 
-            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
             bpy.ops.mesh.select_all(action='SELECT')
 
@@ -209,7 +209,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             bpy.ops.mesh.quads_convert_to_tris()
 
             bpy.ops.mesh.select_all(action='DESELECT')
-            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         # if self.consistent_normals :
         # 	bpy.ops.object.mode_set(mode='EDIT')
@@ -224,7 +224,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         if self.merge_by_material:
             # TODO: Split faces by materials
 
-            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
             bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
 
             # Rename with unique ID

@@ -3,12 +3,16 @@ import imp
 import string
 import random
 import re
+import os
+import pathlib
 from mathutils import Vector, Matrix
 
 from . import modifier
 
 from ..utilities import traverse_tree_from_iteration, isclose_matrix, matrix_to_list
 from .. import settings
+
+bake_data = {}
 
 
 class BGE_mod_bake_actions(modifier.BGE_mod_default):
@@ -17,7 +21,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_merge"
     type = 'ARMATURE'
     icon = 'ACTION'
-    priority = 0
+    priority = 2
     tooltip = 'Joins armatures and actions when exporting'
 
     active: bpy.props.BoolProperty(
@@ -62,6 +66,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             col.prop(self, 'try_keep_action_names')
 
     def pre_process(self, bundle_info):
+        print('hi')
+
         def validate_actions(act, path_resolve):
             for fc in act.fcurves:
                 data_path = fc.data_path
@@ -70,15 +76,21 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 try:
                     path_resolve(data_path)
                 except ValueError:
+                    print('datapath not found: {}'.format(data_path))
                     return False
             return True
+
+        armatures = bundle_info['armatures']
+        print(armatures)
 
         for armature in bundle_info['armatures']:
 
             baked_actions = {}
 
             for action in bpy.data.actions:
-                if validate_actions(action, armature.path_resolve):
+                is_action_valid = validate_actions(action, armature.path_resolve)
+                print('{} -> {} : {}'.format(armature.name, action.name, is_action_valid))
+                if is_action_valid:
                     if not armature.animation_data:
                         armature.animation_data_create()
                     armature.animation_data.action = action
@@ -114,11 +126,14 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                             else:  # TODO: this needs to be deleted
                                 frame_data['created_matrix_basis'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
                                 frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
+                                frame_data['original_parent'] = '__NONE__'
 
                             frame_data['matrix_world'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='WORLD')
-                            action_data[f].append(bone.name, frame_data)
+                            action_data[f].append((bone.name, frame_data))
 
-            armature['__baked_action_data__'] = baked_actions
+            bake_data[armature.name] = baked_actions
+            # print(baked_actions)
+            print('found animations for {} - {}'.format(armature, baked_actions.keys()))
 
         # now that we stored all the bones transforms, we delete all animation data
         for armature in bundle_info['armatures']:
@@ -126,6 +141,9 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             armature.animation_data_clear()
 
             # make all layers visible
+            bpy.context.view_layer.objects.active = None
+            bpy.ops.object.select_all(action="DESELECT")
+            bpy.context.view_layer.objects.active = armature
             bpy.ops.object.mode_set(mode='POSE', toggle=False)
             for x in range(0, 32):
                 armature.data.layers[x] = True
@@ -182,10 +200,12 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             bpy.context.view_layer.objects.active = armature
             bpy.ops.object.mode_set(mode='POSE', toggle=False)
 
-            baked_actions = armature['__baked_action_data__']
+            if armature.name not in bake_data:
+                continue
 
+            baked_actions = bake_data[armature.name]
             for action_name, action_data in baked_actions.items():
-                print(action_name)
+                print('applying cached animation: {}'.format(action_name))
                 # if the action exists, rename it
                 if action_name in bpy.data.actions:
                     temp_name = '_TEMP_{}'.format(action_name)
@@ -193,6 +213,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                     renamed_actions[temp_name] = action_name
                     self['renamed_actions'] = renamed_actions
 
+                armature.animation_data_create()
                 # create a new action
                 new_action = bpy.data.actions.new(action_name)
                 armature.animation_data.action = new_action
@@ -202,46 +223,53 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 bpy.context.view_layer.update()
 
                 # loop though all the actions
-                for action_name, action_info in baked_actions.items():
+                for frame, frame_tuples in action_data.items():
+                    for bone_name, frame_data in frame_tuples:
+                        bone = armature.pose.bones.get(bone_name)
+                        if not bone:
+                            continue
+                        bone.rotation_mode = 'QUATERNION'
+                        matrix = frame_data['created_matrix_basis'] if bone.parent and bone.parent.name == frame_data['original_parent'] else frame_data['created_matrix_basis_no_parent']
+                        bone.matrix_basis = matrix.copy()
+
+                        # for storing last frame quaternion
+                        # uses action_name to store different quaternions for each animation
+                        if action_name in bone.keys():
+                            quat = bone.rotation_quaternion.copy()
+                            quat.make_compatible(bone[action_name])
+                            bone.rotation_quaternion = quat
+                            bone[action_name] = quat
+                            del quat
+                        else:
+                            bone[action_name] = bone.rotation_quaternion.copy()
+
+                        bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
+                        bone.keyframe_insert("rotation_quaternion", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
+                        bone.keyframe_insert("scale", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
+                if settings.debug:
+                    # this checks that all transforms were applied correctly
+                    bpy.context.view_layer.update()
                     for frame, frame_tuples in action_info.items():
+                        bpy.context.scene.frame_set(frame)
                         for bone_name, frame_data in frame_tuples:
                             bone = armature.pose.bones[bone_name]
-                            bone.rotation_mode = 'QUATERNION'
-                            matrix = frame_data['created_matrix_basis'] if bone.parent and bone.parent.name == frame_data['original_parent'] else frame_data['created_matrix_basis_no_parent']
-                            bone.matrix_basis = matrix.copy()
+                            matrix = armature.convert_space(pose_bone=bone, matrix=frame_data['matrix_world'], from_space='WORLD', to_space='POSE')
+                            if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
+                                print('DOUBLE CHECK ### INCORRECT ### f{} - {}'.format(frame, bone.name))
+                                print('W-{}'.format(matrix))
+                                print('CW-{}'.format(bone.matrix))
+                            if not isclose_matrix(bone.matrix_basis, frame_data['created_matrix_basis'], abs_tol=0.01):
+                                print('CB-{}'.format(bone.matrix_basis))
+                                print('B-{}'.format(frame_data['created_matrix_basis']))
 
-                            # for storing last frame quaternion
-                            # uses action_name to store different quaternions for each animation
-                            if action_name in bone.keys():
-                                quat = bone.rotation_quaternion.copy()
-                                quat.make_compatible(bone[action_name])
-                                bone.rotation_quaternion = quat
-                                bone[action_name] = quat
-                                del quat
-                            else:
-                                bone[action_name] = bone.rotation_quaternion.copy()
+        # the following processess are only for fbx
+        if not self._is_using_fbx(bundle_info['export_format']):
+            return
 
-                            bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
-                            bone.keyframe_insert("rotation_quaternion", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
-                            bone.keyframe_insert("scale", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
-                    if settings.debug:
-                        # this checks that all transforms were applied correctly
-                        bpy.context.view_layer.update()
-                        for frame, frame_tuples in action_info.items():
-                            bpy.context.scene.frame_set(frame)
-                            for bone_name, frame_data in frame_tuples:
-                                bone = armature.pose.bones[bone_name]
-                                matrix = armature.convert_space(pose_bone=bone, matrix=frame_data['matrix_world'], from_space='WORLD', to_space='POSE')
-                                if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
-                                    print('DOUBLE CHECK ### INCORRECT ### f{} - {}'.format(frame, bone.name))
-                                    print('W-{}'.format(matrix))
-                                    print('CW-{}'.format(bone.matrix))
-                                if not isclose_matrix(bone.matrix_basis, frame_data['created_matrix_basis'], abs_tol=0.01):
-                                    print('CB-{}'.format(bone.matrix_basis))
-                                    print('B-{}'.format(frame_data['created_matrix_basis']))
+        bundle_info['export_preset']['bake_anim'] = True
 
         # modifify the way the fbx exporter names actions
-        if self.actions_as_separate_files and self.try_keep_action_names and self._is_using_fbx(bundle_info['export_format']):
+        if self.actions_as_separate_files and self.try_keep_action_names:
             from collections.abc import Iterable
             import io_scene_fbx.export_fbx_bin as fbx
             from io_scene_fbx.fbx_utils import get_bid_name
@@ -256,7 +284,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             fbx.get_blenderID_name = get_blenderID_name
 
         # export actions as files
-        if self.actions_as_separate_files and self._is_using_fbx(bundle_info['export_format']):
+        if self.actions_as_separate_files:
             # from fbx addon exporter:
             def validate_actions(act, path_resolve):
                 for fc in act.fcurves:
@@ -290,8 +318,10 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
                         export_preset['filepath'] = path_full
 
+                        bpy.context.view_layer.objects.active = None
                         bpy.ops.object.select_all(action="DESELECT")
                         armature.select_set(True)
+                        bpy.context.view_layer.objects.active = armature
                         armature.animation_data.action = act
                         settings.export_operators[bundle_info['export_format']](**export_preset)
 
@@ -317,3 +347,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 import io_scene_fbx.export_fbx_bin as fbx
                 import io_scene_fbx.fbx_utils as utils
                 fbx.get_blenderID_name = utils.get_blenderID_name
+
+        # delete bake data
+        keys = [x for x in bake_data.keys()]
+        for key in keys:
+            del bake_data[key]

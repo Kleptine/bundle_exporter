@@ -40,7 +40,7 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
         pass
 
     def _check_delete_bone(self, bone):
-        if bone.use_deform and self.delete_non_deforming:
+        if not bone.use_deform and self.delete_non_deforming:
             return True
 
     def process(self, bundle_info):
@@ -54,7 +54,7 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
             bundle_info['export_preset']['use_armature_deform_only'] = False
 
         for armature in armatures:
-            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+            bpy.context.view_layer.objects.active = None
 
             bpy.ops.object.select_all(action='DESELECT')
             armature.select_set(True)
@@ -67,4 +67,6 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
             for bone in delete_bones:
                 armature.data.edit_bones.remove(bone)
 
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        bpy.context.view_layer.objects.active = None

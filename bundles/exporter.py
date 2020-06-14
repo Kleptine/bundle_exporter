@@ -181,6 +181,7 @@ def export(bundles):
             for modifier in bundle.modifiers:
                 print('Appliying modifier "{}" ...'.format(modifier.id))
                 modifier.process(bundle_info)
+                print('Modifier processed')
 
             # apply the pivot
             all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
@@ -196,6 +197,7 @@ def export(bundles):
             pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
             # Select all export objects
+            bpy.context.view_layer.objects.active = None
             bpy.ops.object.select_all(action="DESELECT")
             for obj in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
                 obj.select_set(True)
