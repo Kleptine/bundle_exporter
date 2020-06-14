@@ -114,7 +114,6 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
                             new_action_name = action_name.replace(match, '')
                             if new_action_name not in baked_merge_actions:
                                 baked_merge_actions[new_action_name] = {}
-                            baked_merge_actions[new_action_name] = {}
                             print('valid action to merge: {}'.format(new_action_name))
                             actions_data = baked_merge_actions[new_action_name]
 
