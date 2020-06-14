@@ -11,6 +11,7 @@ from ..settings import engines, ue4_collider_prefixes
 
 def create_box_collider(obj, engine):
     new_obj = None
+    bpy.context.view_layer.objects.active = obj
     if bpy.context.object.mode == 'OBJECT':
         scale = obj.scale
 
@@ -58,7 +59,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
     type = 'GENERAL'
     icon = 'CUBE'
     priority = 999  # just after rename
-    tooltip = 'This modifier will create extra collision meshes based on the exported meshes'
+    tooltip = 'Setups collision meshes properly. It also has options to automatically create them'
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -167,6 +168,8 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         if self.collider_creation:
             if self.generate_process == 'BOX':
                 for obj in objects:
+                    bpy.context.view_layer.objects.active = obj
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
                     col = create_box_collider(obj, self.engine)
                     col['__IS_COPY__'] = True  # to automatically delete them after export
                     bundle_info['extras'].append(col)

@@ -70,15 +70,6 @@ class BGE_Settings(bpy.types.PropertyGroup):
         description="Padding for fences",
         subtype='DISTANCE'
     )
-    collapseBundles: bpy.props.BoolProperty(
-        name="Collapse",
-        default=False,
-        description="Compact list view"
-    )
-    recent: bpy.props.StringProperty(
-        name="Recent export",
-        default=""
-    )
     bundles: bpy.props.CollectionProperty(
         type=bundles.Bundle
     )

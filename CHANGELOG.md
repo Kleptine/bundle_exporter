@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New modifiers:
     - Triangulate
     - Export Animations
-        - option to export each action as a separate file
-        - option to disable renaming the actions when exported
+        - export each action as a separate file
+        - disable renaming the actions when exported
     - Purge Bones (lets the user delete or keep specific bones)
     - Collision modifier rework:
-        - it will search possible colliders inside the bundle and set them up correctly for unreal or unity (parent them or rename them if necessary)
+        - it will search possible colliders inside the bundle and set them up correctly for unreal engine
         - Option to create colliders:
             - Box: it will create a box collider with the shape of the bounding box for each object in the bundle
             - Decimate: it will create collider the old way (applying decimation modifiers etc)
@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Modifiers are now displayed in the order they are applied
+- Minor UI changes and typos fixed
+- default fbx presets don't export animations (it is enabled when adding an export actions modifier)
 
 ### Fixed
 - Fixed error using the "Export Textures" modifier (it would cause error when finding a texture node without an image applied to it)

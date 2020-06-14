@@ -20,7 +20,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
     type = 'ARMATURE'
     icon = 'CON_ARMATURE'
     priority = -2
-    tooltip = 'Joins armatures and actions when exporting'
+    tooltip = 'Merges armatures and actions when exporting'
 
     active: bpy.props.BoolProperty(
         name="Active",

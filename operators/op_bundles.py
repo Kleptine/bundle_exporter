@@ -52,7 +52,7 @@ mesh_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label
 general_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label, x['global'].icon, x['global'].unique_num) for x in modifiers.modifiers_dict.values() if x['global'].type == 'GENERAL']
 helper_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label, x['global'].icon, x['global'].unique_num) for x in modifiers.modifiers_dict.values() if x['global'].type == 'HELPER']
 armature_modifiers = [(x['global'].id, x['global'].label, "add " + x['global'].label, x['global'].icon, x['global'].unique_num) for x in modifiers.modifiers_dict.values() if x['global'].type == 'ARMATURE']
-modifier_enum = [("", "General", "description", "MODIFIER", 0)] + general_modifiers + [("", "Mesh", "description", "OUTLINER_OB_MESH", 0)] + mesh_modifiers + [("", "Helper", "description", "OUTLINER_OB_EMPTY", 0)] + helper_modifiers + [("", "Armature", "description", "OUTLINER_OB_ARMATURE", 0)] + armature_modifiers
+modifier_enum = [("", "General", "description", "MODIFIER", 0)] + general_modifiers + [("", "Mesh", "description", "OUTLINER_OB_MESH", 0)] + mesh_modifiers + [("", "Empty", "description", "OUTLINER_OB_EMPTY", 0)] + helper_modifiers + [("", "Armature", "description", "OUTLINER_OB_ARMATURE", 0)] + armature_modifiers
 
 
 class BGE_OT_override_bundle_modifier(bpy.types.Operator):

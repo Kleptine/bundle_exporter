@@ -18,7 +18,7 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
     type = 'ARMATURE'
     icon = 'BONE_DATA'
     priority = -5
-    tooltip = 'Deleted specific bones by matching rules'
+    tooltip = 'Deletes specific bones from the armatures'
 
     active: bpy.props.BoolProperty(
         name="Active",

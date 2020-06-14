@@ -22,7 +22,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
     type = 'ARMATURE'
     icon = 'ACTION'
     priority = 2
-    tooltip = 'Joins armatures and actions when exporting'
+    tooltip = 'Bakes compatible actions for each bundle and exports them'
 
     active: bpy.props.BoolProperty(
         name="Active",

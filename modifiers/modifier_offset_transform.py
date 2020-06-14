@@ -12,7 +12,7 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/#modifier_offset"
     type = "MESH"
     icon = 'ORIENTATION_VIEW'
-    tooltip = 'applies the transform data from the source object to all export meshes'
+    tooltip = 'Applies the transform data from the source object to all export meshes'
 
     active: bpy.props.BoolProperty(
         name="Active",

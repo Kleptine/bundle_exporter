@@ -6,7 +6,7 @@ from . import modifier
 
 
 class BGE_mod_transform_helpers(modifier.BGE_mod_default):
-    label = "Transfrom Helpers"
+    label = "Scale Empties"
     id = 'transform_helpers'
     url = "http://renderhjs.net/fbxbundle/"
     type = 'HELPER'
