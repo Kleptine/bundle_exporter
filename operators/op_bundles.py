@@ -72,7 +72,6 @@ class BGE_OT_override_bundle_modifier(bpy.types.Operator):
         return "not implemented"
 
     def execute(self, context):
-        print(self.option)
         mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.bundles[bpy.context.scene.BGE_Settings.bundle_index].override_modifiers)
         for x in mods:
             if x.id == self.option:
@@ -99,7 +98,6 @@ class BGE_OT_add_bundle_modifier(bpy.types.Operator):
         return "not implemented"
 
     def execute(self, context):
-        print(self.option)
         mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.scene_modifiers)
         for x in mods:
             if x.id == self.option:

@@ -66,8 +66,6 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             layout.prop(self, 'try_keep_action_names')
 
     def pre_process(self, bundle_info):
-        print('hi')
-
         def validate_actions(act, path_resolve):
             for fc in act.fcurves:
                 data_path = fc.data_path
@@ -76,20 +74,17 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 try:
                     path_resolve(data_path)
                 except ValueError:
-                    print('datapath not found: {}'.format(data_path))
-                    return False
-            return True
+                    return False, data_path
+            return True, ''
 
         armatures = bundle_info['armatures']
-        print(armatures)
-
         for armature in bundle_info['armatures']:
 
             baked_actions = {}
 
             for action in bpy.data.actions:
-                is_action_valid = validate_actions(action, armature.path_resolve)
-                print('{} -> {} : {}'.format(armature.name, action.name, is_action_valid))
+                is_action_valid, error_datapath = validate_actions(action, armature.path_resolve)
+                print('{}::{} , valid: {}  {}'.format(armature.name, action.name, is_action_valid, error_datapath))
                 if is_action_valid:
                     if not armature.animation_data:
                         armature.animation_data_create()
@@ -132,9 +127,6 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                             action_data[f].append((bone.name, frame_data))
 
             bake_data[armature.name] = baked_actions
-            # print(baked_actions)
-            print('found animations for {} - {}'.format(armature, baked_actions.keys()))
-
         # now that we stored all the bones transforms, we delete all animation data
         for armature in bundle_info['armatures']:
             # remove all animation data
@@ -205,7 +197,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
             baked_actions = bake_data[armature.name]
             for action_name, action_data in baked_actions.items():
-                print('applying cached animation: {}'.format(action_name))
+                print('{} -> applying cached animation "{}"'.format(armature.name, action_name))
                 # if the action exists, rename it
                 if action_name in bpy.data.actions:
                     temp_name = '_TEMP_{}'.format(action_name)

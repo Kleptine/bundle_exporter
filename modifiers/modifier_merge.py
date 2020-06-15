@@ -179,7 +179,6 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
                     if len(uv_names) < index:
                         uv_names.append(uv.name)
                     uv.name = '__{}__'.format(index)
-            print(uv_names)
             # for x in objects:
             #    for index, uv in enumerate(x.data.uv_layers):
             #        uv.name = uv_names[index]
@@ -282,11 +281,8 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         objects = new_objects
 
         if armature_dict:
-            print(armature_dict)
             for x in objects:
                 mod = x.modifiers.new('MergeArmature', 'ARMATURE')
-                print(x)
-                print(mod)
                 for prop, value in armature_dict.items():
                     setattr(mod, prop, value)
                 if armatures and mod.object not in armatures:

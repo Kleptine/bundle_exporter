@@ -218,6 +218,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
                     # add them to "extras" so other modifiers won't process them
                     bundle_info['extras'].append(copy)
 
+        # rename and parent (required for unreal engine)
         parent_object = bundle_info['meshes'][0]
         if parent_object:
             colliders = self._get_colliders(bundle_info['extras'], pop=False)

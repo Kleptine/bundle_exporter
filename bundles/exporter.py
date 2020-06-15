@@ -171,7 +171,7 @@ def export(bundles):
     for bundle in bundles:
         with Exporter(bundle, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset) as bundle_info:
             all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
-            print('objects before modifiers: {}'.format(all_objects))
+            print('objects to export: {}'.format(all_objects))
 
             bpy.ops.object.select_all(action="DESELECT")
             for modifier in bundle.modifiers:
@@ -181,11 +181,11 @@ def export(bundles):
             for modifier in bundle.modifiers:
                 print('Appliying modifier "{}" ...'.format(modifier.id))
                 modifier.process(bundle_info)
-                print('Modifier processed')
-
             # apply the pivot
             all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
-            print(all_objects)
+
+            print('objects after modifiers: {}'.format(all_objects))
+
             for x in all_objects:
                 if x.parent and x.parent in all_objects:
                     continue

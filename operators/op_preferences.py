@@ -28,5 +28,5 @@ class BGE_OT_load_preferences(bpy.types.Operator):
     bl_label = "Load Preferences"
 
     def execute(self, context):
-        print('TODO - LOAD PREFERENCES')
+        print('TODO: LOAD PREFERENCES')
         return {'FINISHED'}

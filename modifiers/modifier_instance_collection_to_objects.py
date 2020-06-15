@@ -80,7 +80,6 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                                 continue
                             try:
                                 new_driver = new_node.driver_add(orig_driver.data_path, orig_driver.array_index) if orig_driver.array_index > 0 else new_node.driver_add(orig_driver.data_path)
-                                #print('found: {} -> {}'.format(new_node['__orig_name__'], orig_driver.data_path))
                             except TypeError:
                                 print('DATAPATH NOT FOUND: {} -> {}'.format(new_node['__orig_name__'], orig_driver.data_path))
                                 continue

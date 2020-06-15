@@ -44,7 +44,7 @@ def import_files(path):
     for name in filenames_valid:
         file_path = os.path.join(path, name)
         extension = (os.path.splitext(file_path)[1])[1:].lower()
-        print("- {} = {}".format(extension, file_path))
+        # print("- {} = {}".format(extension, file_path))
 
         try:
             # https://docs.blender.org/api/2.78a/bpy.ops.import_scene.html

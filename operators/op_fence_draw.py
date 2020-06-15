@@ -98,11 +98,11 @@ class SortedGridAxis:
         # Calculate clusters
 
         for i in range(len(self.groups)):
-            print("i {}. / {}".format(i, len(self.groups)))
+            # print("i {}. / {}".format(i, len(self.groups)))
 
             j = 0
             for x in range(len(self.groups)):
-                print("  j {}. / {}".format(j, len(self.groups)))
+                # print("  j {}. / {}".format(j, len(self.groups)))
 
                 if i != j and i < len(self.groups) and j < len(self.groups):
                     g0 = self.groups[i]
@@ -118,7 +118,7 @@ class SortedGridAxis:
                         self.groups.remove(g1)
                         self.bounds.remove(b1)
                         j -= 1
-                        print("    Grp @ {} {} = {}x".format(i, j, len(self.groups)))
+                        # print("    Grp @ {} {} = {}x".format(i, j, len(self.groups)))
                         # break
                         # j-=1
                         # i-=1
@@ -127,7 +127,7 @@ class SortedGridAxis:
             # 	j+=1
             # i+=1
 
-        print("Final {} x {}".format(len(self.groups), len(self.bounds)))
+        # print("Final {} x {}".format(len(self.groups), len(self.bounds)))
 
         # Sort
         values = {(self.bounds.index(b)): (b[0]) for b in self.bounds}
@@ -138,7 +138,7 @@ class SortedGridAxis:
 
             index = 0
             for s in ordered:
-                print(".. Sorted {} = {}".format(s[0], s[1]))
+                # print(".. Sorted {} = {}".format(s[0], s[1]))
                 self.groups[index] = copy_groups[s[0]]
                 self.bounds[index] = copy_bounds[s[0]]
                 index += 1

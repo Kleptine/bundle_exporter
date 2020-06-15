@@ -17,7 +17,6 @@ def get_draw():
 
 
 def clear():
-    print("Clear")
     draw = get_draw()
     draw.clear()
 
@@ -72,8 +71,6 @@ class LineDraw:
         self.gp_frame.clear()
 
     def add_box(self, position, size=1.0):
-        print("Box")
-
         self.add_line([
             position + Vector((-0.5, -0.5, -0.5)) * size,
             position + Vector((+0.5, -0.5, -0.5)) * size,
