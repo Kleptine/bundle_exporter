@@ -6,9 +6,9 @@ from . import modifier
 from mathutils import Euler
 
 
-class BGE_mod_unity_fix(modifier.BGE_mod_default):
-    label = "Unity Fix"
-    id = 'unity_fix'
+class BGE_mod_unity_rotation_fix(modifier.BGE_mod_default):
+    label = "Unity Rotation Fix"
+    id = 'unity_rotation_fix'
     url = "http://renderhjs.net/fbxbundle/"
     type = 'GENERAL'
     icon = 'NODE'

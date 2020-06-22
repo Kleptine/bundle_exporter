@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_2_1)
 ### Added
-- "Unity Fix" Modifier that fixes rotations missmatch between blender and unity
+- "Unity Rotation Fix" Modifier that fixes rotations missmatch between blender and unity
 
 ### Changed
 - The default unity FBX preset now has the bake transforms experimental option disabled
