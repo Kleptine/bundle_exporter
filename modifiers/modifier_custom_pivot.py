@@ -11,7 +11,7 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
     url = "http://renderhjs.net/fbxbundle/"
     type = 'MESH'
     icon = 'EMPTY_ARROWS'
-    priority = 10
+    priority = -999
     tooltip = 'Assign a custom pivot by choosing a source object'
 
     active: bpy.props.BoolProperty(

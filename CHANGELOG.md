@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_2_2)
+### Added
+- new "Set origin to pivot" modifier
+- new unity preset with the bake transforms experimental option enabled
+
+### Fixed
+- "Unity Rotation Fix" modifier increased float precission
+- "Merge" modifier now takes into account the pivot of the bundle
+
 ## [2.2.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_2_1)
 ### Added
 - "Unity Rotation Fix" Modifier that fixes rotations missmatch between blender and unity

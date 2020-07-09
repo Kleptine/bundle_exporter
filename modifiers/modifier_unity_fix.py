@@ -5,6 +5,8 @@ from . import modifier
 
 from mathutils import Euler
 
+import math
+
 
 class BGE_mod_unity_rotation_fix(modifier.BGE_mod_default):
     label = "Unity Rotation Fix"
@@ -48,12 +50,12 @@ class BGE_mod_unity_rotation_fix(modifier.BGE_mod_default):
         x.rotation_euler = Euler((0.0, 0.0, 0.0), 'XYZ')
 
         #bpy.ops.object.transform_apply(location=False, rotation=True, scale=False, properties=False)
-        bpy.ops.transform.rotate(value=-1.5708, orient_axis='X', constraint_axis=(True, False, False), orient_type='GLOBAL')
+        bpy.ops.transform.rotate(value=-math.pi / 2, orient_axis='X', constraint_axis=(True, False, False), orient_type='GLOBAL')
 
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=False, properties=False)
 
         x.rotation_euler = orig_rotation
-        bpy.ops.transform.rotate(value=1.5708, orient_axis='X', constraint_axis=(True, False, False), orient_type='LOCAL')
+        bpy.ops.transform.rotate(value=math.pi / 2, orient_axis='X', constraint_axis=(True, False, False), orient_type='LOCAL')
 
         if parent:
             x.parent = parent

@@ -98,11 +98,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         name = bundle_info['name']
         objects = bundle_info['meshes']
         armatures = bundle_info['armatures']
+        pivot = bundle_info['pivot']
         if len(objects) < 2:
             return
 
         if self.merge_type == 'ALL':
-            objects = self.merge_meshes(objects, armatures, name)
+            objects = self.merge_meshes(objects, armatures, name, pivot)
 
         elif self.merge_type == 'COLLECTION':
             # gather all collections
@@ -116,7 +117,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             objects = []
             # merge by gathered objects
             for collection_name, objs in collections_dict.items():
-                merged = self.merge_meshes(objs, armatures, collection_name)
+                merged = self.merge_meshes(objs, armatures, collection_name, pivot)
                 # rename all merged objects to the name of the collection
                 for obj in merged:
                     obj.name = collection_name
@@ -141,12 +142,12 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             objects = []
 
             for parent, children in parents.items():
-                merged = self.merge_meshes([parent] + children, armatures, parent.name)
+                merged = self.merge_meshes([parent] + children, armatures, parent.name, pivot)
                 objects.extend(merged)
 
         bundle_info['meshes'] = objects
 
-    def merge_meshes(self, objects, armatures, name):
+    def merge_meshes(self, objects, armatures, name, pivot):
 
         if len(objects) < 2:
             return objects
@@ -187,7 +188,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
         bpy.ops.object.join()
         new_objects = [bpy.context.object]
         bpy.context.object.name = name  # assign bundle name
-        bpy.context.scene.cursor.location = Vector((0, 0, 0))
+        bpy.context.scene.cursor.location = pivot
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
         # Apply rotation

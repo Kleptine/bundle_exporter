@@ -34,7 +34,7 @@ preset_folders = {'FBX': 'operator/export_scene.fbx/',
 
 bge_presets_path = os.path.join(os.path.dirname(__file__), 'presets')
 
-BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), os.path.join(bge_presets_path, 'BGE_unity.py')},
+BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), os.path.join(bge_presets_path, 'BGE_unity.py'), os.path.join(bge_presets_path, 'BGE_unity_experimental.py')},
                       'OBJ': {os.path.join(bge_presets_path, 'BGE_obj.py')},
                       'COLLADA': {os.path.join(bge_presets_path, 'BGE_collada.py')},
                       'GLTF': {os.path.join(bge_presets_path, 'BGE_gltf.py')}}
