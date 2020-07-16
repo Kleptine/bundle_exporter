@@ -160,7 +160,9 @@ def export(bundles):
     previous_unit_system = bpy.context.scene.unit_settings.system
     previous_pivot = bpy.context.scene.tool_settings.transform_pivot_point
     previous_cursor = bpy.context.scene.cursor.location
-
+    
+    if bpy.ops.object.mode_set.poll():
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
     if bpy.context.view_layer.objects.active:
         bpy.context.view_layer.objects.active = None
 
