@@ -14,6 +14,7 @@ from .. import settings
 
 bake_data = {}
 
+#TODO: force export only specific actions, by name,
 
 class BGE_mod_bake_actions(modifier.BGE_mod_default):
     label = "Export Actions"

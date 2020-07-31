@@ -126,6 +126,7 @@ class Exporter():
             del obj['__orig_name__']
             del obj['__orig_hide__']
             del obj['__orig_hide_select__']
+            del obj['__orig_hide_vl__']
             del obj['__orig_collection__']
 
         for collection in bpy.data.collections:
