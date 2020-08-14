@@ -19,7 +19,7 @@ modifiers_dict = {}
 
 num_id = 1
 for x in [x for x in __globals if x.startswith('modifier_')]:
-    for y in [item for item in dir(__globals[x]) if item.startswith('BGE_')]:
+    for y in [item for item in dir(__globals[x]) if item.startswith('BGE_mod_')]:
         mod = getattr(__globals[x], y)
         mod.unique_num = num_id
         num_id += 1
@@ -55,7 +55,8 @@ def create_local_settings(Settings, defaults_path, name):
     for key in Settings.__annotations__:
         preferences_val = eval("{}.{}".format(defaults_path, key))
         prop_data = Settings.__annotations__[key][1]  # copy the original dictionary
-        prop_data['default'] = preferences_val
+        if not 'type' in prop_data:
+            prop_data['default'] = preferences_val
         new_annotattions[key] = (Settings.__annotations__[key][0], prop_data)
         # new_annotattions[key]['default']=preferences_val
     SettingsScene = type(name, (Settings,), {'__annotations__': new_annotattions})
@@ -68,8 +69,9 @@ def register_globals():
     global BGE_modifiers_global
     from bpy.utils import register_class
     for x in modifiers_dict:
+        modifiers_dict[x]['addon'].register_dependants()
         register_class(modifiers_dict[x]['addon'])
-
+        
     register_class(BGE_modifiers)
 
 
@@ -96,6 +98,7 @@ def unregister_globals():
 
     for x in modifiers_dict:
         unregister_class(modifiers_dict[x]['addon'])
+        modifiers_dict[x]['addon'].unregister_dependants()
 
 
 def unregister_locals():

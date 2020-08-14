@@ -16,7 +16,8 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     icon = 'MODIFIER'
     priority = 200  # lower number will be executed earlier
     tooltip = 'Default modifier'
-
+    dependants = []
+    
     active: bpy.props.BoolProperty(
         name="Active",
         default=False
@@ -41,6 +42,19 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     # children of this class should implement this function to draw their settings
     def _draw_info(self, layout):
         pass
+
+    @classmethod
+    def register_dependants(cls):
+        from bpy.utils import register_class
+        for cls in cls.dependants:
+            print(f'registering dependant {cls}')
+            register_class(cls)
+
+    @classmethod
+    def unregister_dependants(cls):
+        from bpy.utils import unregister_class
+        for cls in reversed(cls.dependants):
+            unregister_class(cls)
 
     # to make the modifier appear red return true
     def _warning(self):
