@@ -307,16 +307,25 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
                                 input_name = getattr(texture_packer, channel)
 
                                 multi_channel = bsdf_inputs[input_name] in ['VECTOR', 'RGBA']
+
+                                img = None
                                 
                                 if bsdf.inputs[input_name].is_linked:
                                     link = bsdf.inputs[input_name].links[0]
-                                    if link.from_node.bl_rna.identifier == 'ShaderNodeTexImage':
-                                        img = link.from_node.image
-                                        if img:
-                                            if img.size[0] < min_width:
-                                                min_width = img.size[0]
-                                            if img.size[1] < min_height:
-                                                min_height = img.size[1]
+                                    from_node = link.from_node
+                                    if from_node.bl_rna.identifier == 'ShaderNodeTexImage':
+                                        img = from_node.image
+                                    elif from_node.bl_rna.identifier == 'ShaderNodeNormalMap':
+                                        if from_node.inputs['Color'].is_linked:
+                                            from_node = from_node.inputs['Color'].links[0].from_node
+                                            if from_node.bl_rna.identifier == 'ShaderNodeTexImage':
+                                                img = from_node.image
+
+                                if img:
+                                    if img.size[0] < min_width:
+                                        min_width = img.size[0]
+                                    if img.size[1] < min_height:
+                                        min_height = img.size[1]
 
                             if min_width == math.inf:
                                 min_width = 8
@@ -334,25 +343,45 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
                                 current_data = None
                                 if bsdf.inputs[input_name].is_linked:
                                     link = bsdf.inputs[input_name].links[0]
-                                    if link.from_node.bl_rna.identifier == 'ShaderNodeTexImage':
-                                        img = link.from_node.image
-                                        if img:
-                                            copy_img = img.copy()
-                                            if not copy_img.packed_file:
-                                                copy_img.pack()
-                                            #copy_img.source = 'GENERATED'
-                                            copy_img.scale(min_width, min_height)
-                                            if not copy_img.packed_file:
-                                                copy_img.pack()
-                                            
-                                            pixels = copy_img.pixels[:]
+                                    from_node = link.from_node
+                                    img = None
+                                    if from_node.bl_rna.identifier == 'ShaderNodeTexImage':
+                                        img = from_node.image
+                                    elif from_node.bl_rna.identifier == 'ShaderNodeNormalMap':
+                                        if from_node.inputs['Color'].is_linked:
+                                            from_node = from_node.inputs['Color'].links[0].from_node
+                                            if from_node.bl_rna.identifier == 'ShaderNodeTexImage':
+                                                img = from_node.image
+                                    if img:
+                                        copy_img = img.copy()
 
-                                            if link.from_socket.name == 'Color':
+                                        if not copy_img.packed_file:
+                                            copy_img.pack()
+                                        #copy_img.source = 'GENERATED'
+                                        copy_img.scale(min_width, min_height)
+                                        if not copy_img.packed_file:
+                                            copy_img.pack()
+                                        
+                                        pixels = copy_img.pixels[:]
+
+                                        if link.from_socket.name == 'Alpha':
+                                            current_data = [(pixels[i+3], pixels[i+3], pixels[i+3], pixels[i+3]) for i in range(0, int(len(pixels)), 4)]
+                                        else:
+                                            if channel in ['RGB', 'RGBA'] or not multi_channel:
                                                 current_data = [(pixels[i+0], pixels[i+1], pixels[i+2], pixels[i+3]) for i in range(0, int(len(pixels)), 4)]
-                                            elif link.from_socket.name == 'Alpha':
-                                                current_data = [(pixels[i+3], pixels[i+3], pixels[i+3], pixels[i+3]) for i in range(0, int(len(pixels)), 4)]
+                                            # if it's multichannel and we are copying it to a single channel, we select which channel to copy
+                                            else:
+                                                channel_from = getattr(texture_packer, channel + '_channel')
+                                                if channel_from == 'R':
+                                                    current_data = [(pixels[i+0], pixels[i+0], pixels[i+0], pixels[i+0]) for i in range(0, int(len(pixels)), 4)]
+                                                elif channel_from == 'G':
+                                                    current_data = [(pixels[i+1], pixels[i+1], pixels[i+1], pixels[i+1]) for i in range(0, int(len(pixels)), 4)]
+                                                elif channel_from == 'B':
+                                                    current_data = [(pixels[i+2], pixels[i+2], pixels[i+2], pixels[i+2]) for i in range(0, int(len(pixels)), 4)]
+                                                elif channel_from == 'A':
+                                                    current_data = [(pixels[i+3], pixels[i+3], pixels[i+3], pixels[i+3]) for i in range(0, int(len(pixels)), 4)]
 
-                                            bpy.data.images.remove(copy_img)
+                                        bpy.data.images.remove(copy_img)
 
                                 if not current_data:
                                     # get one pixel
@@ -374,7 +403,6 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
                                 channel_data[channel] = current_data
                             
                             final_pixels = []
-                            print(channel_data.keys())
                             for x in range(0, total_pixels):
                                 pixel = [1, 1, 1, 1]
                                 for channel in channel_data.keys():
