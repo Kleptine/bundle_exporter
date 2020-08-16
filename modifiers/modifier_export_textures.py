@@ -195,7 +195,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
            ('RGBA', 'RGBA', 'Red, green, blue, alpha'),
        ],
        default='RGB',
-       name='Mode'
+       name='Color'
     )
     color_depth: bpy.props.EnumProperty(
        items=[
@@ -205,7 +205,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
        default='8',
        name='Depth'
     )
-
+    compression: bpy.props.IntProperty(default=0, subtype='PERCENTAGE', min=0, max =100, name='Compression')
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -237,10 +237,21 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
             col2.use_property_decorate = False
             row=col2.row(align=True)
             row.prop(self, 'color_mode', expand=True,)
-            if not self.image_format == 'TARGA':
+            if not self.image_format == 'TGA':
                 row=col2.row(align=True)
                 row.prop(self, 'color_depth', expand=True)
+            if self.image_format == 'PNG':
+                col2.prop(self, 'compression', expand=True)
         elif self.export_method == 'PACK':
+
+            col2 = layout.column(align=True)
+            col2.use_property_split = True
+            col2.use_property_decorate = False
+            row=col2.row(align=True)
+
+            if self.image_format == 'PNG':
+                col2.prop(self, 'compression', expand=True)
+            
             row = layout.row(align=True)
             row.template_list("BGE_UL_texture_packs", "", self, "texture_packs", self, "texture_packs_index", rows=2)
             col = row.column(align=True)
@@ -250,6 +261,8 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
             if self.texture_packs_index >= 0 and self.texture_packs_index < len(self.texture_packs):
                 texture_pack = self.texture_packs[self.texture_packs_index]
                 texture_pack.draw(layout)
+            
+            
 
     def process(self, bundle_info):
         meshes = bundle_info['meshes']
@@ -269,8 +282,8 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
         bpy.context.scene.render.image_settings.file_format = self.image_format
         bpy.context.scene.render.image_settings.color_mode = self.color_mode
         bpy.context.scene.render.image_settings.color_depth = self.color_depth
-        bpy.context.scene.render.image_settings.compression = 0
-        bpy.context.scene.render.image_settings.tiff_codec = 'DEFLATE'
+        bpy.context.scene.render.image_settings.compression = self.compression
+        #bpy.context.scene.render.image_settings.tiff_codec = 'DEFLATE'
         bpy.context.scene.view_settings.view_transform = 'Standard'
 
         if self.export_method == 'EXPORT_ALL':
@@ -400,6 +413,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
                                 if getattr(texture_packer, channel+'_invert'):
                                     for i in range(0, len(current_data)):
                                         current_data[i] = [1-x for x in current_data[i]]
+                                        
                                 channel_data[channel] = current_data
                             
                             final_pixels = []

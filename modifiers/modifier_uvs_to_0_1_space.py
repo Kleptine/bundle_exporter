@@ -31,7 +31,7 @@ class BGE_mod_uvs_to_0_1_space(modifier.BGE_mod_default):
     uv_coord: bpy.props.IntVectorProperty(
         name = 'UV origin',
         size = 2,
-        default = [0, 0]
+        #default = [0, 0]
     )
 
     def get_all_islands(self, obj, uv_layer):
