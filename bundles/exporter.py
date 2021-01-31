@@ -138,10 +138,12 @@ class Exporter():
 
         layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
         for layer_collection in layers_in_hierarchy:
-            layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
-            layer_collection.hide_viewport = bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
-            del bpy.data.collections[layer_collection.name]['__orig_exclude__']
-            del bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
+            if '__orig_exclude__' in bpy.data.collections[layer_collection.name]:
+                layer_collection.exclude = bpy.data.collections[layer_collection.name]['__orig_exclude__']
+                del bpy.data.collections[layer_collection.name]['__orig_exclude__']
+            if '__orig_hide_lc__' in bpy.data.collections[layer_collection.name]:
+                layer_collection.hide_viewport = bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
+                del bpy.data.collections[layer_collection.name]['__orig_hide_lc__']
 
         # remove unused meshes
         for block in bpy.data.meshes:
@@ -206,6 +208,8 @@ def export(bundles):
                 obj.select_set(True)
 
             bundle_info['export_preset']['filepath'] = path_full
+            if bundle_info['export_format'] == 'FBX':
+                bundle_info['export_preset']['use_selection'] = True
             settings.export_operators[bundle_info['export_format']](**bundle_info['export_preset'])
 
     # TODO: add this final part into a except/finally scope ?

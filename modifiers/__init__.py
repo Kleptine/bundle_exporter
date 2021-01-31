@@ -40,7 +40,22 @@ local_settings = []
 # BGE_modifiers_local is used by the bundles and scenes and it references the addon preferences for its default values
 modifier_annotations = {}
 for x in modifiers_dict:
-    SettingsGlobal = type(modifiers_dict[x]['global'].__name__, (modifiers_dict[x]['global'],), modifiers_dict[x]['global'].__dict__.copy())
+    name = modifiers_dict[x]['global'].__name__
+    parent_type = modifiers_dict[x]['global']
+    type_dict = modifiers_dict[x]['global'].__dict__.copy()
+    annotations = type_dict['__annotations__'].copy()
+    del_annotations = set()
+    for annotation_name, annotation_data in annotations.items():
+        if 'type' in annotation_data[1]:
+            del_annotations.add(annotation_name)
+    for del_annotation in del_annotations:
+        print(del_annotation)
+        del annotations[del_annotation]
+    
+    type_dict['__annotations__'] = annotations
+
+    SettingsGlobal = type(name, (parent_type,), type_dict)
+
     modifiers_dict[x]['addon'] = SettingsGlobal
 
     modifier_annotations[modifiers_dict[x]['global'].settings_name()] = (bpy.props.PointerProperty, {'type': modifiers_dict[x]['addon']})
@@ -53,9 +68,9 @@ def create_local_settings(Settings, defaults_path, name):
     new_annotattions = {}
 
     for key in Settings.__annotations__:
-        preferences_val = eval("{}.{}".format(defaults_path, key))
         prop_data = Settings.__annotations__[key][1]  # copy the original dictionary
         if not 'type' in prop_data:
+            preferences_val = eval("{}.{}".format(defaults_path, key))
             prop_data['default'] = preferences_val
         new_annotattions[key] = (Settings.__annotations__[key][0], prop_data)
         # new_annotattions[key]['default']=preferences_val

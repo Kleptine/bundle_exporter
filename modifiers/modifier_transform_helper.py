@@ -24,6 +24,7 @@ class BGE_mod_transform_helpers(modifier.BGE_mod_default):
     )
 
     scale: bpy.props.FloatVectorProperty(default=(0.01, 0.01, 0.01), subtype='XYZ', size=3)
+    rotation: bpy.props.FloatVectorProperty(default=(90.0, 0.0, 0.0), subtype='XYZ', size=3)
 
     def _draw_info(self, layout):
         row = layout.row(align=True)

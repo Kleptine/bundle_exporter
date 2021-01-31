@@ -14,7 +14,41 @@ from .. import settings
 
 bake_data = {}
 
-#TODO: force export only specific actions, by name,
+class BGE_OT_add_export_action(bpy.types.Operator):
+    bl_idname = "ezb.add_export_action"
+    bl_label = "New Texture Packer"
+
+    def execute(self, context):
+        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        mod.export_actions.add()
+        index=len(mod.export_actions) - 1
+        mod.export_actions_index = index
+        return {'FINISHED'}
+
+class BGE_OT_remove_export_action(bpy.types.Operator):
+    bl_idname = "ezb.remove_export_action"
+    bl_label = "Remove Texture Packer"
+
+    @classmethod
+    def poll(cls, context):
+        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        return len(mod.export_actions) > mod.export_actions_index
+
+    def execute(self, context):
+        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        mod.export_actions.remove(mod.export_actions_index)
+
+        if mod.export_actions_index >= len(mod.export_actions):
+            mod.export_actions_index = len(mod.export_actions)-1
+        return {'FINISHED'}
+
+
+class BGE_ActionCollection(bpy.types.PropertyGroup):
+    action: bpy.props.PointerProperty(type=bpy.types.Action)
+
+class BGE_UL_export_actions(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.prop(item, 'action', emboss=True, text='Action')
 
 class BGE_mod_bake_actions(modifier.BGE_mod_default):
     label = "Export Actions"
@@ -46,6 +80,15 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
         default=True
     )
 
+    action_validation_mode: bpy.props.EnumProperty(name='Validation Mode', items=[
+        ('CORRECT_PATHS', 'Correct Path', 'Checks that all fcurves are valid for the current armature'),
+        ('SELECT', 'Select', 'Select the actions that will be exported'),
+    ])
+
+    export_actions: bpy.props.CollectionProperty(type=BGE_ActionCollection)
+    export_actions_index: bpy.props.IntProperty()
+    dependants = [BGE_OT_add_export_action, BGE_OT_remove_export_action, BGE_ActionCollection, BGE_UL_export_actions]
+
     path: bpy.props.StringProperty(default="{bundle_path}")
     file: bpy.props.StringProperty(default="{action_name}")
 
@@ -65,18 +108,30 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             col.prop(self, "file", text="File")
         else:
             layout.prop(self, 'try_keep_action_names')
+        
+        layout.prop(self, 'action_validation_mode')
+        if self.action_validation_mode == 'SELECT':
+            row = layout.row(align=True)
+            row.template_list("BGE_UL_export_actions", "", self, "export_actions", self, "export_actions_index", rows=3)
+            col = row.column(align=True)
+            col.operator('ezb.add_export_action', text='', icon = 'ADD')
+            col.operator('ezb.remove_export_action', text='', icon = 'REMOVE')
+            
 
     def pre_process(self, bundle_info):
         def validate_actions(act, path_resolve):
-            for fc in act.fcurves:
-                data_path = fc.data_path
-                if fc.array_index:
-                    data_path = data_path + "[%d]" % fc.array_index
-                try:
-                    path_resolve(data_path)
-                except ValueError:
-                    return False, data_path
-            return True, ''
+            if self.action_validation_mode == 'SELECT':
+                return any(act == x.action for x in self.export_actions), ''
+            elif self.action_validation_mode == 'CORRECT_PATHS':
+                for fc in act.fcurves:
+                    data_path = fc.data_path
+                    if fc.array_index:
+                        data_path = data_path + "[%d]" % fc.array_index
+                    try:
+                        path_resolve(data_path)
+                    except ValueError:
+                        return False, data_path
+                return True, ''
 
         armatures = bundle_info['armatures']
         for armature in bundle_info['armatures']:
@@ -113,7 +168,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
                                 # depending on the inherit scale / rotation/ scale we should create a new base matrrix below
                                 # in this case I chose every bone to inherit location and rotation but not scale
-                                created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
+                                # created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
                                 # all this should be equal to bone.matrix_basis
                                 frame_data['created_matrix_basis'] = created_base_matrix.inverted() @ bone.matrix
                                 frame_data['original_parent'] = parent.name
@@ -122,12 +177,13 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                             else:  # TODO: this needs to be deleted
                                 frame_data['created_matrix_basis'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
                                 frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
-                                frame_data['original_parent'] = '__NONE__'
+                                frame_data['original_parent'] = ''
 
                             frame_data['matrix_world'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='WORLD')
                             action_data[f].append((bone.name, frame_data))
 
             bake_data[armature.name] = baked_actions
+        
         # now that we stored all the bones transforms, we delete all animation data
         for armature in bundle_info['armatures']:
             # remove all animation data
@@ -176,6 +232,8 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             bpy.ops.pose.loc_clear()
             bpy.ops.pose.rot_clear()
             bpy.ops.pose.scale_clear()
+        
+        
 
     def process(self, bundle_info):
 
@@ -222,6 +280,11 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                         if not bone:
                             continue
                         bone.rotation_mode = 'QUATERNION'
+                        if frame_data['original_parent']:
+                            if not bone.parent or bone.parent.name != frame_data['original_parent']:
+                                print(f'{action_name} -- [{bone_name}] has an incorrect parent??')
+
+
                         matrix = frame_data['created_matrix_basis'] if bone.parent and bone.parent.name == frame_data['original_parent'] else frame_data['created_matrix_basis_no_parent']
                         bone.matrix_basis = matrix.copy()
 
@@ -239,21 +302,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                         bone.keyframe_insert("location", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
                         bone.keyframe_insert("rotation_quaternion", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
                         bone.keyframe_insert("scale", index=-1, frame=frame, group=bone.name, options={'INSERTKEY_NEEDED'})
-                if settings.debug:
-                    # this checks that all transforms were applied correctly
-                    bpy.context.view_layer.update()
-                    for frame, frame_tuples in action_info.items():
-                        bpy.context.scene.frame_set(frame)
-                        for bone_name, frame_data in frame_tuples:
-                            bone = armature.pose.bones[bone_name]
-                            matrix = armature.convert_space(pose_bone=bone, matrix=frame_data['matrix_world'], from_space='WORLD', to_space='POSE')
-                            if not isclose_matrix(bone.matrix, matrix, abs_tol=0.01):
-                                print('DOUBLE CHECK ### INCORRECT ### f{} - {}'.format(frame, bone.name))
-                                print('W-{}'.format(matrix))
-                                print('CW-{}'.format(bone.matrix))
-                            if not isclose_matrix(bone.matrix_basis, frame_data['created_matrix_basis'], abs_tol=0.01):
-                                print('CB-{}'.format(bone.matrix_basis))
-                                print('B-{}'.format(frame_data['created_matrix_basis']))
+
 
         # the following processess are only for fbx
         if not self._is_using_fbx(bundle_info['export_format']):
