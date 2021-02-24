@@ -29,7 +29,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 
     merge_verts: bpy.props.BoolProperty(
         name="Merge",
-        description="Split meshes by material after merging.",
+        description="Merges vertices by distance (Remove Doubles)",
         default=False
     )
 
@@ -126,18 +126,17 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
 
         elif self.merge_type == 'PARENT':
             parents = {}
-
-            for i in reversed(range(0, len(objects))):
-                parent = objects[i].parent
+            for obj in reversed(objects):
+                parent = obj.parent
                 if parent and parent in objects:
-                    while parent and parent.parent in objects:
+                    while parent and parent.parent and parent.parent in objects:
                         parent = parent.parent
                     if parent not in parents:
                         parents[parent] = []
 
-                    parents[parent].append(objects[i])
-                else:
-                    parents[objects[i]] = []
+                    parents[parent].append(obj)
+                elif obj not in parents:
+                    parents[obj] = []
 
             objects = []
 

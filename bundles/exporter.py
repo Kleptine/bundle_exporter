@@ -173,7 +173,10 @@ def export(bundles):
     bpy.context.scene.unit_settings.system = 'METRIC'
     bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
 
+    processed_bundles = 0
+
     for bundle in bundles:
+        processed_bundles += 1
         with Exporter(bundle, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset) as bundle_info:
             all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
             print('objects to export: {}'.format(all_objects))
@@ -226,6 +229,6 @@ def export(bundles):
     def draw(self, context):
         self.layout.operator("wm.path_open", text=bpy.context.scene.BGE_Settings.path, icon='FILE_FOLDER').filepath = bpy.context.scene.BGE_Settings.path
 
-    bpy.context.window_manager.popup_menu(draw, title="Exported {}x files".format(len(list(bundles))), icon='INFO')
+    bpy.context.window_manager.popup_menu(draw, title=f"Exported {processed_bundles}x bundles", icon='INFO')
 
     print("Exported in {} seconds".format(str(datetime.timedelta(seconds=(time.time() - start_time)))))

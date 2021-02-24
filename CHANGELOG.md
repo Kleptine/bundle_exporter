@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_3_1)
+### Changed
+- Export animations modifier now allows to specify which actions to export
+### Fixed
+- The selected objects will always be exported in fbx format even if the preset says otherwise
+- Error when a collection was linked to the scene multiple times
+- Tooltip mismatch
+- Merge by parent was not working in most situations
+
 ## [2.3.0](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_3_0)
 ### Added
 - Export textures modifier:
