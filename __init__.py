@@ -11,13 +11,11 @@ from bpy.props import (
     PointerProperty,
 )
 
-from . import operators
 from . import modifiers
+from . import operators
 from . import settings
 from .settings import mode_bundle_types, mode_pivot_types
-
 from . import addon_updater_ops
-
 
 bl_info = {
     "name": "Bundle Exporter",
@@ -49,8 +47,6 @@ class BGE_preferences(bpy.types.AddonPreferences):
 
     mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default='COLLECTION')
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
-
-    modifier_preferences: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)
 
     export_format: bpy.props.EnumProperty(items=settings.export_formats)
     export_preset: bpy.props.EnumProperty(items=export_presets_getter, update=update_scene_export_preset)
@@ -104,8 +100,6 @@ class BGE_preferences(bpy.types.AddonPreferences):
         col.prop(self, "mode_bundle", text="Bundle by")
         col.prop(self, "mode_pivot", text="Bundle by", icon='OUTLINER_DATA_EMPTY')
 
-        modifiers.draw(col, context, self.modifier_preferences)
-
         col.operator('bge.save_preferences', text='Save User Preferences', icon='FILE_TICK')
 
 
@@ -115,18 +109,17 @@ def register():
 
     addon_updater_ops.register(bl_info)
 
-    modifiers.register_globals()
-
     register_class(BGE_preferences)
+
+    modifiers.register()
 
     operators.register()
 
-    modifiers.register_locals()
-
+    # we need to load core after the addon preferences have been registered, because classes in this module reference them
     from . import core
     import imp
-    # to make sure it uses the correct variables when registering modifiers, otherwise errors will happen during development
     imp.reload(core)
+
     core.register()
 
 
@@ -135,14 +128,13 @@ def unregister():
     from bpy.utils import unregister_class
 
     from . import core
+
     core.unregister()
 
-    modifiers.unregister_locals()
+    modifiers.unregister()
 
     operators.unregister()
 
     unregister_class(BGE_preferences)
-
-    modifiers.unregister_globals()
 
     addon_updater_ops.unregister()

@@ -9,7 +9,6 @@ from .. import settings
 from ..settings import mesh_types, empty_types, armature_types, mode_bundle_types, mode_pivot_types
 from ..utilities import traverse_tree
 
-
 class Bundle(bpy.types.PropertyGroup):
 
     key: bpy.props.StringProperty(

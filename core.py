@@ -90,7 +90,7 @@ class BGE_Settings(bpy.types.PropertyGroup):
     mode_bundle: bpy.props.EnumProperty(items=mode_bundle_types, name="Bundle Mode", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_bundle)
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.mode_pivot)
 
-    scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers_local)  # sometimes this variable may point to an old version, maybe force reload modules will fix it
+    scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)  # sometimes this variable may point to an old version, maybe force reload modules will fix it
 
     export_format: bpy.props.EnumProperty(items=settings.export_formats, default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
     export_preset: bpy.props.EnumProperty(items=get_preset_enum)
