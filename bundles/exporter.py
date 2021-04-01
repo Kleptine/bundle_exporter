@@ -170,7 +170,6 @@ def export(bundles):
         bpy.context.view_layer.objects.active = None
 
     # bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.context.scene.unit_settings.system = 'METRIC'
     bpy.context.scene.tool_settings.transform_pivot_point = 'MEDIAN_POINT'
 
     processed_bundles = 0

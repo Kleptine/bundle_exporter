@@ -29,7 +29,6 @@ for modifier_class in modifier_classes:
     created_classes.append(created_type)
     modifier_annotations[modifier_class.settings_name()] = (bpy.props.PointerProperty, {'type': created_type})
 BGE_modifiers = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations, 'bl_idname':'BGE_modifiers'})
-print(modifier_annotations)
 
 # ---------------------------------------------------------------------------- #
 #                              REGISTER/UNREGISTER                             #
