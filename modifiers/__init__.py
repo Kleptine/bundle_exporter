@@ -27,7 +27,8 @@ modifier_annotations = {}
 for modifier_class in modifier_classes:
     created_type = type(modifier_class.__name__, (modifier_class,), modifier_class.__dict__.copy())
     created_classes.append(created_type)
-    modifier_annotations[modifier_class.settings_name()] = (bpy.props.PointerProperty, {'type': created_type})
+    annotation_prop = (bpy.props.PointerProperty, {'type': created_type}) if bpy.app.version < (2, 93, 0) else bpy.props.PointerProperty(type=created_type)
+    modifier_annotations[modifier_class.settings_name()] = annotation_prop
 BGE_modifiers = type("BGE_modifiers", (bpy.types.PropertyGroup,), {'__annotations__': modifier_annotations, 'bl_idname':'BGE_modifiers'})
 
 # ---------------------------------------------------------------------------- #

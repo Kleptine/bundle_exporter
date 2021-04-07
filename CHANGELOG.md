@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_3_3)
+### Fixed
+- Scene unit settings were being reset after each export
+- The addon now works on blender 2.93
+
 ## [2.3.2](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_3_2)
 ### Added
 - Added missing triangulation options
