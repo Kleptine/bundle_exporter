@@ -81,10 +81,12 @@ class Exporter():
 
         # duplicate the objects
         bpy.ops.object.duplicate()
-        copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
         bpy.ops.object.make_local(type='SELECT_OBDATA')
         bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
+        copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
+
+        
         # mark copied objects for later deletion
         for x in copied_objects:
             x['__IS_COPY__'] = True
