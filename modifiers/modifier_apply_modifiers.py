@@ -3,13 +3,13 @@ import imp
 
 from . import modifier
 
-class BGE_mod_make_normals_consistent(modifier.BGE_mod_default):
-    label = "Make Normals Consistent"
-    id = 'consistent_normals'
+class BGE_mod_Apply_modifiers(modifier.BGE_mod_default):
+    label = "Apply Modifiers"
+    id = 'apply_modifiers'
     type = 'MESH'
-    icon = 'NORMALS_FACE'
-    tooltip = 'Make Normals Consistent'
-    priority = 100
+    icon = 'CHECKMARK'
+    tooltip = 'Apply Modifiers'
+    priority = -9999
 
     active: bpy.props.BoolProperty(
         name="Active",
@@ -32,7 +32,5 @@ class BGE_mod_make_normals_consistent(modifier.BGE_mod_default):
             bpy.context.view_layer.objects.active = meshes[0]
             for mesh in meshes:
                 mesh.select_set(True)
-            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-
-            bpy.ops.mesh.normals_make_consistent()
+            bpy.ops.object.convert(target='MESH')
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)

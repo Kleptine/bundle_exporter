@@ -92,7 +92,8 @@ class BGE_OT_file_export_scene_selected(bpy.types.Operator):
         return "Export selected bundles"
 
     def execute(self, context):
-        bundles.exporter.export((x for x in bundles.get_bundles() if x.is_bundle_obj_selected()))
+        export_bundles = [x for x in bundles.get_bundles() if x.is_bundle_obj_selected()]
+        bundles.exporter.export(export_bundles)
 
         return {'FINISHED'}
 
