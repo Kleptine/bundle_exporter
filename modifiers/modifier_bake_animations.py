@@ -93,6 +93,18 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
         default="{armature.name}_{name}"
     )
 
+    action_match_force: bpy.props.BoolProperty(
+        name='Action Match Force',
+        description='Force to only export actions with a given name',
+        default=False
+    )
+
+    action_match_force_name: bpy.props.StringProperty(
+        name='Action Match Force Name',
+        description='Only export actions that match this name',
+        default=''
+    )
+
     export_actions: bpy.props.CollectionProperty(type=BGE_ActionCollection)
     export_actions_index: bpy.props.IntProperty()
     dependants = [BGE_OT_add_export_action, BGE_OT_remove_export_action, BGE_ActionCollection, BGE_UL_export_actions]
@@ -125,8 +137,11 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             col.operator('ezb.add_export_action', text='', icon = 'ADD')
             col.operator('ezb.remove_export_action', text='', icon = 'REMOVE')
         elif self.action_validation_mode == 'NAMING':
-            row = layout.row(align=True)
-            row.prop(self, 'action_match_name')
+            col = layout.column(align=True)
+            col.prop(self, 'action_match_name')
+            col.prop(self, 'action_match_force')
+            if self.action_match_force:
+                col.prop(self, 'action_match_force_name')
 
     def remove_animation_data(self, armature):
         # remove all animation data
@@ -253,7 +268,12 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 armature_string = self.action_match_name.format(armature=armature, name='')
                 for action in bpy.data.actions:
                     if armature_string in action.name:
-                        action_set.add(action.name.replace(armature_string, ''))
+                        action_name = action.name.replace(armature_string, '')
+                        if self.action_match_force:
+                            if action_name.lower() != self.action_match_force_name.lower():
+                                print(f'Action {action_name} was not collected because "force name" is active')
+                                continue
+                        action_set.add(action_name)
             print(action_set)
             for action_base_name in action_set:
                 for armature in bundle_info['armatures']:

@@ -35,11 +35,15 @@ class BGE_mod_set_origin(modifier.BGE_mod_default):
         pivot = bundle_info['pivot']
         bpy.context.scene.cursor.location = pivot
 
+        if bpy.ops.object.mode_set.poll():
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
         bpy.ops.object.select_all(action='DESELECT')
         for x in objects:
             x.select_set(True)
 
         bpy.context.view_layer.objects.active = objects[0]
+        
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
