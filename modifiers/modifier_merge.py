@@ -141,7 +141,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
             objects = []
 
             for parent, children in parents.items():
-                merged = self.merge_meshes([parent] + children, armatures, parent.name, pivot)
+                merged = self.merge_meshes([parent] + children, armatures, parent.name, parent.location)
                 objects.extend(merged)
 
         bundle_info['meshes'] = objects
