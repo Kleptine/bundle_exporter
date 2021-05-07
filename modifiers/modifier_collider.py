@@ -219,7 +219,11 @@ class BGE_mod_collider(modifier.BGE_mod_default):
                     bundle_info['extras'].append(copy)
 
         # rename and parent (required for unreal engine)
-        parent_object = bundle_info['meshes'][0]
+        try:
+            parent_object = next(x for x in bundle_info['meshes'] if not x.parent or x.parent not in bundle_info['meshes'])
+        except StopIteration:
+            parent_object = None
+            
         if parent_object:
             colliders = self._get_colliders(bundle_info['extras'], pop=False)
             for index, x in enumerate(colliders):
@@ -227,5 +231,6 @@ class BGE_mod_collider(modifier.BGE_mod_default):
                     parent_object = x.parent
                 prefix = self._get_ue_collider_prefix(x.name)
                 x.name = '{}_{}_{}'.format(prefix, parent_object.name, index)
-                x.parent = parent_object
-                x.matrix_parent_inverse = parent_object.matrix_world.inverted()
+                if parent_object is not x.parent:
+                    x.parent = parent_object
+                    x.matrix_parent_inverse = parent_object.matrix_world.inverted()
