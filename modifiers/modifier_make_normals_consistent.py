@@ -32,6 +32,7 @@ class BGE_mod_make_normals_consistent(modifier.BGE_mod_default):
             bpy.context.view_layer.objects.active = meshes[0]
             for mesh in meshes:
                 mesh.select_set(True)
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
             bpy.ops.mesh.normals_make_consistent()

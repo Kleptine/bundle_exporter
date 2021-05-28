@@ -40,6 +40,8 @@ class Exporter():
 
     def __enter__(self):
         objects = self.bundle.objects
+        orig_obj_names = set([x.name for x in objects])
+        print('Objects to export: {}'.format(objects))
         bpy.ops.object.select_all(action="DESELECT")
         # we need to traverse the tree from child to parent or else the exclude property can be missed
         layers_in_hierarchy = reversed(list(traverse_tree(bpy.context.view_layer.layer_collection, exclude_parent=True)))
@@ -74,10 +76,16 @@ class Exporter():
             obj.hide_set(False)
 
             if obj in objects:
-                obj.select_set(True)
+                try:
+                    obj.select_set(True)
+                except RuntimeError:
+                    pass
                 obj.name = prefix_copy + obj.name
             else:
-                obj.select_set(False)
+                try:
+                    obj.select_set(False)
+                except RuntimeError:
+                    pass
 
         # duplicate the objects
         bpy.ops.object.duplicate()
@@ -86,7 +94,6 @@ class Exporter():
 
         copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
 
-        
         # mark copied objects for later deletion
         for x in copied_objects:
             x['__IS_COPY__'] = True
@@ -180,8 +187,9 @@ def export(bundles):
         processed_bundles += 1
         with Exporter(bundle, bpy.context.scene.BGE_Settings.path, bpy.context.scene.BGE_Settings.export_format, bpy.context.scene.BGE_Settings.export_preset) as bundle_info:
             all_objects = bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']
-            print('objects to export: {}'.format(all_objects))
+            print('Copied objects to export: {}'.format(all_objects))
 
+            #assert False
             bpy.ops.object.select_all(action="DESELECT")
             for modifier in bundle.modifiers:
                 print('Pre-processing modifier "{}" ...'.format(modifier.id))
