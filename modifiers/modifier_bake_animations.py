@@ -208,60 +208,67 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                     except ValueError:
                         return False, data_path
                 return True, ''
-
-        def bake_animation(armature, action):
-            print(f'Baking {armature.name} -> {action.name}')
-            actions_dict = bake_data.setdefault(armature.name, {})
+        
+        def apply_action(armature, action):
+            print(f'Applying action {armature.name} -> {action.name}')
+            
 
             if not armature.animation_data:
                 armature.animation_data_create()
             armature.animation_data.action = action
 
-            actions_dict[action.name] = {}
-            action_data = actions_dict[action.name]
-
-            for f in range(int(action.frame_range[0]), int(action.frame_range[1] + 1)):
-                if f not in action_data:
-                    action_data[f] = []
+        def bake_animation(armatures_actions, start, end):
+            for f in range(int(start), int(end)):
                 bpy.context.scene.frame_set(f)
                 bpy.context.view_layer.update()
-                # gets the transform of all the bones for each frame
-                # order from root to children here, make array with tuple (bone.name, frame_data) instead of a dictionary for each frame values
-                for bone in traverse_tree_from_iteration(bone for bone in armature.pose.bones if not bone.parent):
-                    frame_data = {}
-                    parent = bone.parent
-                    if parent:
-                        # https://blender.stackexchange.com/questions/44637/how-can-i-manually-calculate-bpy-types-posebone-matrix-using-blenders-python-ap
-                        created_base_matrix = (parent.matrix.copy() @ (parent.bone.matrix_local.copy().inverted() @ bone.bone.matrix_local))  # this should be like rest pose
 
-                        rot_mat = created_base_matrix.to_quaternion().to_matrix().to_4x4()
-                        loc_mat = Matrix.Translation(created_base_matrix.to_translation()).to_4x4()
+                for armature, action in armatures_actions.items():
+                    print(f'Baking {armature.name} -> {action.name} :: {f}')
+                    actions_dict = bake_data.setdefault(armature.name, {})
+                    actions_dict.setdefault(action.name, {})
+                    action_data = actions_dict[action.name]
 
-                        # depending on the inherit scale / rotation/ scale we should create a new base matrrix below
-                        # in this case I chose every bone to inherit location and rotation but not scale
-                        # created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
-                        # all this should be equal to bone.matrix_basis
-                        frame_data['created_matrix_basis'] = created_base_matrix.inverted() @ bone.matrix
-                        frame_data['original_parent'] = parent.name
-                        # if the bone has no parent, this is the matrix that should be applied
-                        frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
-                    else:  # TODO: this needs to be deleted
-                        frame_data['created_matrix_basis'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
-                        frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
-                        frame_data['original_parent'] = ''
+                    if f not in action_data:
+                        action_data[f] = []
 
-                    frame_data['matrix_world'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='WORLD')
-                    action_data[f].append((bone.name, frame_data))
+                    # gets the transform of all the bones for each frame
+                    # order from root to children here, make array with tuple (bone.name, frame_data) instead of a dictionary for each frame values
+                    for bone in traverse_tree_from_iteration(bone for bone in armature.pose.bones if not bone.parent):
+                        frame_data = {}
+                        parent = bone.parent
+                        if parent:
+                            # https://blender.stackexchange.com/questions/44637/how-can-i-manually-calculate-bpy-types-posebone-matrix-using-blenders-python-ap
+                            created_base_matrix = (parent.matrix.copy() @ (parent.bone.matrix_local.copy().inverted() @ bone.bone.matrix_local))  # this should be like rest pose
+
+                            rot_mat = created_base_matrix.to_quaternion().to_matrix().to_4x4()
+                            loc_mat = Matrix.Translation(created_base_matrix.to_translation()).to_4x4()
+
+                            # depending on the inherit scale / rotation/ scale we should create a new base matrrix below
+                            # in this case I chose every bone to inherit location and rotation but not scale
+                            # created_base_matrix = loc_mat @ rot_mat  # and ignore scaling
+                            # all this should be equal to bone.matrix_basis
+                            frame_data['created_matrix_basis'] = created_base_matrix.inverted() @ bone.matrix
+                            frame_data['original_parent'] = parent.name
+                            # if the bone has no parent, this is the matrix that should be applied
+                            frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
+                        else:  # TODO: this needs to be deleted
+                            frame_data['created_matrix_basis'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
+                            frame_data['created_matrix_basis_no_parent'] = bone.bone.matrix_local.copy().inverted() @ bone.matrix
+                            frame_data['original_parent'] = ''
+
+                        frame_data['matrix_world'] = armature.convert_space(pose_bone=bone, matrix=bone.matrix, from_space='POSE', to_space='WORLD')
+                        action_data[f].append((bone.name, frame_data))
 
 
         if self.action_validation_mode != 'NAMING':
             armatures = bundle_info['armatures']
-            for armature in bundle_info['armatures']:
-                for action in bpy.data.actions:
+            for action in bpy.data.actions:
+                for armature in bundle_info['armatures']:
                     is_action_valid, error_datapath = validate_actions(action, armature.path_resolve)
                     print('{}::{} , valid: {}  {}'.format(armature.name, action.name, is_action_valid, error_datapath))
                     if is_action_valid:
-                        bake_animation(armature, action)
+                        apply_action(armature, action)
+                        bake_animation({armature:action}, action.frame_range[0], action.frame_range[1] + 1)
         else:
             action_set = set()
             for armature in bundle_info['armatures']:
@@ -276,16 +283,24 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                         action_set.add(action_name)
             print(action_set)
             for action_base_name in action_set:
+                lowest_frame = 0
+                highest_frame = 0
+                armatures = list()
                 for armature in bundle_info['armatures']:
                     action_name = self.action_match_name.format(armature=armature, name=action_base_name)
                     if action_name in bpy.data.actions:
+                        armatures.append(armature)
                         action = bpy.data.actions[action_name]
+                        if action.frame_range[0] < lowest_frame:
+                            lowest_frame = action.frame_range[0]
+                        if action.frame_range[1] > highest_frame:
+                            highest_frame = action.frame_range[1]
+
                         if not armature.animation_data:
                             armature.animation_data_create()
-                        armature.animation_data.action = action
-                for armature in bundle_info['armatures']:
-                    if armature.animation_data.action:
-                        bake_animation(armature, armature.animation_data.action)
+                        apply_action(armature, action)
+
+                bake_animation({x: x.animation_data.action for x in armatures}, lowest_frame, highest_frame + 1)
 
         # now that we stored all the bones transforms, we delete all animation data
         for armature in bundle_info['armatures']:
