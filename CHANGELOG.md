@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Merge by parent was resetting the pivot to the bundle pivot, it now respects the parent pivot
 - Error when using set origin to pivot modifier
+- Temporal fix for objects being picked by the bundle but not being in the viewlayer
+- Collider modifier was incorrectly parenting objects
 
 ## [2.3.4](https://gitlab.com/AquaticNightmare/bundle_exporter/-/releases/2_3_4)
 ### Fixed
