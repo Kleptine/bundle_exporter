@@ -226,6 +226,15 @@ class BGE_mod_collider(modifier.BGE_mod_default):
             
         if parent_object:
             colliders = self._get_colliders(bundle_info['extras'], pop=False)
+
+            if colliders:
+                bpy.ops.object.select_all(action='DESELECT')
+                bpy.context.view_layer.objects.active = colliders[0]
+                for mesh in colliders:
+                    mesh.select_set(True)
+                bpy.ops.object.convert(target='MESH')
+                bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                bpy.ops.object.select_all(action='DESELECT')
             for index, x in enumerate(colliders):
                 if x.parent and x.parent in bundle_info['meshes']:
                     parent_object = x.parent
