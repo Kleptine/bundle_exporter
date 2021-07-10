@@ -31,15 +31,15 @@ bl_info = {
     "tracker_url": "https://gitlab.com/AquaticNightmare/bundle_exporter/-/issues",
 }
 
-
+preset_enum_items = []
 # https://blender.stackexchange.com/questions/118118/blender-2-8-field-property-declaration-and-dynamic-class-creation
 def export_presets_getter(self, context):
-    items = settings.get_presets_enum(bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
-    return items
+    global preset_enum_items
+    preset_enum_items = settings.get_presets_enum(bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
+    return preset_enum_items
 
 
-def update_scene_export_preset(self, context):
-    context.scene.BGE_Settings.export_preset = self.export_preset
+
 
 
 class BGE_preferences(bpy.types.AddonPreferences):
@@ -49,7 +49,18 @@ class BGE_preferences(bpy.types.AddonPreferences):
     mode_pivot: bpy.props.EnumProperty(items=mode_pivot_types, name="Pivot From", default='OBJECT_FIRST')
 
     export_format: bpy.props.EnumProperty(items=settings.export_formats)
-    export_preset: bpy.props.EnumProperty(items=export_presets_getter, update=update_scene_export_preset)
+
+    def default_export_preset_changed(self, value):
+        self.internal_export_preset = preset_enum_items[value][0]
+
+    def get_export_preset(self):
+        try:
+            return next(i for i, x in enumerate(preset_enum_items) if x[0] == self.internal_export_preset)
+        except StopIteration:
+            return 0
+
+    internal_export_preset: bpy.props.StringProperty(default='BGE_unreal')
+    export_preset: bpy.props.EnumProperty(items=export_presets_getter, get=get_export_preset, set=default_export_preset_changed)
     # addon updater preferences
 
     auto_check_update: bpy.props.BoolProperty(

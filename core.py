@@ -37,21 +37,20 @@ def set_path(self, value):
 def get_path(self):
     return self.real_path
 
+preset_enum_items = []
 
 def get_preset_enum(self, context):
+    global preset_enum_items
     prefs = context.preferences.addons[__name__.split('.')[0]].preferences
     presets = settings.get_presets(context.scene.BGE_Settings.export_format)
     if context.scene.BGE_Settings.export_format == prefs.export_format and prefs.export_preset in presets.keys():
         index = list(presets.keys()).index(prefs.export_preset)
-        enum = settings.create_preset_enum(presets)
-        enum[0], enum[index] = enum[index], enum[0]
-        return enum
+        preset_enum_items = settings.create_preset_enum(presets)
+        preset_enum_items[0], preset_enum_items[index] = preset_enum_items[index], preset_enum_items[0]
+        return preset_enum_items
     else:
-        enum = settings.create_preset_enum(presets)
-        return enum
-
-    return []
-
+        preset_enum_items = settings.create_preset_enum(presets)
+        return preset_enum_items
 
 class BGE_Settings(bpy.types.PropertyGroup):
     real_path: bpy.props.StringProperty(default="")
@@ -93,7 +92,20 @@ class BGE_Settings(bpy.types.PropertyGroup):
     scene_modifiers: bpy.props.PointerProperty(type=modifiers.BGE_modifiers)  # sometimes this variable may point to an old version, maybe force reload modules will fix it
 
     export_format: bpy.props.EnumProperty(items=settings.export_formats, default=bpy.context.preferences.addons[__name__.split('.')[0]].preferences.export_format)
-    export_preset: bpy.props.EnumProperty(items=get_preset_enum)
+
+    def default_export_preset_changed(self, value):
+        self.internal_export_preset = preset_enum_items[value][0]
+
+    def get_export_preset(self):
+        try:
+            return next(i for i, x in enumerate(preset_enum_items) if x[0] == self.internal_export_preset)
+        except StopIteration:
+            if 'export_preset' in self:
+                return self['export_preset']
+            return 0
+
+    internal_export_preset: bpy.props.StringProperty(default='BGE_unreal')
+    export_preset: bpy.props.EnumProperty(items=get_preset_enum, get=get_export_preset, set=default_export_preset_changed)
 
 
 class BGE_PT_core_panel(bpy.types.Panel):

@@ -81,11 +81,19 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
         default=True
     )
 
-    action_validation_mode: bpy.props.EnumProperty(name='Validation Mode', items=[
-        ('CORRECT_PATHS', 'Correct Path', 'Checks that all fcurves are valid for the current armature'),
-        ('SELECT', 'Select', 'Select the actions that will be exported'),
-        ('NAMING', 'Naming', 'Bakes animations based on their names'),
-    ])
+    def get_action_validation_items(self, context):
+        ans = [
+            ('CORRECT_PATHS', 'Correct Path', 'Checks that all fcurves are valid for the current armature', '', 0),
+            ('SELECT', 'Select', 'Select the actions that will be exported', '', 1),
+            ('NAMING', 'Naming', 'Bakes animations based on their names', '', 2),
+        ]
+
+        if hasattr(context.scene, 'ACT_Settings'):
+            ans.append(('ACTION_TOOLS_ADDON', 'Action Tools Addon', 'Uses the action tools addon', '', 3))
+
+        return ans
+
+    action_validation_mode: bpy.props.EnumProperty(name='Validation Mode', items=get_action_validation_items)
 
     action_match_name: bpy.props.StringProperty(
         name='Action Name',
@@ -221,6 +229,9 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             for f in range(int(start), int(end)):
                 bpy.context.scene.frame_set(f)
                 bpy.context.view_layer.update()
+                #set the frame twice, some animation drivers may not update on the first try
+                bpy.context.scene.frame_set(f)
+                bpy.context.view_layer.update()
 
                 for armature, action in armatures_actions.items():
                     print(f'Baking {armature.name} -> {action.name} :: {f}')
@@ -260,7 +271,13 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                         action_data[f].append((bone.name, frame_data))
 
 
-        if self.action_validation_mode != 'NAMING':
+        if self.action_validation_mode == 'ACTION_TOOLS_ADDON':
+            module = bpy.context.scene.ACT_Settings.main_module
+            for action_name in module.get_all_action_names(bundle_info['armatures']):
+                module.set_current_action(bundle_info['armatures'], action_name)
+                print({x:x.animation_data.action for x in bundle_info['armatures']})
+                bake_animation({x:x.animation_data.action for x in bundle_info['armatures']}, bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1)
+        elif self.action_validation_mode != 'NAMING':
             armatures = bundle_info['armatures']
             for action in bpy.data.actions:
                 for armature in bundle_info['armatures']:
@@ -421,10 +438,13 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             export_preset['bake_anim_use_nla_strips'] = False
             export_preset['use_selection'] = True
 
+            print(created_actions)
+
             for armature in bundle_info['armatures']:
                 for act_name in created_actions:
                     act = bpy.data.actions[act_name]
                     if validate_actions(act, armature.path_resolve):
+                        print(f'Starting fbx export process for {act.name}')
                         bpy.context.scene.frame_start = act.frame_range[0]
                         bpy.context.scene.frame_end = act.frame_range[1]
                         folder = self.path.format(bundle_path=bundle_info['path'])
