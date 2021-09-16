@@ -63,11 +63,11 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
 
             bpy.ops.object.mode_set(mode='OBJECT')
 
-            prev_cursor_mode = bpy.context.space_data.pivot_point
+            prev_cursor_mode = bpy.context.scene.tool_settings.transform_pivot_point 
             prev_cursor_location = bpy.context.scene.cursor.location
 
             # Export origin
-            bpy.context.space_data.pivot_point = 'CURSOR'
+            bpy.context.scene.tool_settings.transform_pivot_point  = 'CURSOR'
             bpy.context.scene.cursor.location = Vector((0, 0, 0))
 
             for obj in objects:
@@ -89,5 +89,5 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
                     bpy.ops.transform.resize(value=source.scale, constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED')
 
             # Restore pivot & mode
-            bpy.context.space_data.pivot_point = prev_cursor_mode
+            bpy.context.scene.tool_settings.transform_pivot_point  = prev_cursor_mode
             bpy.context.scene.cursor.location = prev_cursor_location
