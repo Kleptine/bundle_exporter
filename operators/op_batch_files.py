@@ -12,7 +12,7 @@ def load_handler(dummy):
     global index
     index +=1
 
-    if index > len(files):
+    if index >= len(files):
         bpy.app.handlers.load_post.pop(bpy.app.handlers.load_post.index(load_handler))
         return
     bpy.ops.wm.open_mainfile(filepath=files[index])
