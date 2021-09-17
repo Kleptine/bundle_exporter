@@ -1,19 +1,7 @@
 import bpy
 import os
-import math
 import bpy.utils.previews
 
-from bpy.props import (
-    StringProperty,
-    BoolProperty,
-    IntProperty,
-    FloatProperty,
-    FloatVectorProperty,
-    EnumProperty,
-    PointerProperty,
-)
-
-from . import gp_draw
 from . import modifiers
 from . import operators
 from . import bundles
@@ -52,6 +40,9 @@ def get_preset_enum(self, context):
         preset_enum_items = settings.create_preset_enum(presets)
         return preset_enum_items
 
+class BGE_BatchInfo(bpy.types.PropertyGroup):
+    path: bpy.props.StringProperty(subtype='FILE_PATH')
+
 class BGE_Settings(bpy.types.PropertyGroup):
     real_path: bpy.props.StringProperty(default="")
     path: bpy.props.StringProperty(
@@ -74,8 +65,14 @@ class BGE_Settings(bpy.types.PropertyGroup):
     )
     bundle_index: bpy.props.IntProperty(
         name="Bundles",
-        default=False,
         description="Bundles"
+    )
+    batches: bpy.props.CollectionProperty(
+        type=BGE_BatchInfo
+    )
+    batch_index: bpy.props.IntProperty(
+        name="Batches",
+        description="batches"
     )
     show_bundle_objects: bpy.props.BoolProperty(
         name="Show bundle objects",
@@ -206,6 +203,31 @@ class BGE_UL_bundles(bpy.types.UIList):
     def invoke(self, context, event):
         pass
 
+class BGE_UL_batch_files(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.prop(item, 'path', text='')
+        layout.operator('bge.delete_batch',icon='X', text='').index=index
+
+
+    def invoke(self, context, event):
+        pass
+
+class BGE_PT_batch_export_panel(bpy.types.Panel):
+    bl_idname = "BGE_PT_batch_export_panel"
+    bl_label = "Batch Export"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "Bundle Exporter"
+    #bl_context = "objectmode"
+
+    def draw(self, context):
+        row = self.layout.row()
+        row.template_list("BGE_UL_batch_files", "", bpy.context.scene.BGE_Settings, "batches", bpy.context.scene.BGE_Settings, "batch_index", rows=2)
+
+        col = row.column()
+        col.operator('bge.add_batch', text='', icon='ADD')
+        self.layout.operator('bge.batch_export')
+
 
 class BGE_PT_files_panel(bpy.types.Panel):
     bl_idname = "BGE_PT_files_panel"
@@ -283,7 +305,16 @@ class BGE_PT_files_panel(bpy.types.Panel):
 
 
 addon_keymaps = []
-classes = [BGE_Settings, BGE_UL_bundles, BGE_PT_core_panel, BGE_PT_modifiers_panel, BGE_PT_files_panel]
+classes = [
+    BGE_BatchInfo,
+    BGE_Settings, 
+    BGE_UL_bundles, 
+    BGE_UL_batch_files,
+    BGE_PT_core_panel, 
+    BGE_PT_modifiers_panel, 
+    BGE_PT_files_panel,
+    BGE_PT_batch_export_panel,
+    ]
 
 
 def register():
