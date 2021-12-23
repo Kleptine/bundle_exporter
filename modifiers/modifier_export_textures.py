@@ -4,6 +4,8 @@ import math
 from . import modifier
 import mathutils
 
+from .. import settings
+
 file_formats_enum = {
     'BMP': '.bmp',
     'IRIS': '.sgi',
@@ -54,7 +56,7 @@ class BGE_OT_new_texture_packer(bpy.types.Operator):
     bl_label = "New Texture Packer"
 
     def execute(self, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_export_textures
+        mod = settings.ctx_modifiers.BGE_modifier_export_textures
         mod.texture_packs.add()
         index=len(mod.texture_packs) - 1
         mod.texture_packs_index = index
@@ -66,11 +68,11 @@ class BGE_OT_remove_texture_packer(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_export_textures
+        mod = settings.ctx_modifiers.BGE_modifier_export_textures
         return len(mod.texture_packs) > mod.texture_packs_index
 
     def execute(self, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_export_textures
+        mod = settings.ctx_modifiers.BGE_modifier_export_textures
         mod.texture_packs.remove(mod.texture_packs_index)
 
         if mod.texture_packs_index >= len(mod.texture_packs):

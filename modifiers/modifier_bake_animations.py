@@ -20,7 +20,7 @@ class BGE_OT_add_export_action(bpy.types.Operator):
     bl_label = "New Texture Packer"
 
     def execute(self, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
         mod.export_actions.add()
         index=len(mod.export_actions) - 1
         mod.export_actions_index = index
@@ -32,11 +32,11 @@ class BGE_OT_remove_export_action(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
         return len(mod.export_actions) > mod.export_actions_index
 
     def execute(self, context):
-        mod = bpy.context.scene.BGE_Settings.scene_modifiers.BGE_modifier_bake_actions
+        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
         mod.export_actions.remove(mod.export_actions_index)
 
         if mod.export_actions_index >= len(mod.export_actions):

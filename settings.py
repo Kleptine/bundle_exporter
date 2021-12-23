@@ -1,4 +1,5 @@
 import os
+from typing import Any
 import bpy
 
 prefix_copy = "__EXPORT_PREFIX_"
@@ -38,6 +39,8 @@ BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), o
                       'OBJ': {os.path.join(bge_presets_path, 'BGE_obj.py')},
                       'COLLADA': {os.path.join(bge_presets_path, 'BGE_collada.py')},
                       'GLTF': {os.path.join(bge_presets_path, 'BGE_gltf.py')}}
+
+ctx_modifiers: Any
 
 
 def get_preset_files(export_format):
