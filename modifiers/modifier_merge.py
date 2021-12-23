@@ -70,7 +70,7 @@ class BGE_mod_merge_meshes(modifier.BGE_mod_default):
     # 	default=True
     # )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         row = layout.row()
 
         col = row.column(align=False)

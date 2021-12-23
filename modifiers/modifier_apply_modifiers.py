@@ -21,7 +21,7 @@ class BGE_mod_Apply_modifiers(modifier.BGE_mod_default):
         default=True
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         pass
 
     def process(self, bundle_info):

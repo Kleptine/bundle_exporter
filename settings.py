@@ -40,8 +40,6 @@ BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), o
                       'COLLADA': {os.path.join(bge_presets_path, 'BGE_collada.py')},
                       'GLTF': {os.path.join(bge_presets_path, 'BGE_gltf.py')}}
 
-ctx_modifiers: Any
-
 
 def get_preset_files(export_format):
     for x in BGE_export_presets[export_format]:

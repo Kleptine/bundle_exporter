@@ -72,10 +72,12 @@ def get_modifiers(modifier_group):
     return [x for x in get_modifiers_iter(modifier_group)]
 
 
-def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERAL', 'MESH', 'HELPER', 'ARMATURE'}):
+def draw(layout, context, modifier_bundle_index, draw_only_active=False, types={'GENERAL', 'MESH', 'HELPER', 'ARMATURE'}):
+    from ..core import get_modifier_for_ctx
     col = layout.column()
 
     modifiers_to_draw = []
+    modifier_group = get_modifier_for_ctx(modifier_bundle_index)
     for x in created_classes:
         modifier = getattr(modifier_group, x.settings_name())
         if modifier.type in types:
@@ -84,4 +86,4 @@ def draw(layout, context, modifier_group, draw_only_active=False, types={'GENERA
     modifiers_to_draw = sorted(modifiers_to_draw)
     for x in modifiers_to_draw:
         box = col.box()
-        x.draw(box, active_as_x=draw_only_active)
+        x.draw(box, modifier_bundle_index, active_as_x=draw_only_active)

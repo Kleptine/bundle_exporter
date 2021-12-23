@@ -40,7 +40,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
         return "bpy.context.preferences.addons['{}'].preferences.modifier_preferences.BGE_modifier_{}".format(__name__.split('.')[0], cls.id)
 
     # children of this class should implement this function to draw their settings
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         pass
 
     @classmethod
@@ -60,7 +60,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
     def _warning(self):
         return False
 
-    def draw(self, layout, active_as_x=True):
+    def draw(self, layout, modifier_bundle_index, active_as_x=True):
         row = layout.row(align=True)
         if not active_as_x:
             row.prop(self, "active", text="")
@@ -97,7 +97,7 @@ class BGE_mod_default(bpy.types.PropertyGroup):
             row.separator()
             row.separator()
             col = row.column(align=False)
-            self._draw_info(col)
+            self._draw_info(col, modifier_bundle_index)
 
     def get_object_from_name(self, name):
         try:

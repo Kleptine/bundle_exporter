@@ -30,7 +30,7 @@ class BGE_mod_copy_modifiers(modifier.BGE_mod_default):
 
     replace_references: bpy.props.BoolProperty(default=True)
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         row = layout.row(align=True)
         row.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 

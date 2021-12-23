@@ -41,7 +41,7 @@ class BGE_mod_purge_bones(modifier.BGE_mod_default):
         default=''
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.label(text='Delete:')
         row = layout.row()
         row.separator()

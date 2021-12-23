@@ -41,7 +41,7 @@ class BGE_mod_exclude_hidden(modifier.BGE_mod_default):
         default={'HIDDEN', 'COLLECTION_HIDDEN'},
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, 'types')
 
     def process(self, bundle_info):

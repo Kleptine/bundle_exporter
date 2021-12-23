@@ -18,9 +18,12 @@ bake_data = {}
 class BGE_OT_add_export_action(bpy.types.Operator):
     bl_idname = "ezb.add_export_action"
     bl_label = "New Texture Packer"
+    modifier_bundle_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
+        from ..core import get_modifier_for_ctx
+        ctx_modifiers = get_modifier_for_ctx(self.modifier_bundle_index)
+        mod = ctx_modifiers.BGE_modifier_bake_actions
         mod.export_actions.add()
         index=len(mod.export_actions) - 1
         mod.export_actions_index = index
@@ -29,14 +32,12 @@ class BGE_OT_add_export_action(bpy.types.Operator):
 class BGE_OT_remove_export_action(bpy.types.Operator):
     bl_idname = "ezb.remove_export_action"
     bl_label = "Remove Texture Packer"
-
-    @classmethod
-    def poll(cls, context):
-        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
-        return len(mod.export_actions) > mod.export_actions_index
+    modifier_bundle_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        mod = settings.ctx_modifiers.BGE_modifier_bake_actions
+        from ..core import get_modifier_for_ctx
+        ctx_modifiers = get_modifier_for_ctx(self.modifier_bundle_index)
+        mod = ctx_modifiers.BGE_modifier_bake_actions
         mod.export_actions.remove(mod.export_actions_index)
 
         if mod.export_actions_index >= len(mod.export_actions):
@@ -126,7 +127,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
     def _warning(self):
         return not self._is_using_fbx(bpy.context.scene.BGE_Settings.export_format)
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, 'actions_as_separate_files')
         if self.actions_as_separate_files:
             row = layout.row()
@@ -142,8 +143,10 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             row = layout.row(align=True)
             row.template_list("BGE_UL_export_actions", "", self, "export_actions", self, "export_actions_index", rows=3)
             col = row.column(align=True)
-            col.operator('ezb.add_export_action', text='', icon = 'ADD')
-            col.operator('ezb.remove_export_action', text='', icon = 'REMOVE')
+            addButton = col.operator('ezb.add_export_action', text='', icon = 'ADD')
+            addButton.modifier_bundle_index = modifier_bundle_index
+            removeButton = col.operator('ezb.remove_export_action', text='', icon = 'REMOVE')
+            removeButton.modifier_bundle_index = modifier_bundle_index
         elif self.action_validation_mode == 'NAMING':
             col = layout.column(align=True)
             col.prop(self, 'action_match_name')

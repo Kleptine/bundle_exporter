@@ -54,9 +54,12 @@ bsdf_inputs = {
 class BGE_OT_new_texture_packer(bpy.types.Operator):
     bl_idname = "ezb.new_texture_packer"
     bl_label = "New Texture Packer"
+    modifier_bundle_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        mod = settings.ctx_modifiers.BGE_modifier_export_textures
+        from ..core import get_modifier_for_ctx
+        ctx_modifiers = get_modifier_for_ctx(self.modifier_bundle_index)
+        mod = ctx_modifiers.BGE_modifier_export_textures
         mod.texture_packs.add()
         index=len(mod.texture_packs) - 1
         mod.texture_packs_index = index
@@ -65,14 +68,12 @@ class BGE_OT_new_texture_packer(bpy.types.Operator):
 class BGE_OT_remove_texture_packer(bpy.types.Operator):
     bl_idname = "ezb.remove_texture_packer"
     bl_label = "Remove Texture Packer"
-
-    @classmethod
-    def poll(cls, context):
-        mod = settings.ctx_modifiers.BGE_modifier_export_textures
-        return len(mod.texture_packs) > mod.texture_packs_index
+    modifier_bundle_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        mod = settings.ctx_modifiers.BGE_modifier_export_textures
+        from ..core import get_modifier_for_ctx
+        ctx_modifiers = get_modifier_for_ctx(self.modifier_bundle_index)
+        mod = ctx_modifiers.BGE_modifier_export_textures
         mod.texture_packs.remove(mod.texture_packs_index)
 
         if mod.texture_packs_index >= len(mod.texture_packs):
@@ -223,7 +224,7 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
     path: bpy.props.StringProperty(default="{bundle_path}")
     file: bpy.props.StringProperty(default="{texture_name}")
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         col = layout.column(align=True)
         col.prop(self, "path", text="Path")
         col.prop(self, "file", text="File")
@@ -258,8 +259,10 @@ class BGE_mod_export_textures(modifier.BGE_mod_default):
             row = layout.row(align=True)
             row.template_list("BGE_UL_texture_packs", "", self, "texture_packs", self, "texture_packs_index", rows=2)
             col = row.column(align=True)
-            col.operator('ezb.new_texture_packer', text='', icon = 'ADD')
-            col.operator('ezb.remove_texture_packer', text='', icon = 'REMOVE')
+            addButton = col.operator('ezb.new_texture_packer', text='', icon = 'ADD')
+            addButton.modifier_bundle_index = modifier_bundle_index
+            removeButton = col.operator('ezb.remove_texture_packer', text='', icon = 'REMOVE')
+            removeButton.modifier_bundle_index = modifier_bundle_index
 
             if self.texture_packs_index >= 0 and self.texture_packs_index < len(self.texture_packs):
                 texture_pack = self.texture_packs[self.texture_packs_index]
