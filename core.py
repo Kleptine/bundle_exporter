@@ -185,7 +185,8 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 
     def draw(self, context):
         self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
-        modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers, draw_only_active=True)
+        settings.ctx_modifiers = bpy.context.scene.BGE_Settings.scene_modifiers
+        modifiers.draw(self.layout, context, settings.ctx_modifiers, draw_only_active=True)
 
 
 class BGE_UL_bundles(bpy.types.UIList):
@@ -277,7 +278,8 @@ class BGE_PT_files_panel(bpy.types.Panel):
                     sub_box.label(text=x.name, icon=icon)
 
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
-            modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
+            settings.ctx_modifiers = bundle_list[bundle_index].override_modifiers
+            modifiers.draw(box, context, settings.ctx_modifiers, draw_only_active=True)
 
         layout.separator()
 
