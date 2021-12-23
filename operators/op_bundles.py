@@ -90,6 +90,8 @@ class BGE_OT_add_bundle_modifier(bpy.types.Operator):
 
     @classmethod
     def description(cls, context, properties):
+        if not len(bpy.context.scene.BGE_Settings.bundles):
+            return ""
         mods = modifiers.get_modifiers(bpy.context.scene.BGE_Settings.bundles[bpy.context.scene.BGE_Settings.bundle_index].override_modifiers)
         for x in mods:
             if x.id == properties.option:
