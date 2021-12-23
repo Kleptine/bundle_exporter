@@ -9,7 +9,7 @@ from ..utilities import traverse_tree
 
 
 class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
-    label = "Group Intstances to Objects"
+    label = "Group Instances to Objects"
     id = 'instance_collection_to_objects'
     url = "http://renderhjs.net/fbxbundle/"
     type = 'GENERAL'
