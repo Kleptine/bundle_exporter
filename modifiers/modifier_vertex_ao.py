@@ -31,7 +31,7 @@ class BGE_mod_vertex_ao(modifier.BGE_mod_default):
         subtype='FACTOR'
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, "contrast", text="Contrast")
 
     def process(self, bundle_info):

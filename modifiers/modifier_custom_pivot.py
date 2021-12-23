@@ -29,7 +29,7 @@ class BGE_mod_custom_pivot(modifier.BGE_mod_default):
     def _warning(self):
         return self.source not in bpy.context.scene.objects
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
     def process(self, bundle_info):
