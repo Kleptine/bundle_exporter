@@ -27,7 +27,7 @@ class BGE_mod_unity_rotation_fix(modifier.BGE_mod_default):
         default=True
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         pass
 
     def fix_rotations(self, x):

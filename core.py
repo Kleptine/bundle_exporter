@@ -25,6 +25,12 @@ def set_path(self, value):
 def get_path(self):
     return self.real_path
 
+def get_modifier_for_ctx(index):
+    if index < 0:
+        return bpy.context.scene.BGE_Settings.scene_modifiers
+    else:
+        return bundles.get_bundles()[index].override_modifiers
+
 preset_enum_items = []
 
 def get_preset_enum(self, context):
@@ -182,7 +188,7 @@ class BGE_PT_modifiers_panel(bpy.types.Panel):
 
     def draw(self, context):
         self.layout.operator_menu_enum(operators.BGE_OT_add_bundle_modifier.bl_idname, 'option')
-        modifiers.draw(self.layout, context, bpy.context.scene.BGE_Settings.scene_modifiers, draw_only_active=True)
+        modifiers.draw(self.layout, context, -1, draw_only_active=True)
 
 
 class BGE_UL_bundles(bpy.types.UIList):
@@ -299,7 +305,7 @@ class BGE_PT_files_panel(bpy.types.Panel):
                     sub_box.label(text=x.name, icon=icon)
 
             box.operator_menu_enum(operators.BGE_OT_override_bundle_modifier.bl_idname, 'option')
-            modifiers.draw(box, context, bundle_list[bundle_index].override_modifiers, draw_only_active=True)
+            modifiers.draw(box, context, bundle_index, draw_only_active=True)
 
         layout.separator()
 

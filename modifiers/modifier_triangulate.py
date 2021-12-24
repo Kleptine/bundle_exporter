@@ -52,7 +52,7 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
         description=bl_rna_properties['keep_custom_normals']['description'],
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         col = layout.column(align=False)
         col.use_property_split = True
         col.use_property_decorate = False

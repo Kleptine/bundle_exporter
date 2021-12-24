@@ -77,7 +77,7 @@ class BGE_mod_uvs_to_0_1_space(modifier.BGE_mod_default):
             islands.append(current_island)
         return islands
     
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, 'uvset')
         row = layout.row(align=True)
         row.prop(self, 'uv_coord')

@@ -31,7 +31,7 @@ class BGE_mod_rename(modifier.BGE_mod_default):
 
     remove_numbering: bpy.props.BoolProperty(name="Remove numbering from objects", default=True)
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         col = layout.column(align=True)
         col.prop(self, "path", text="Path")
         col.prop(self, "file", text="File")

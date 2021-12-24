@@ -9,7 +9,7 @@ from ..utilities import traverse_tree
 
 
 class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
-    label = "Group Intstances to Objects"
+    label = "Group Instances to Objects"
     id = 'instance_collection_to_objects'
     url = "http://renderhjs.net/fbxbundle/"
     type = 'GENERAL'
@@ -32,7 +32,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
         default=False
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, 'export_hidden')
 
     def pre_process(self, bundle_info):

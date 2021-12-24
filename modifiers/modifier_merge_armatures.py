@@ -69,7 +69,7 @@ class BGE_mod_merge_armatures(modifier.BGE_mod_default):
         default="{armature.name}_{name}"
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         col = layout.column(align=False)
         row = col.row(align=True)
         col.prop(self, 'armature_name')

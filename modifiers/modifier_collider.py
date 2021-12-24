@@ -108,7 +108,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
         ]
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop(self, "engine")
 
         layout.prop(self, "collider_creation")

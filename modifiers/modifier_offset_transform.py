@@ -26,7 +26,7 @@ class BGE_mod_offset_transform(modifier.BGE_mod_default):
 
     source: bpy.props.StringProperty()
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         layout.prop_search(self, "source", bpy.context.scene, "objects", text="Source")
 
         if self.source in bpy.data.objects:

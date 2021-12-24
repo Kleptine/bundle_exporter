@@ -42,7 +42,7 @@ class BGE_mod_lod(modifier.BGE_mod_default):
         subtype='FACTOR'
     )
 
-    def _draw_info(self, layout):
+    def _draw_info(self, layout, modifier_bundle_index):
         row = layout.row(align=True)
         row.prop(self, "levels", text="Steps", icon='AUTOMERGE_ON')
         row.prop(self, "quality", text="Quality", icon='AUTOMERGE_ON')
