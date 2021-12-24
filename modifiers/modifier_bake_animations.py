@@ -223,6 +223,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
 
             if not armature.animation_data:
                 armature.animation_data_create()
+
             armature.animation_data.action = action
 
         def bake_animation(armatures_actions, start, end):
@@ -234,6 +235,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
                 bpy.context.view_layer.update()
 
                 for armature, action in armatures_actions.items():
+                    armature.data.pose_position = 'POSE'
                     print(f'Baking {armature.name} -> {action.name} :: {f}')
                     actions_dict = bake_data.setdefault(armature.name, {})
                     actions_dict.setdefault(action.name, {})
@@ -276,7 +278,7 @@ class BGE_mod_bake_actions(modifier.BGE_mod_default):
             for action_name in module.get_all_action_names(bundle_info['armatures']):
                 module.set_current_action(bundle_info['armatures'], action_name)
                 print({x:x.animation_data.action for x in bundle_info['armatures']})
-                bake_animation({x:x.animation_data.action for x in bundle_info['armatures']}, bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1)
+                bake_animation({x:x.animation_data.action for x in bundle_info['armatures']}, bpy.context.scene.frame_start - 1, bpy.context.scene.frame_end + 1)
         elif self.action_validation_mode != 'NAMING':
             armatures = bundle_info['armatures']
             for action in bpy.data.actions:
