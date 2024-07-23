@@ -46,12 +46,6 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
         max=bl_rna_properties['min_vertices']['hard_max'],
     )
 
-    keep_custom_normals: bpy.props.BoolProperty(
-        name=bl_rna_properties['keep_custom_normals']['name'],
-        default=bl_rna_properties['keep_custom_normals']['default'],
-        description=bl_rna_properties['keep_custom_normals']['description'],
-    )
-
     def _draw_info(self, layout, modifier_bundle_index):
         col = layout.column(align=False)
         col.use_property_split = True
@@ -59,7 +53,6 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
         col.prop(self, "quad_method")
         col.prop(self, "ngon_method")
         col.prop(self, "min_vertices")
-        col.prop(self, "keep_custom_normals")
 
     def process(self, bundle_info):
         meshes = bundle_info['meshes']
@@ -73,4 +66,3 @@ class BGE_mod_triangulate(modifier.BGE_mod_default):
             mod.quad_method = self.quad_method
             mod.ngon_method = self.ngon_method
             mod.min_vertices = self.min_vertices
-            mod.keep_custom_normals = self.keep_custom_normals
