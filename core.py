@@ -10,21 +10,6 @@ from .settings import mode_bundle_types, mode_pivot_types
 
 from . import addon_updater_ops
 
-
-def set_path(self, value):
-    # checks if the provided path is inside a subdirectory of the current file to save it as a relative path
-    if bpy.data.is_saved:
-        value = os.path.realpath(bpy.path.abspath(value))
-        file_path = os.path.dirname(os.path.realpath(bpy.path.abspath(bpy.data.filepath)))
-        if os.path.commonprefix([os.path.realpath(bpy.path.abspath(value)), file_path]) == file_path:
-            value = bpy.path.relpath(value)
-
-    self.real_path = value
-
-
-def get_path(self):
-    return self.real_path
-
 def get_modifier_for_ctx(index):
     if index < 0:
         return bpy.context.scene.BGE_Settings.scene_modifiers
@@ -50,14 +35,12 @@ class BGE_BatchInfo(bpy.types.PropertyGroup):
     path: bpy.props.StringProperty(subtype='FILE_PATH')
 
 class BGE_Settings(bpy.types.PropertyGroup):
-    real_path: bpy.props.StringProperty(default="")
     path: bpy.props.StringProperty(
         name="Output Path",
         default="",
         description="Define the path where to export or import from",
-        subtype='DIR_PATH',
-        get=get_path,
-        set=set_path
+        subtype='FILE_PATH',
+        options={'PATH_SUPPORTS_BLEND_RELATIVE'}
     )
     padding: bpy.props.FloatProperty(
         name="Padding",
