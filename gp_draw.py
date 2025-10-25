@@ -51,16 +51,20 @@ def draw_debug():
 
 
 class LineDraw:
+    """
+    Grease Pencil v3 drawing class for Blender 4.3+
+    Replaces the legacy annotations system
+    """
 
     name = ""
     color = (0, 0, 0)
 
-    gp = None
+    gp_obj = None
+    gp_data = None
     gp_layer = None
-    gp_palette = None
-    gp_color = None
     gp_frame = None
-    gp_mat = None
+    gp_drawing = None
+    gp_material = None
 
     def __init__(self, name, color):
         self.name = name
@@ -68,7 +72,14 @@ class LineDraw:
         self.setup_gp()
 
     def clear(self):
-        self.gp_frame.clear()
+        """Clear all strokes from the drawing"""
+        if self.gp_drawing and self.gp_layer:
+            # Remove all strokes
+            self.gp_drawing.remove_strokes()
+            
+            # Update the view
+            if bpy.context.view_layer:
+                bpy.context.view_layer.update()
 
     def add_box(self, position, size=1.0):
         self.add_line([
@@ -119,38 +130,50 @@ class LineDraw:
 
     def add_line(self, points, alpha=1.0, dash=0.0):
 
+        """Add a line (stroke) with given points"""
+        if not self.gp_drawing:
+            return
+        
         if dash == 0:
-            stroke = self.get_gp_stroke()
-            offset = len(stroke.points)
-
-            stroke.points.add(len(points))
-            for i in range(len(points)):
-                index = offset + i
-                stroke.points[index].co = points[i]
-                stroke.points[index].select = True
-                stroke.points[index].pressure = 1
-                stroke.points[index].strength = alpha
-
+            # Create a single stroke with all points
+            self.gp_drawing.add_strokes(sizes=[len(points)])
+            stroke = self.gp_drawing.strokes[-1]  # Get the last stroke
+            
+            # Set stroke properties
+            stroke.material_index = 0
+            
+            # Set point positions and properties
+            for i, point_co in enumerate(points):
+                point = stroke.points[i]
+                point.position = point_co
+                point.opacity = alpha
+                point.radius = 0.02  # Line width - thinner for better visibility
+                point.vertex_color = (*self.color, 1.0)  # Set vertex color
         else:
+            # Dashed line - create multiple small strokes
             for i in range(len(points) - 1):
-                # stroke = self.get_gp_stroke()
-                length = (points[i] - points[i - 1]).magnitude
+                length = (points[i+1] - points[i]).magnitude
                 steps = math.floor((length / dash) / 2)
                 A = points[i]
                 B = points[i + 1]
 
                 for s in range(steps):
-                    stroke = self.get_gp_stroke()
-                    stroke.points.add(2)
-                    stroke.points[-2].co = A + (B - A).normalized() * (s * (dash * 2))
-                    stroke.points[-2].select = True
-                    stroke.points[-2].pressure = 1
-                    stroke.points[-2].strength = alpha
-
-                    stroke.points[-1].co = A + (B - A).normalized() * (s * (dash * 2) + dash)
-                    stroke.points[-1].select = True
-                    stroke.points[-1].pressure = 1
-                    stroke.points[-1].strength = alpha
+                    # Add a small stroke for each dash segment
+                    self.gp_drawing.add_strokes(sizes=[2])
+                    stroke = self.gp_drawing.strokes[-1]
+                    stroke.material_index = 0
+                    
+                    # First point of dash
+                    stroke.points[0].position = A + (B - A).normalized() * (s * (dash * 2))
+                    stroke.points[0].opacity = alpha
+                    stroke.points[0].radius = 0.05
+                    stroke.points[0].vertex_color = (*self.color, 1.0)
+                    
+                    # Second point of dash
+                    stroke.points[1].position = A + (B - A).normalized() * (s * (dash * 2) + dash)
+                    stroke.points[1].opacity = alpha
+                    stroke.points[1].radius = 0.05
+                    stroke.points[1].vertex_color = (*self.color, 1.0)
 
     def add_text(self, text, pos=Vector((0, 0, 0)), size=1.0):
         # text = text.upper()
@@ -169,7 +192,6 @@ class LineDraw:
                     y = math.floor(id / 3) * size_xy.y / 2 + padding
                     path.append(pos + Vector((x, -size_xy.y - 2 * padding + y, 0)))
 
-                # add_mesh_edges(bm, path)
                 self.add_line(path)
 
         # 6 -- 7 -- 8
@@ -207,7 +229,7 @@ class LineDraw:
             'y': [[3, 1], [5, -3]],
             'z': [[3, 5, 0, 2]],
 
-            # Alhabet Uppercase
+            # Alphabet Uppercase
             'A': [[0, 3, 7, 5, 2], [3, 5]],
             'B': [[0, 6, 8, 4, 2, 0], [3, 4]],
             'C': [[2, 1, 3, 7, 8]],
@@ -245,7 +267,7 @@ class LineDraw:
             '|': [[1, 7]],
             '/': [[0, 8]],
             '\\': [[6, 2]],
-            '\'': [[7, 4]],
+            "'": [[7, 4]],
             '*': [[0, 8], [3, 5], [6, 2], [1, 7]],
             '%': [[6, 3], [8, 0], [5, 2]],
             '"': [[6, 4], [7, 5]],
@@ -253,7 +275,7 @@ class LineDraw:
             '@': [[0, 6, 8, 2, 1, 4]],
             '$': [[0, 1, 5, 3, 7, 8], [7, 1]],
             '^': [[3, 7, 5]],
-            ': ': [[4, 5], [1, 2]],
+            ':': [[4, 5], [1, 2]],
             ';': [[4, 5], [1, -3]],
             # '&': [[2,3,6,7,4,3,0,5]],
 
@@ -289,62 +311,101 @@ class LineDraw:
             offset += 1
 
     def is_valid(self):
-        if not self.gp:
+        """Check if the grease pencil system is still valid"""
+        try:
+            if not self.gp_obj:
+                return False
+            # Check if object still exists (accessing .name will raise error if deleted)
+            _ = self.gp_obj.name
+            if self.gp_obj.name not in bpy.data.objects:
+                return False
+            if not self.gp_layer:
+                return False
+            if not self.gp_frame:
+                return False
+            if not self.gp_drawing:
+                return False
+            return True
+        except ReferenceError:
+            # Object was deleted
             return False
-        if not bpy.context.scene.grease_pencil or self.gp != bpy.context.scene.grease_pencil:
-            return False
-        if not self.gp_layer:
-            return False
-        if not self.gp_palette:
-            return False
-
-        return True
 
     def setup_gp(self):
-        # Documentation https://wiki.blender.org/index.php/User:Antoniov/Grease_Pencil_Api_Changes
-        id_grease = "id_grease"
-        id_layer = "id_layer"
-        id_palette = "id_palette"
-
-        #
-        bpy.context.space_data.show_object_viewport_grease_pencil = True
-
-        # gp = scene.grease_pencil
-        # if not gp:
-        # 	gp = bpy.data.grease_pencils.get(gname, None)
-        # 	if not gp:
-        # 		gp = bpy.data.grease_pencils.new(gname)
-        # 		print("Created new Grease Pencil", gp.name)
-        # 	scene.grease_pencil = gp
-        # 	print("Added Grease Pencil %s to current scene" % (gp.name) )
-        # return gp
-
-        # Grease Pencil
-        self.gp = bpy.context.scene.grease_pencil
-        if not self.gp:
-            if id_grease in bpy.data.grease_pencils:
-                self.gp = bpy.data.grease_pencils.get(id_grease, None)
-            else:
-                self.gp = bpy.data.grease_pencils.new(id_grease)
-            bpy.context.scene.grease_pencil = self.gp
-
-        # Layer
-        if id_layer in self.gp.layers:
-            self.gp_layer = self.gp.layers[id_layer]
+        """
+        Set up Grease Pencil v3 object, layer, and frame
+        This replaces the legacy annotations system
+        """
+        gp_name = f"BGE_Fence_{self.name}"
+        
+        # Check if we already have a GP object
+        if gp_name in bpy.data.objects:
+            self.gp_obj = bpy.data.objects[gp_name]
+            self.gp_data = self.gp_obj.data
         else:
-            self.gp_layer = self.gp.layers.new(id_layer, set_active=True)
-
-        self.gp_layer.color = (0, 0.8, 1)
-
-        # Frame
-        if len(self.gp_layer.frames) == 0:
-            self.gp_frame = self.gp_layer.frames.new(bpy.context.scene.frame_current)
+            # Create new Grease Pencil v3 data
+            self.gp_data = bpy.data.grease_pencils_v3.new(gp_name)
+            
+            # Create object and link to scene
+            self.gp_obj = bpy.data.objects.new(gp_name, self.gp_data)
+            bpy.context.scene.collection.objects.link(self.gp_obj)
+        
+        # Create or get material
+        mat_name = f"BGE_FenceMat_{self.name}"
+        if mat_name in bpy.data.materials:
+            self.gp_material = bpy.data.materials[mat_name]
         else:
-            self.gp_frame = self.gp_layer.frames[0]
-
-    def get_gp_stroke(self, id_grease="fance", id_layer="lines", id_palette="colors"):
-        stroke = self.gp_frame.strokes.new()
-        stroke.display_mode = '3DSPACE'
-        stroke.line_width = 100
-        stroke.material_index = 0
-        return stroke
+            self.gp_material = bpy.data.materials.new(mat_name)
+            
+            # Use nodes for better color rendering
+            self.gp_material.use_nodes = True
+            nodes = self.gp_material.node_tree.nodes
+            links = self.gp_material.node_tree.links
+            
+            # Clear default nodes
+            nodes.clear()
+            
+            # Add Principled BSDF
+            bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+            bsdf.location = (0, 0)
+            bsdf.inputs['Base Color'].default_value = (*self.color, 1.0)
+            # Add slight emission to make color more visible
+            bsdf.inputs['Emission Color'].default_value = (*self.color, 1.0)
+            bsdf.inputs['Emission Strength'].default_value = 0.3
+            
+            # Add Material Output
+            output = nodes.new('ShaderNodeOutputMaterial')
+            output.location = (200, 0)
+            
+            # Link
+            links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+        
+        # Ensure material is in the GP object
+        if self.gp_material.name not in self.gp_data.materials:
+            self.gp_data.materials.append(self.gp_material)
+        
+        # Get or create layer
+        layer_name = "BGE_Layer"
+        if layer_name in self.gp_data.layers:
+            self.gp_layer = self.gp_data.layers[layer_name]
+        else:
+            self.gp_layer = self.gp_data.layers.new(layer_name)
+        
+        # Get or create frame
+        current_frame = bpy.context.scene.frame_current
+        self.gp_frame = None
+        
+        # Check if frame exists at current frame number
+        for frame in self.gp_layer.frames:
+            if frame.frame_number == current_frame:
+                self.gp_frame = frame
+                break
+        
+        # Create frame if it doesn't exist
+        if not self.gp_frame:
+            self.gp_frame = self.gp_layer.frames.new(current_frame)
+        
+        # Get the drawing from the frame
+        self.gp_drawing = self.gp_frame.drawing
+        
+        # Enable show in front (X-ray mode) so fences are visible through objects
+        self.gp_obj.show_in_front = True
