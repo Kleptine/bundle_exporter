@@ -164,15 +164,40 @@ class Exporter():
             modifier.post_export(self.bundle_info)
 
 
+def _is_relative_path(path):
+    """Check if a path is relative (not absolute and not empty)."""
+    if not path:
+        return False
+    # Blender's '//' prefix denotes blend-file-relative paths
+    if path.startswith('//'):
+        return True
+    # Standard relative paths like '../' or 'subdir/'
+    if not os.path.isabs(path):
+        return True
+    return False
+
+
 def export(bundles):
     start_time = time.time()
+
+    # Validate that relative paths can be resolved.
+    # Relative paths (like '../' or '//') need the blend file to be saved first,
+    # because they are resolved relative to the blend file's location on disk.
+    # Without a saved file, there's no directory to resolve from.
+    export_path = bpy.context.scene.BGE_Settings.path
+    if _is_relative_path(export_path) and not bpy.data.is_saved:
+        def draw_error(self, context):
+            self.layout.label(text=f"A relative export path ({export_path}) requires the blend file to be saved first.")
+            self.layout.label(text="Save your file or use an absolute path.")
+        bpy.context.window_manager.popup_menu(draw_error, title="Cannot Export", icon='ERROR')
+        return
 
     previous_selection = bpy.context.selected_objects.copy()
     previous_active = bpy.context.view_layer.objects.active
     previous_unit_system = bpy.context.scene.unit_settings.system
     previous_pivot = bpy.context.scene.tool_settings.transform_pivot_point
     previous_cursor = bpy.context.scene.cursor.location
-    
+
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
     if bpy.context.view_layer.objects.active:
@@ -208,8 +233,24 @@ def export(bundles):
                     continue
                 x.location -= bundle_info['pivot']
 
-            # create path
-            path_full = os.path.join(bpy.path.abspath(bundle_info['path']), bundle_info['name']) + "." + settings.export_format_extensions[bundle_info['export_format']]
+            # Resolve the export path to an absolute path.
+            #
+            # Path resolution requires the blend file to be saved when using relative paths,
+            # because we need a known location on disk to resolve paths like '../' from.
+            # The validation at the start of export() ensures this precondition is met.
+            #
+            # bpy.path.abspath() handles Blender's '//' prefix (blend-file-relative notation),
+            # but standard relative paths like '../' need additional handling - we resolve
+            # them relative to the blend file's parent directory.
+            export_path = bundle_info['path']
+            blend_dir = os.path.dirname(bpy.data.filepath)
+            # First expand '//' prefix if present
+            export_path = bpy.path.abspath(export_path)
+            # If still relative (e.g. '../subfolder'), resolve from the blend file's directory
+            if not os.path.isabs(export_path):
+                export_path = os.path.normpath(os.path.join(blend_dir, export_path))
+
+            path_full = os.path.join(export_path, bundle_info['name']) + "." + settings.export_format_extensions[bundle_info['export_format']]
             directory = os.path.dirname(path_full)
             pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
