@@ -35,6 +35,9 @@ class Exporter():
             exec(line, globals(), locals())
 
         kwargs = op.__dict__
+        operator = settings.export_operators[self.export_format]
+        valid_props = operator.get_rna_type().properties.keys()
+        kwargs = {k: v for k, v in kwargs.items() if k in valid_props}
 
         return kwargs
 
@@ -261,8 +264,14 @@ def export(bundles):
                 obj.select_set(True)
 
             bundle_info['export_preset']['filepath'] = path_full
-            if bundle_info['export_format'] == 'FBX':
+            operator = settings.export_operators[bundle_info['export_format']]
+            valid_props = operator.get_rna_type().properties.keys()
+
+            if 'use_selection' in valid_props:
                 bundle_info['export_preset']['use_selection'] = True
+            elif 'export_selected_objects' in valid_props:
+                bundle_info['export_preset']['export_selected_objects'] = True
+
             settings.export_operators[bundle_info['export_format']](**bundle_info['export_preset'])
 
     # TODO: add this final part into a except/finally scope ?
