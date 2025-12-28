@@ -77,37 +77,32 @@ def compute_knot_rotation(tangent_out, tilt):
     return base_quat
 
 
-def extract_bezier_spline(spline, matrix_world, pivot, use_y_up):
-    """Extract data from a Bezier spline."""
+def extract_bezier_spline(spline, use_y_up):
+    """Extract data from a Bezier spline in local object coordinates."""
     knots = []
 
     for bp in spline.bezier_points:
-        # Transform positions to world space
-        co_world = matrix_world @ bp.co
-        handle_left_world = matrix_world @ bp.handle_left
-        handle_right_world = matrix_world @ bp.handle_right
-
-        # Apply pivot offset
-        co_world -= pivot
-        handle_left_world -= pivot
-        handle_right_world -= pivot
+        # Use local coordinates (no world transform)
+        co = bp.co.copy()
+        handle_left = bp.handle_left.copy()
+        handle_right = bp.handle_right.copy()
 
         # Compute tangents relative to knot position
-        tangent_in = handle_left_world - co_world
-        tangent_out = handle_right_world - co_world
+        tangent_in = handle_left - co
+        tangent_out = handle_right - co
 
         # Compute rotation from tangent and tilt
         rotation = compute_knot_rotation(tangent_out, bp.tilt)
 
         # Convert to Y-up if needed
         if use_y_up:
-            co_world = transform_point_z_to_y_up(co_world)
+            co = transform_point_z_to_y_up(co)
             tangent_in = transform_point_z_to_y_up(tangent_in)
             tangent_out = transform_point_z_to_y_up(tangent_out)
             rotation = transform_quat_z_to_y_up(rotation)
 
         knots.append({
-            "position": vector_to_list(co_world),
+            "position": vector_to_list(co),
             "tangentIn": vector_to_list(tangent_in),
             "tangentOut": vector_to_list(tangent_out),
             "rotation": quat_to_list(rotation),
@@ -120,8 +115,8 @@ def extract_bezier_spline(spline, matrix_world, pivot, use_y_up):
     }
 
 
-def extract_nurbs_spline(spline, matrix_world, pivot, use_y_up):
-    """Extract data from a NURBS spline.
+def extract_nurbs_spline(spline, use_y_up):
+    """Extract data from a NURBS spline in local object coordinates.
 
     Unity Splines doesn't have native NURBS support, so we store
     the raw control points and NURBS parameters for custom handling.
@@ -131,14 +126,12 @@ def extract_nurbs_spline(spline, matrix_world, pivot, use_y_up):
     for point in spline.points:
         # NURBS points have 4 components (x, y, z, w) where w is the homogeneous coordinate
         co = Vector((point.co.x, point.co.y, point.co.z))
-        co_world = matrix_world @ co
-        co_world -= pivot
 
         if use_y_up:
-            co_world = transform_point_z_to_y_up(co_world)
+            co = transform_point_z_to_y_up(co)
 
         knots.append({
-            "position": vector_to_list(co_world),
+            "position": vector_to_list(co),
             "weight": round(point.co.w, 6),  # NURBS weight (homogeneous coord)
         })
 
@@ -150,20 +143,18 @@ def extract_nurbs_spline(spline, matrix_world, pivot, use_y_up):
     }
 
 
-def extract_poly_spline(spline, matrix_world, pivot, use_y_up):
-    """Extract data from a Poly spline (linear segments)."""
+def extract_poly_spline(spline, use_y_up):
+    """Extract data from a Poly spline (linear segments) in local object coordinates."""
     knots = []
 
     for point in spline.points:
         co = Vector((point.co.x, point.co.y, point.co.z))
-        co_world = matrix_world @ co
-        co_world -= pivot
 
         if use_y_up:
-            co_world = transform_point_z_to_y_up(co_world)
+            co = transform_point_z_to_y_up(co)
 
         knots.append({
-            "position": vector_to_list(co_world),
+            "position": vector_to_list(co),
         })
 
     return {
@@ -173,25 +164,48 @@ def extract_poly_spline(spline, matrix_world, pivot, use_y_up):
     }
 
 
-def extract_curve_data(curve_obj, pivot, use_y_up):
-    """Extract all spline data from a curve object."""
+def extract_curve_data(curve_obj, use_y_up):
+    """Extract all spline data from a curve object in local coordinates."""
     curve_data = curve_obj.data
-    matrix_world = curve_obj.matrix_world.copy()
 
     splines = []
     for spline in curve_data.splines:
         if spline.type == 'BEZIER':
-            splines.append(extract_bezier_spline(spline, matrix_world, pivot, use_y_up))
+            splines.append(extract_bezier_spline(spline, use_y_up))
         elif spline.type == 'NURBS':
-            splines.append(extract_nurbs_spline(spline, matrix_world, pivot, use_y_up))
+            splines.append(extract_nurbs_spline(spline, use_y_up))
         elif spline.type == 'POLY':
-            splines.append(extract_poly_spline(spline, matrix_world, pivot, use_y_up))
+            splines.append(extract_poly_spline(spline, use_y_up))
 
     return {
         "splines": splines,
         "dimensions": curve_data.dimensions,  # '2D' or '3D'
         "resolution": curve_data.resolution_u,
     }
+
+
+def get_axis_vector(axis_str):
+    """Convert axis string like 'Y', '-Z' to a vector."""
+    axis_map = {
+        'X': (1, 0, 0), '-X': (-1, 0, 0),
+        'Y': (0, 1, 0), '-Y': (0, -1, 0),
+        'Z': (0, 0, 1), '-Z': (0, 0, -1),
+    }
+    return list(axis_map.get(axis_str, (0, 1, 0)))
+
+
+def extract_curve_data_with_file_axis(curve_obj, axis_forward, axis_up):
+    """Extract curve data in local object coordinates with file axis info.
+
+    The curve data is in raw Blender local coordinates. The Unity importer
+    will use the file axis vectors to compute the correct coordinate transformation,
+    matching what Unity does for the object's transform.
+    """
+    data = extract_curve_data(curve_obj, use_y_up=False)
+    # Include the file's axis settings so Unity can compute the correct transform
+    data["fileAxisForward"] = get_axis_vector(axis_forward)
+    data["fileAxisUp"] = get_axis_vector(axis_up)
+    return data
 
 
 class BGE_mod_export_curves(modifier.BGE_mod_default):
@@ -289,21 +303,25 @@ class BGE_mod_export_curves(modifier.BGE_mod_default):
                 bpy.context.window_manager.popup_menu(draw_error, title="Export Warning", icon='ERROR')
                 print(f"WARNING: {prop_name} is not enabled - curve custom properties will not be exported!")
 
-        pivot = bundle_info['pivot']
-
-        # Check if Y-up conversion is needed
-        # Different exporters use different property names:
-        # - GLTF/GLB: export_yup (bool)
-        # - FBX: axis_up ('Y' or 'Z')
+        # Get axis settings from export preset
+        # FBX uses axis_forward and axis_up
+        # GLTF uses export_yup (always -Z forward when Y-up)
         preset = bundle_info.get('export_preset', {})
         if export_format == 'FBX':
-            use_y_up = preset.get('axis_up', 'Y') == 'Y'
+            axis_forward = preset.get('axis_forward', '-Z')
+            axis_up = preset.get('axis_up', 'Y')
         else:
-            use_y_up = preset.get('export_yup', True)
+            # GLTF/GLB: Y-up with -Z forward (OpenGL convention)
+            if preset.get('export_yup', True):
+                axis_forward = '-Z'
+                axis_up = 'Y'
+            else:
+                axis_forward = 'Y'
+                axis_up = 'Z'
 
         for curve_obj in curves:
-            # Extract curve data
-            curve_data = extract_curve_data(curve_obj, pivot, use_y_up)
+            # Extract curve data in local object coordinates with file axis info
+            curve_data = extract_curve_data_with_file_axis(curve_obj, axis_forward, axis_up)
 
             # Serialize to JSON
             json_data = json.dumps(curve_data, separators=(',', ':'))  # Compact JSON
