@@ -15,30 +15,35 @@ engines = [
 
 export_formats = [('FBX', 'FBX', 'fbx format'),
                   ('COLLADA', 'Collada ', 'collada format'),
-                  ('GLB', 'GLB', 'glb export'),
+                  ('GLB', 'GLB', 'glb binary export'),
+                  ('GLTF', 'GLTF', 'gltf text export'),
                   ('OBJ', 'OBJ', 'obj export')]
 
 export_format_extensions = {'FBX': 'fbx',
                             'COLLADA': 'dae',
                             'GLB': 'glb',
+                            'GLTF': 'gltf',
                             'OBJ': 'obj'}
 
 export_operators = {'FBX': bpy.ops.export_scene.fbx,
                     'COLLADA': bpy.ops.wm.collada_export,
                     'GLB': bpy.ops.export_scene.gltf,
+                    'GLTF': bpy.ops.export_scene.gltf,
                     'OBJ': bpy.ops.wm.obj_export}
 
 preset_folders = {'FBX': 'operator/export_scene.fbx/',
                   'OBJ': 'operator/wm.obj_export/',
                   'COLLADA': 'operator/wm.collada_export/',
-                  'GLB': 'operator/export_scene.gltf/'}
+                  'GLB': 'operator/export_scene.gltf/',
+                  'GLTF': 'operator/export_scene.gltf/'}
 
 bge_presets_path = os.path.join(os.path.dirname(__file__), 'presets')
 
 BGE_export_presets = {'FBX': {os.path.join(bge_presets_path, 'BGE_unreal.py'), os.path.join(bge_presets_path, 'BGE_unity.py'), os.path.join(bge_presets_path, 'BGE_unity_experimental.py')},
                       'OBJ': {os.path.join(bge_presets_path, 'BGE_obj.py')},
                       'COLLADA': {os.path.join(bge_presets_path, 'BGE_collada.py')},
-                      'GLB': {os.path.join(bge_presets_path, 'BGE_glb.py')}}
+                      'GLB': {os.path.join(bge_presets_path, 'BGE_glb.py')},
+                      'GLTF': {os.path.join(bge_presets_path, 'BGE_gltf.py')}}
 
 
 def get_preset_files(export_format):
