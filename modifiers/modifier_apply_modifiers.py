@@ -35,8 +35,21 @@ class BGE_mod_Apply_modifiers(modifier.BGE_mod_default):
                 mesh.select_set(True)
 
                 for modifier in mesh.modifiers:
-                    if modifier.type != 'ARMATURE':
+                    if modifier.type == 'ARMATURE':
+                        continue
+                    try:
                         bpy.ops.object.modifier_apply(modifier=modifier.name)
+                    except RuntimeError as e:
+                        obj_name = mesh.get('__orig_name__', mesh.name)
+                        mod_name = modifier.name
+                        mod_type = modifier.type
+                        error_msg = str(e)
+                        def draw_error(self, context):
+                            self.layout.label(text=f"Object: {obj_name}")
+                            self.layout.label(text=f"Modifier: {mod_name} ({mod_type})")
+                            self.layout.label(text=f"Error: {error_msg}")
+                        bpy.context.window_manager.popup_menu(draw_error, title="Failed to Apply Modifier", icon='ERROR')
+                        raise
 
             #bpy.ops.object.convert(target='MESH')
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
