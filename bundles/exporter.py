@@ -39,6 +39,11 @@ class Exporter():
         valid_props = operator.get_rna_type().properties.keys()
         kwargs = {k: v for k, v in kwargs.items() if k in valid_props}
 
+        # Active collection filtering breaks bundle export since we select
+        # specific objects to export, not whatever collection is active.
+        if 'use_active_collection' in kwargs:
+            kwargs['use_active_collection'] = False
+
         return kwargs
 
     def __enter__(self):
