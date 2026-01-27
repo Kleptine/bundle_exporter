@@ -38,14 +38,20 @@ class BGE_OT_create_bundle(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return len(bpy.context.selected_objects) > 0
+        if len(bpy.context.selected_objects) > 0:
+            return True
+        # The scene root collection is excluded since it contains everything.
+        collection = bpy.context.collection
+        return collection is not None and collection != bpy.context.scene.collection
 
     @classmethod
     def description(cls, context, properties):
         if len(bpy.context.selected_objects) > 0:
             return "Create new bundle(s) from selected objects"
-        else:
-            return "Select objects to create a bundle"
+        collection = bpy.context.collection
+        if collection is not None and collection != bpy.context.scene.collection:
+            return "Create new bundle(s) from active collection"
+        return "Select objects or a collection to create a bundle"
 
 
 mesh_modifiers = [(x.id, x.label, "add " + x.label, x.icon, x.unique_num) for x in modifiers.modifier_classes if x.type == 'MESH']

@@ -2,6 +2,7 @@ import bpy
 
 from . import bundle
 from . import exporter
+from ..settings import mesh_types, empty_types, armature_types
 
 Bundle = bundle.Bundle
 
@@ -43,6 +44,15 @@ def create_bundles_from_selection():
     mode_bundle = bpy.context.scene.BGE_Settings.mode_bundle
     mode_pivot = bpy.context.scene.BGE_Settings.mode_pivot
     objects = [obj for obj in bpy.context.selected_objects]
+
+    # If no objects are selected, fall back to the active collection's objects.
+    # The scene root collection is excluded since it contains everything.
+    if not objects:
+        collection = bpy.context.collection
+        if collection is not None and collection != bpy.context.scene.collection:
+            valid_types = mesh_types | empty_types | armature_types
+            objects = [obj for obj in collection.all_objects if obj.type in valid_types]
+
     keys = set()
     for x in objects:
         key = get_key(x, mode_bundle)
