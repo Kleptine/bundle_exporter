@@ -12,6 +12,14 @@ from ..utilities import traverse_tree, traverse_tree_from_iteration
 # https://preshing.com/20110920/the-python-with-statement-by-example/
 # instead of try finally
 
+# The exporter works by duplicating out a copy of the bundled objects into a 'shadow' copy.
+# On this copy we can apply all of the destructive modifiers, changes, renames, etc. 
+# We then export that copy.
+
+# Notes:
+# Due to Blender requiring a global unique name for every object, and the exported object needing to have
+# the 'true' name for the object, we have to first rename the original objects before export. Later we reset 
+# the names back to originals. 
 
 class Exporter():
     def __init__(self, bundle, path, export_format, export_preset):
@@ -95,12 +103,42 @@ class Exporter():
                 except RuntimeError:
                     pass
 
-        # duplicate the objects
+        # 1. Duplicate objects (currently linked to the shared collection)
         bpy.ops.object.duplicate()
-        bpy.ops.object.make_local(type='SELECT_OBDATA')
-        bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
+        
+        # Capture the duplicates immediately (Blender selects duplicates automatically)
+        copied_objects = [x for x in bpy.context.selected_objects]
 
-        copied_objects = [x for x in bpy.context.scene.objects if x.select_get()]
+        # 2. Create a temporary scene for isolation
+        self.orig_scene = bpy.context.scene
+        self.export_scene = bpy.data.scenes.new(name="BGE_Export_Staging")
+
+        # 3. Move duplicates to the temporary scene
+        # We explicitly link to the new scene and unlink from ALL old collections
+        # to ensure they no longer exist in the shared 'Hub' collection.
+        for obj in copied_objects:
+            self.export_scene.collection.objects.link(obj)
+            for coll in obj.users_collection:
+                if coll != self.export_scene.collection:
+                    coll.objects.unlink(obj)
+
+        # 4. Switch context to the new scene
+        # This ensures subsequent operations happen in the isolated environment
+        bpy.context.window.scene = self.export_scene
+
+        # 5. Re-establish selection in the new scene
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in copied_objects:
+            obj.select_set(True)
+
+        # 6. Make Single User
+        # This makes sure that all of the data blocks used by the exported and 
+        # soon-to-be-modified objects are not going to affect the original scene. 
+        bpy.ops.object.make_local(type='SELECT_OBDATA') # Instantiate linked objects from other files into this scene. 
+        bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
+        
+        # Refresh list in case object references changed (unlikely here but safe practice)
+        copied_objects = [x for x in bpy.context.selected_objects]
 
         # mark copied objects for later deletion
         for x in copied_objects:
@@ -121,16 +159,22 @@ class Exporter():
     def __exit__(self, type, value, traceback):
         if settings.debug:
             return
-        # first delete duplicated objects
-        objs = [x for x in bpy.data.objects]
-        for obj in objs:
-            if '__IS_COPY__' in obj and obj['__IS_COPY__']:
-                bpy.data.objects.remove(obj, do_unlink=True)
+
+        # We must return to the original scene before deleting the export scene
+        bpy.context.window.scene = self.orig_scene
+
+        # Delete the duplicated 'export' objects.
+        # We iterate bpy.data.objects because they might be in the other scene
+        for obj in list(self.export_scene.objects):
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Delete the temporary export scene. 
+        bpy.data.scenes.remove(self.export_scene)
 
         # now restore original values
         objs = [x for x in bpy.data.objects]
         for obj in objs:
-            if obj.name is not obj['__orig_name__']:
+            if obj.name != obj['__orig_name__']:
                 obj.name = obj['__orig_name__']
             obj.hide_viewport = obj['__orig_hide__']
             obj.hide_select = obj['__orig_hide_select__']
