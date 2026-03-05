@@ -1,7 +1,7 @@
 import bpy
 
 from . import bundle
-from . import exporter
+from . import export
 from ..settings import mesh_types, empty_types, armature_types
 
 Bundle = bundle.Bundle
