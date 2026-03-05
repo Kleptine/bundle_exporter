@@ -98,7 +98,6 @@ debug = False
 # If any of these are found outside an active export, the file is
 # contaminated from a prior failed or aborted export session.
 contamination_props_object = {
-    '__IS_COPY__',
     '__orig_name__',
     '__orig_hide__',
     '__orig_hide_select__',

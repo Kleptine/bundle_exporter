@@ -54,7 +54,6 @@ class Exporter():
             )
 
         objects = self.bundle.objects
-        orig_obj_names = set([x.name for x in objects])
         print('Objects to export: {}'.format(objects))
         bpy.ops.object.select_all(action="DESELECT")
         # we need to traverse the tree from child to parent or else the exclude property can be missed
@@ -118,17 +117,21 @@ class Exporter():
         bpy.ops.object.make_local(type='SELECT_OBDATA')
         bpy.ops.object.make_single_user(type='SELECTED_OBJECTS', object=True, obdata=True, material=False, animation=False)
 
+        # Re-fetch after make_single_user which can create new object IDs.
         copied_objects = [x for x in bpy.context.selected_objects]
 
-        # mark copied objects for later deletion
+        # Track copies in a set for cleanup in __exit__. Modifiers that create
+        # additional objects during processing add to this set via bundle_info['_copies'].
+        self.copies = set(copied_objects)
+
         for x in copied_objects:
-            x['__IS_COPY__'] = True
             x.name = x['__orig_name__']
 
         bundle_info = self.bundle.create_bundle_info()
         bundle_info['meshes'] = [x for x in copied_objects if x.type in mesh_types]
         bundle_info['empties'] = [x for x in copied_objects if x.type in empty_types]
         bundle_info['armatures'] = [x for x in copied_objects if x.type in armature_types]
+        bundle_info['_copies'] = self.copies
         bundle_info['path'] = self.path
         bundle_info['export_format'] = self.export_format
         bundle_info['export_preset'] = self.get_export_arguments()
@@ -140,10 +143,12 @@ class Exporter():
         if settings.debug:
             return
         # first delete duplicated objects
-        objs = [x for x in bpy.data.objects]
-        for obj in objs:
-            if '__IS_COPY__' in obj and obj['__IS_COPY__']:
+        for obj in list(self.copies):
+            try:
                 bpy.data.objects.remove(obj, do_unlink=True)
+            except ReferenceError:
+                pass  # already freed by Blender
+        self.copies.clear()
 
         # now restore original values
         objs = [x for x in bpy.data.objects]

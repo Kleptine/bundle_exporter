@@ -101,6 +101,14 @@ def export(bundles):
             for obj in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
                 obj.select_set(True)
 
+            # Strip internal bookkeeping properties from export objects so they
+            # don't leak into the file via use_custom_props / export_extras.
+            # These copies are deleted in Exporter.__exit__ so stripping is safe.
+            for obj in bundle_info['meshes'] + bundle_info['empties'] + bundle_info['armatures'] + bundle_info['extras']:
+                for key in settings.contamination_props_object:
+                    if key in obj:
+                        del obj[key]
+
             bundle_info['export_preset']['filepath'] = path_full
             operator = settings.export_operators[bundle_info['export_format']]
             valid_props = operator.get_rna_type().properties.keys()

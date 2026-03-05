@@ -171,7 +171,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
                     bpy.context.view_layer.objects.active = obj
                     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
                     col = create_box_collider(obj, self.engine)
-                    col['__IS_COPY__'] = True  # to automatically delete them after export
+                    bundle_info['_copies'].add(col)
                     bundle_info['extras'].append(col)
             if self.generate_process == 'DECIMATION':
                 for obj in objects:
@@ -213,7 +213,7 @@ class BGE_mod_collider(modifier.BGE_mod_default):
 
                     # bpy.ops.object.modifier_add(type='DECIMATE')
                     # bpy.context.object.modifiers["Decimate"].ratio = get_quality(i, self.levels, self.quality)
-                    copy['__IS_COPY__'] = True  # to automatically delete them after export
+                    bundle_info['_copies'].add(copy)
 
                     # add them to "extras" so other modifiers won't process them
                     bundle_info['extras'].append(copy)

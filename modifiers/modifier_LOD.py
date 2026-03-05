@@ -90,3 +90,4 @@ class BGE_mod_lod(modifier.BGE_mod_default):
 
                 # add them to "extras" so other modifiers won't process them
                 bundle_info['extras'].append(bpy.context.object)
+                bundle_info['_copies'].add(bpy.context.object)

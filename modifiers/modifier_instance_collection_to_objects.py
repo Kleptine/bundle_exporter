@@ -63,7 +63,7 @@ class BGE_mod_instance_collection_to_objects(modifier.BGE_mod_default):
                 for new_node in new_nodes:
                     for key in coll_dict:
                         new_node[key] = coll_dict[key]
-                    new_node['__IS_COPY__'] = True  # to automatically delete them after export
+                    bundle_info['_copies'].add(new_node)
 
                     #  time to copy drivers, they are lost when making collections real (https://developer.blender.org/T70551)
                     try:
