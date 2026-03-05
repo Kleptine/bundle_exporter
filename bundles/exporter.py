@@ -47,6 +47,15 @@ class Exporter():
         return kwargs
 
     def __enter__(self):
+        contaminated = [obj.name for obj in bpy.data.objects if '__IS_COPY__' in obj]
+        if contaminated:
+            names = ', '.join(contaminated)
+            raise RuntimeError(
+                f"Stale __IS_COPY__ markers found on: {names}. "
+                f"These are from a prior failed export. Inspect these objects, then remove "
+                f"the stale custom properties (__IS_COPY__, __orig_name__, etc.) before exporting again."
+            )
+
         objects = self.bundle.objects
         orig_obj_names = set([x.name for x in objects])
         print('Objects to export: {}'.format(objects))
