@@ -60,7 +60,7 @@ class BGE_OT_file_export(bpy.types.Operator):
 
         try:
             bundle_list = bundles.get_bundles(only_valid=True)
-            bundles.exporter.export(bundle_list)
+            bundles.export.export_bundles(bundle_list)
         except Exception as e:
             _show_export_error(e)
             return {'CANCELLED'}
@@ -108,7 +108,7 @@ class BGE_OT_file_export_scene_selected(bpy.types.Operator):
     def execute(self, context):
         try:
             export_bundles = [x for x in bundles.get_bundles() if x.is_bundle_obj_selected()]
-            bundles.exporter.export(export_bundles)
+            bundles.export.export_bundles(export_bundles)
         except Exception as e:
             _show_export_error(e)
             return {'CANCELLED'}
@@ -155,7 +155,7 @@ class BGE_OT_file_export_selected(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            bundles.exporter.export([bundles.get_bundles()[bpy.context.scene.BGE_Settings.bundle_index]])
+            bundles.export.export_bundles([bundles.get_bundles()[bpy.context.scene.BGE_Settings.bundle_index]])
         except Exception as e:
             _show_export_error(e)
             return {'CANCELLED'}
