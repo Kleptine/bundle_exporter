@@ -25,17 +25,13 @@ def _is_relative_path(path):
 def export(bundles):
     start_time = time.time()
 
-    # Validate that relative paths can be resolved.
-    # Relative paths (like '../' or '//') need the blend file to be saved first,
-    # because they are resolved relative to the blend file's location on disk.
+    # Relative paths (like '../' or '//') resolve from the blend file's directory.
     # Without a saved file, there's no directory to resolve from.
     export_path = bpy.context.scene.BGE_Settings.path
     if _is_relative_path(export_path) and not bpy.data.is_saved:
-        def draw_error(self, context):
-            self.layout.label(text=f"A relative export path ({export_path}) requires the blend file to be saved first.")
-            self.layout.label(text="Save your file or use an absolute path.")
-        bpy.context.window_manager.popup_menu(draw_error, title="Cannot Export", icon='ERROR')
-        return
+        raise RuntimeError(
+            f"Relative export path [{export_path}] requires the blend file to be saved first. Save the file or use an absolute path."
+        )
 
     previous_selection = bpy.context.selected_objects.copy()
     previous_active = bpy.context.view_layer.objects.active
