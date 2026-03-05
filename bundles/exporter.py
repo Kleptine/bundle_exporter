@@ -42,13 +42,15 @@ class Exporter():
         return kwargs
 
     def __enter__(self):
-        contaminated = [obj.name for obj in bpy.data.objects if '__IS_COPY__' in obj]
+        contaminated = [
+            obj.name for obj in bpy.data.objects
+            if any(key in obj for key in settings.contamination_props_object)
+        ]
         if contaminated:
             names = ', '.join(contaminated)
             raise RuntimeError(
-                f"Stale __IS_COPY__ markers found on: {names}. "
-                f"These are from a prior failed export. Inspect these objects, then remove "
-                f"the stale custom properties (__IS_COPY__, __orig_name__, etc.) before exporting again."
+                f"Stale export properties found on: {names}. "
+                f"Use the Cleanup button in the Bundle Exporter panel to fix this."
             )
 
         objects = self.bundle.objects

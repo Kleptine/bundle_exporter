@@ -93,3 +93,24 @@ mode_pivot_types = [
 ue4_collider_prefixes = {'UBX', 'UCP', 'USP', 'UCX'}
 
 debug = False
+
+# Custom properties stamped on objects and collections during export.
+# If any of these are found outside an active export, the file is
+# contaminated from a prior failed or aborted export session.
+contamination_props_object = {
+    '__IS_COPY__',
+    '__orig_name__',
+    '__orig_hide__',
+    '__orig_hide_select__',
+    '__orig_collection__',
+    '__orig_hide_vl__',
+    '__orig_action__',
+    '__do_export__',
+}
+
+contamination_props_collection = {
+    '__orig_exclude__',
+    '__orig_hide_lc__',
+    '__orig_hide__',
+    '__orig_hide_select__',
+}

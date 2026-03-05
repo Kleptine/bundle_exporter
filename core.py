@@ -6,9 +6,22 @@ from . import modifiers
 from . import operators
 from . import bundles
 from . import settings
-from .settings import mode_bundle_types, mode_pivot_types
+from .settings import mode_bundle_types, mode_pivot_types, contamination_props_object, contamination_props_collection
 
 from . import addon_updater_ops
+
+
+def _has_contamination():
+    """Check whether any object or collection has stale export properties."""
+    for obj in bpy.data.objects:
+        for key in contamination_props_object:
+            if key in obj:
+                return True
+    for coll in bpy.data.collections:
+        for key in contamination_props_collection:
+            if key in coll:
+                return True
+    return False
 
 def get_modifier_for_ctx(index):
     if index < 0:
@@ -106,6 +119,14 @@ class BGE_PT_core_panel(bpy.types.Panel):
         addon_updater_ops.update_notice_box_ui(self, context)
 
         layout = self.layout
+
+        # Contamination warning -- stale export properties from a prior failed export.
+        if _has_contamination():
+            warn_box = layout.box()
+            warn_box.alert = True
+            warn_box.label(text="Objects in this file are in an invalid state.", icon='ERROR')
+            warn_box.operator("bge.fix_contamination", text="Cleanup", icon='FILE_REFRESH')
+
         box = layout.box()
         #row = box.row(align=True)
         #row.operator('bge.load_preferences', text='', icon='RECOVER_LAST')
